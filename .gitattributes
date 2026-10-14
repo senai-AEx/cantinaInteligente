@@ -1,0 +1,15 @@
+# Padroniza arquivos de texto no repositório.
+* text=auto eol=lf
+
+# Scripts executados pelo cmd do Windows.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Imagens e documentos devem manter seus bytes originais.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary

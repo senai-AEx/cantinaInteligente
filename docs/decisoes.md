@@ -1,6 +1,6 @@
 # Decisões de projeto para iniciar a AV04
 
-Estas são **decisões de implementação tomadas para o protótipo**, com base no negócio e nas entregas. Elas resolvem as pendências da estrutura inicial; mudanças posteriores devem ser registradas aqui.
+Estas são **decisões iniciais de implementação para o protótipo**, com base no negócio e nas entregas. **A stack ainda depende da decisão do grupo:** Python + Flask, SQLite e HTML/CSS/JavaScript são a proposta inicial, sem confirmação da equipe. Após a votação, alinhar dependências, migração, documentação e issues. Mudanças posteriores devem ser registradas aqui.
 
 | Tema | Decisão | Motivo |
 | --- | --- | --- |
