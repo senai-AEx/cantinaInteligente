@@ -35,8 +35,8 @@ A distribuição de falas fica a cargo da equipe. Todos devem conseguir explicar
 
 - **CRUD (50%):** cada operação demonstrada altera ou consulta dados persistidos no banco.
 - **Layout e validação (50%):** os campos orientam o preenchimento e os erros aparecem de forma compreensível.
-- **Exclusão adotada:** a inativação remove o produto da lista de ativos e preserva seu histórico, conforme a decisão registrada em [requisitos](requisitos-av04.md).
-- **Auditoria:** mostrar inclusão, alteração, inativação e reativação com autor, origem, data/hora e valores antes/depois.
+- **Inativar e excluir:** inativar é reversível e mantém o produto; “Excluir definitivamente” remove o produto e mantém a auditoria. Se forem mostrar a exclusão definitiva, usem um segundo produto descartável e confirmem a migração 004 antes.
+- **Auditoria:** mostrar inclusão, alteração, inativação, reativação e, se demonstrada, exclusão definitiva com autor, origem, data/hora e valores antes/depois.
 - **Stack:** apresentar as tecnologias efetivamente escolhidas pelo grupo e usadas na demonstração.
 
 ## Ensaio e ajustes

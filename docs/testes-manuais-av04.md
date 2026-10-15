@@ -66,8 +66,9 @@ Em cada tentativa inválida, conferir que nada foi gravado e que os outros campo
 - [ ] **T16 — Auditoria:** consultar o histórico de T01, T03, T05 e T06. Conferir ação, produto, autor, origem, data/hora e valores antes/depois. Tentativas rejeitadas não devem criar uma operação bem-sucedida no histórico.
 - [ ] **T17 — Registro inexistente:** consultar ou alterar pela API um identificador que não existe. Esperar HTTP 404, sem criar produto ou alterar outro registro.
 - [ ] **T18 — Catálogo, quando disponível:** um produto inativo, sem estoque ou vencido não aparece no catálogo disponível, mas continua consultável pela administração. Se a tela de catálogo ainda não fizer parte da entrega, registrar como pendente.
+- [ ] **T19 — Excluir definitivamente:** cadastrar um segundo produto descartável, usar a ação “Excluir definitivamente” e confirmar o aviso. O produto deve sumir da administração e do catálogo; `GET /api/produtos/{id}` deve responder `404`; `GET /api/produtos/{id}/auditoria` deve continuar mostrando as ações anteriores e `EXCLUIR`.
 
-T11 e T12 podem mudar os dados de exemplo durante as tentativas válidas. Antes de ensaiar, restaurar pela aplicação o preço de R$ 5,00, estoque 12, mínimo 3, máximo 20 e validade futura.
+T11 e T12 podem mudar os dados de exemplo durante as tentativas válidas. T19 remove definitivamente o produto usado; use apenas um registro descartável criado para esse teste. Antes de ensaiar, restaurar pela aplicação o preço de R$ 5,00, estoque 12, mínimo 3, máximo 20 e validade futura.
 
 ## Resultado da rodada
 

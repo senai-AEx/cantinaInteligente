@@ -37,13 +37,14 @@ Exemplo de corpo para `POST` e `PUT`:
 | `GET /api/produtos/{id}` | Abrir detalhes para visualizar/editar | `200` com `{"produto": {...}}`; não existe: `404` |
 | `POST /api/produtos` | Cadastrar | `201` com `{"produto": {...}}` e cabeçalho `Location` |
 | `PUT /api/produtos/{id}` | Salvar edição | `200` com `{"produto": {...}}`; não existe: `404` |
-| `DELETE /api/produtos/{id}` | Inativar após confirmação da interface | `200` com o produto inativo; não existe: `404` |
+| `PATCH /api/produtos/{id}/inativar` | Inativar após confirmação da interface | `200` com o produto inativo; não existe: `404` |
 | `PATCH /api/produtos/{id}/reativar` | Reativar produto | `200` com o produto ativo; não existe: `404` |
-| `GET /api/produtos/{id}/auditoria` | Consultar até 100 alterações mais recentes | `200` com `{"auditorias": [...]}`; não existe: `404` |
+| `DELETE /api/produtos/{id}` | Excluir definitivamente após confirmação explícita | `200` com a mensagem de confirmação; não existe: `404`; migração 004 pendente: `409` |
+| `GET /api/produtos/{id}/auditoria` | Consultar até 100 alterações mais recentes, inclusive após exclusão | `200` com `{"auditorias": [...]}`; id desconhecido: `404` |
 
 O filtro `status` aceita `TODOS`, `ATIVO` ou `INATIVO`; o padrão é `TODOS`, para a tela administrativa poder localizar itens inativos. `q` é opcional. As rotas de catálogo devem exibir apenas produtos ativos, com estoque maior que zero e validade não vencida; a listagem administrativa continua mostrando todos.
 
-`DELETE` é uma inativação lógica, não remove a linha do banco. Inativar um produto já inativo ou reativar um já ativo não duplica registros de auditoria.
+Inativar é reversível: o produto sai do catálogo, continua no banco e pode ser reativado. Excluir é definitivo: remove a linha de `produtos`, grava a ação `EXCLUIR` com a cópia final do produto e mantém todo o histórico em `auditoria_produtos`. Depois da exclusão, `GET /api/produtos/{id}/auditoria` continua disponível para consultar esse histórico. A migração `004_auditoria_exclusao_mysql.sql` é obrigatória para remover a chave estrangeira restritiva e permitir essa operação. Inativar um produto já inativo ou reativar um já ativo não duplica registros de auditoria.
 
 ## Respostas de erro
 
@@ -63,11 +64,11 @@ O front deve mostrar `campos[nome_do_campo]` junto ao respectivo controle e pres
 
 ## Auditoria e transações
 
-Inclusão, edição, inativação e reativação registram ação, produto, autor, origem, horário UTC e valores antes/depois. Cada alteração e seu registro de auditoria ficam na mesma transação MySQL; se uma falhar, ambas são revertidas. A interface pode enviar `X-Actor` para identificar o operador na demonstração; sem o cabeçalho, fica `administrador-local`. Esse valor é informativo e não comprova identidade enquanto o sistema não tiver autenticação.
+Inclusão, edição, inativação, reativação e exclusão registram ação, produto, autor, origem, horário UTC e valores antes/depois. Cada alteração e seu registro de auditoria ficam na mesma transação MySQL; se uma falhar, ambas são revertidas. A interface pode enviar `X-Actor` para identificar o operador na demonstração; sem o cabeçalho, fica `administrador-local`. Esse valor é informativo e não comprova identidade enquanto o sistema não tiver autenticação.
 
 ## Integração local do frontend
 
-Para desenvolvimento separado, CORS aceita as origens de Live Server `http://localhost:5500` e `http://127.0.0.1:5500`, e Vite `http://localhost:5173` e `http://127.0.0.1:5173`. A interface pode usar `fetch("http://127.0.0.1:5000/api/produtos")`, enviar/receber JSON e tratar códigos HTTP. Não abra o CRUD administrativo para uma rede pública antes de adicionar autenticação e autorização de Administrador.
+Para desenvolvimento separado, CORS aceita as origens de Live Server nas portas `5500` e `5501`, e Vite na porta `5173`, em `localhost` e `127.0.0.1`. A interface pode usar `fetch("http://127.0.0.1:5000/api/produtos")`, enviar/receber JSON e tratar códigos HTTP. Não abra o CRUD administrativo para uma rede pública antes de adicionar autenticação e autorização de Administrador.
 
 Exemplo de chamada do navegador:
 

@@ -22,7 +22,7 @@ A numeração dos RFs mudou entre AV02 e AV03. Esta especificação usa **RF02 d
 1. **Incluir:** formulário salva um produto válido; o registro aparece na lista e permanece após reiniciar a aplicação.
 2. **Consultar:** lista com busca por nome/código e filtro por situação. Mostrar nome, código, categoria, preço, estoque, validade e situação; foto e selos quando informados.
 3. **Alterar:** editar os campos do produto; a lista e o banco refletem os novos valores. Alteração de preço fica na auditoria.
-4. **Excluir:** executar **inativação** com confirmação. O produto sai da lista de ativos e do catálogo disponível, permanece no banco e pode ser reativado.
+4. **Inativar:** operação reversível com confirmação; o produto sai da lista de ativos e do catálogo disponível, permanece no banco e pode ser reativado. A tela também oferece **Excluir definitivamente**, uma ação separada com confirmação explícita que remove a linha do produto e preserva seu histórico de auditoria.
 
 Somente **Administrador** altera produtos. O catálogo de cliente é somente leitura. A implementação de autenticação e autorização deverá proteger as rotas administrativas quando o sistema ganhar login; não se deve expor o CRUD em uma implantação pública sem essa proteção.
 
@@ -31,7 +31,8 @@ Somente **Administrador** altera produtos. O catálogo de cliente é somente lei
 - [ ] Inclusão, consulta, alteração e inativação/reativação funcionam com MySQL, inclusive após reiniciar a aplicação.
 - [ ] Código duplicado, preço não positivo, estoque negativo e máximo menor que mínimo são recusados.
 - [ ] Campos obrigatórios e data inválida têm mensagem junto ao campo; o banco também contém restrições para os dados que consegue validar.
-- [ ] Inativar preserva o registro; a lista de ativos e o catálogo não o exibem.
+- [ ] Inativar preserva o registro; a lista de ativos e o catálogo não o exibem, e a equipe consegue reativá-lo.
+- [ ] Excluir definitivamente remove o produto, registra a ação e preserva o histórico de auditoria.
 - [ ] A interface funciona em 360 × 800 px e desktop sem rolagem horizontal.
 - [ ] Cada inclusão, alteração, inativação e reativação gera registro de auditoria na mesma transação.
 

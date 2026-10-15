@@ -12,7 +12,7 @@ Acompanhe as tarefas no [Kanban AV04](https://github.com/orgs/senai-AEx/projects
 
 O modelo comum está em [docs/modelo-produto.md](docs/modelo-produto.md); as regras da entrega estão em [docs/requisitos-av04.md](docs/requisitos-av04.md). A tabela MySQL mantém código único, preço positivo em centavos, quantidades válidas, validade, foto, selos, situação e datas. A exclusão do CRUD será inativação para preservar o produto e a auditoria.
 
-A migração antiga `001_produtos.sql` é específica para **SQLite**. Para a stack do grupo, use somente as migrações MySQL `002_produtos_mysql.sql` e `003_auditoria_produtos_mysql.sql`, nessa ordem.
+A migração antiga `001_produtos.sql` é específica para **SQLite**. Para a stack do grupo, use as migrações MySQL `002_produtos_mysql.sql`, `003_auditoria_produtos_mysql.sql` e `004_auditoria_exclusao_mysql.sql`, nessa ordem.
 
 ## Preparar o ambiente no Windows
 
@@ -71,26 +71,44 @@ Salve o arquivo. Ele é ignorado pelo Git; não o envie ao GitHub.
 
 ### 4. Criar as tabelas do banco
 
-Faça este passo uma única vez para cada banco novo. Se as tabelas `produtos` e `auditoria_produtos` já existem, pule para o passo 5. A primeira migração abaixo cria `produtos`; a segunda cria a auditoria e depende da primeira.
+Faça este passo uma única vez para cada banco. Em um banco novo, execute as três migrações na ordem. Se `produtos` e `auditoria_produtos` já existem, execute somente a migração `004` para habilitar a exclusão definitiva e manter a auditoria.
 
-Na pasta principal do projeto, copie os arquivos para o container e conecte como root:
+Para um banco novo, na pasta principal do projeto, copie os três arquivos para o container e conecte como root:
 
 ```powershell
 docker cp .\database\migrations\002_produtos_mysql.sql cantina-mysql:/tmp/002_produtos_mysql.sql
 docker cp .\database\migrations\003_auditoria_produtos_mysql.sql cantina-mysql:/tmp/003_auditoria_produtos_mysql.sql
+docker cp .\database\migrations\004_auditoria_exclusao_mysql.sql cantina-mysql:/tmp/004_auditoria_exclusao_mysql.sql
 docker exec -it cantina-mysql mysql -u root -p
 ```
 
-Digite a senha de root do container. No prompt `mysql>`, rode cada linha:
+Digite a senha de root do container. No prompt `mysql>`, rode cada linha para um banco novo:
 
 ```sql
 source /tmp/002_produtos_mysql.sql;
 source /tmp/003_auditoria_produtos_mysql.sql;
+source /tmp/004_auditoria_exclusao_mysql.sql;
 SHOW TABLES;
 exit;
 ```
 
-Devem aparecer `produtos` e `auditoria_produtos`. Não execute essas migrações novamente nesse mesmo banco. `001_produtos.sql` é uma migração antiga de SQLite; para MySQL, use somente `002` e `003`.
+Devem aparecer `produtos` e `auditoria_produtos`. Não execute as migrações novamente nesse mesmo banco.
+
+Se as duas tabelas já existem, copie e execute **somente** a migração 004:
+
+```powershell
+docker cp .\database\migrations\004_auditoria_exclusao_mysql.sql cantina-mysql:/tmp/004_auditoria_exclusao_mysql.sql
+docker exec -it cantina-mysql mysql -u root -p
+```
+
+No prompt `mysql>`, rode:
+
+```sql
+source /tmp/004_auditoria_exclusao_mysql.sql;
+exit;
+```
+
+A migração `004` remove a restrição que impediria excluir um produto e amplia as ações de auditoria; os registros históricos são preservados. `001_produtos.sql` é uma migração antiga de SQLite.
 
 ### 5. Iniciar o backend (faça isso quando for testar)
 
@@ -127,8 +145,9 @@ Com o backend iniciado, estas rotas ficam disponíveis:
 - `GET /api/produtos/<id>` — consulta detalhes.
 - `POST /api/produtos` — cadastra produto.
 - `PUT /api/produtos/<id>` — edita produto.
-- `DELETE /api/produtos/<id>` — inativa produto sem apagá-lo.
+- `PATCH /api/produtos/<id>/inativar` — tira do catálogo, mantendo o produto para reativação.
 - `PATCH /api/produtos/<id>/reativar` — reativa produto.
+- `DELETE /api/produtos/<id>` — exclui definitivamente o produto e preserva o histórico de auditoria.
 - `GET /api/produtos/<id>/auditoria` — consulta o histórico de alterações.
 
 Para nomes de campos, exemplos de JSON e regras de erro, consulte o [contrato da API](docs/contrato-crud.md). Faça operações administrativas em ambiente local; não publique a API sem autenticação e autorização.
