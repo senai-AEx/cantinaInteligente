@@ -16,4 +16,22 @@ document.addEventListener("DOMContentLoaded", function () {
         modal.setAttribute("aria-hidden", "true");
     });
 
+    // MODAL DE EDIÇÃO DE PRODUTOS
+
+    const modalEditar = document.getElementById("modal-editar-produto");
+    const botaoFecharEditar = document.getElementById("fechar-editar-produto");
+    const botoesEditar = document.querySelectorAll(".acoes-produto .botao-principal");
+
+    botoesEditar.forEach(function (botao) {
+        botao.addEventListener("click", function () {
+            modalEditar.classList.add("aberto");
+            modalEditar.setAttribute("aria-hidden", "false");
+        });
+    });
+
+    botaoFecharEditar.addEventListener("click", function () {
+        modalEditar.classList.remove("aberto");
+        modalEditar.setAttribute("aria-hidden", "true");
+    });
+
 });
