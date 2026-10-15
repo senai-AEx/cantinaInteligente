@@ -23,234 +23,64 @@
             <div class="layout-admin">
 
                 <!-- MENU LATERAL -->
-                <aside class="menu-admin">
-
-                    <h2>Administração</h2>
-
-                    <nav>
-                        <a href="#">Relatórios</a>
-
-                        <button
-                            type="button"
-                            class="botao botao-principal"
-                            id="abrir-cadastro-produto"
-                        >
-                            Cadastrar produto
+                <aside class="menu-admin" id="menu-admin">
+                    <div class="menu-admin-topo">
+                        <div>
+                            <span class="sobretitulo">PAINEL DA CANTINA</span>
+                            <h2>Administração</h2>
+                        </div>
+                        <button type="button" class="botao-menu" id="alternar-menu" aria-expanded="true" aria-controls="navegacao-admin">
+                            Recolher
                         </button>
+                    </div>
 
-                        <a href="#">Visualizar estoque</a>
+                    <nav id="navegacao-admin" class="navegacao-admin" aria-label="Atalhos administrativos">
+                        <button type="button" class="botao botao-principal" id="abrir-cadastro-produto">
+                            <span aria-hidden="true">＋</span> Novo produto
+                        </button>
+                        <a href="catalogo_produtos.html">Ver catálogo da cantina</a>
+                        <button type="button" class="atalho-menu" id="filtrar-estoque-baixo" aria-pressed="false">
+                            Produtos com estoque baixo
+                        </button>
                     </nav>
-
                 </aside>
 
                 <!-- CATÁLOGO -->
                 <section class="secao-produtos-admin">
 
                     <div class="introducao">
-                        <h1>Catálogo de produtos</h1>
-                        <p>Gerencie os produtos disponíveis na cantina.</p>
+                        <div>
+                            <span class="sobretitulo">GESTÃO DE ESTOQUE</span>
+                            <h1>Produtos</h1>
+                            <p>Gerencie o catálogo e acompanhe os produtos da cantina.</p>
+                        </div>
+                        <button type="button" class="botao botao-principal botao-novo-produto" id="abrir-cadastro-produto-topo">
+                            ＋ Cadastrar produto
+                        </button>
                     </div>
 
-                    <div class="lista-produtos">
+                    <section class="resumo-produtos" aria-label="Resumo do catálogo">
+                        <article class="resumo-card"><span>Produtos ativos</span><strong id="total-ativos">—</strong></article>
+                        <article class="resumo-card"><span>Produtos inativos</span><strong id="total-inativos">—</strong></article>
+                        <article class="resumo-card"><span>Estoque baixo</span><strong id="total-estoque-baixo">—</strong></article>
+                    </section>
 
-                        <!-- PRODUTO 1 -->
-                        <article class="card-produto">
+                    <section class="controles-catalogo" aria-label="Buscar e filtrar produtos">
+                        <label class="busca-produtos" for="busca-produtos">
+                            <span aria-hidden="true">⌕</span>
+                            <input type="search" id="busca-produtos" placeholder="Buscar por nome, código ou categoria" autocomplete="off">
+                        </label>
+                        <div class="filtros-status" role="group" aria-label="Filtrar situação dos produtos">
+                            <button type="button" class="filtro-status selecionado" data-filtro-status="TODOS" aria-pressed="true">Todos</button>
+                            <button type="button" class="filtro-status" data-filtro-status="ATIVO" aria-pressed="false">Ativos</button>
+                            <button type="button" class="filtro-status" data-filtro-status="INATIVO" aria-pressed="false">Inativos</button>
+                        </div>
+                    </section>
+                    <p class="contador-produtos" id="contador-produtos" aria-live="polite"></p>
 
-                            <img
-                                src="img/biscoito.jpg"
-                                alt="Pacote de biscoitos"
-                                class="imagem-produto"
-                            >
-
-                            <div class="conteudo-produto">
-
-                                <h3>Biscoito integral</h3>
-
-                                <p class="preco-produto">R$ 3,00</p>
-
-                                <div class="validade-selos">
-
-                                    <p class="validade">
-                                        Validade: 20/10/2026
-                                    </p>
-
-                                    <div class="selos-produto">
-                                        <span class="selo">
-                                            Zero lactose
-                                        </span>
-                                    </div>
-
-                                </div>
-
-                                <div class="acoes-produto">
-
-                                    <button
-                                        type="button"
-                                        class="botao botao-principal"
-                                    >
-                                        Editar
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="botao botao-excluir"
-                                    >
-                                        Excluir
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                        </article>
-
-                        <!-- PRODUTO 2 -->
-                        <article class="card-produto">
-
-                            <img
-                                src="img/suco.jpg"
-                                alt="Caixa de suco"
-                                class="imagem-produto"
-                            >
-
-                            <div class="conteudo-produto">
-
-                                <h3>Suco de frutas</h3>
-
-                                <p class="preco-produto">R$ 2,50</p>
-
-                                <div class="validade-selos">
-
-                                    <p class="validade">
-                                        Validade: 22/10/2026
-                                    </p>
-
-                                </div>
-
-                                <div class="acoes-produto">
-
-                                    <button
-                                        type="button"
-                                        class="botao botao-principal"
-                                    >
-                                        Editar
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="botao botao-excluir"
-                                    >
-                                        Excluir
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                        </article>
-
-                        <!-- PRODUTO 3 -->
-                        <article class="card-produto">
-
-                            <img
-                                src="img/sanduiche.jpg"
-                                alt="Sanduíche natural"
-                                class="imagem-produto"
-                            >
-
-                            <div class="conteudo-produto">
-
-                                <h3>Sanduíche natural</h3>
-
-                                <p class="preco-produto">R$ 5,00</p>
-
-                                <div class="validade-selos">
-
-                                    <p class="validade">
-                                        Validade: 18/10/2026
-                                    </p>
-
-                                    <div class="selos-produto">
-                                        <span class="selo">
-                                            Vegetariano
-                                        </span>
-                                    </div>
-
-                                </div>
-
-                                <div class="acoes-produto">
-
-                                    <button
-                                        type="button"
-                                        class="botao botao-principal"
-                                    >
-                                        Editar
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="botao botao-excluir"
-                                    >
-                                        Excluir
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                        </article>
-
-                        <!-- PRODUTO 4 -->
-                        <article class="card-produto">
-
-                            <img
-                                src="img/barrinha.jpg"
-                                alt="Barrinha de cereal"
-                                class="imagem-produto"
-                            >
-
-                            <div class="conteudo-produto">
-
-                                <h3>Barrinha de cereal</h3>
-
-                                <p class="preco-produto">R$ 2,00</p>
-
-                                <div class="validade-selos">
-
-                                    <p class="validade">
-                                        Validade: 25/10/2026
-                                    </p>
-
-                                    <div class="selos-produto">
-                                        <span class="selo">
-                                            Zero açúcar
-                                        </span>
-                                    </div>
-
-                                </div>
-
-                                <div class="acoes-produto">
-
-                                    <button
-                                        type="button"
-                                        class="botao botao-principal"
-                                    >
-                                        Editar
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="botao botao-excluir"
-                                    >
-                                        Excluir
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                        </article>
-
+                    <p id="mensagem-api" class="mensagem-api" role="status" aria-live="polite"></p>
+                    <div class="lista-produtos" id="lista-produtos" aria-live="polite">
+                        <p class="estado-lista">Carregando produtos...</p>
                     </div>
 
                 </section>
@@ -268,7 +98,7 @@
         aria-hidden="true"
     >
 
-        <div class="modal-conteudo">
+        <div class="modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="titulo-cadastro-produto">
 
             <button
                 type="button"
@@ -279,93 +109,167 @@
                 &times;
             </button>
 
-            <h2>Cadastrar novo produto</h2>
+            <span class="sobretitulo">NOVO ITEM DO CATÁLOGO</span>
+            <h2 id="titulo-cadastro-produto">Cadastrar produto</h2>
+            <p class="texto-modal">Preencha as informações para disponibilizar o produto na cantina.</p>
 
             <form id="form-cadastro-produto">
 
-                <div class="campo-formulario">
-
-                    <label for="nome-produto">
-                        Nome do produto
-                    </label>
-
+                <section class="form-secao" aria-labelledby="cadastro-secao-01">
+                    <div class="form-secao-titulo">
+                        <span>01</span>
+                        <div><h3 id="cadastro-secao-01">Identificação</h3><p>Código, nome e categoria do produto.</p></div>
+                    </div>
+                    <div class="form-grade">
+<div class="campo-formulario">
+                    <label for="cadastro-codigo_produto">Código do produto</label>
                     <input
                         type="text"
-                        id="nome-produto"
-                        name="nome-produto"
+                        id="cadastro-codigo_produto"
+                        name="codigo_produto"
                         required
+                        minlength="3"
+                        maxlength="32"
+                        autocomplete="off"
                     >
-
+                    <small class="dica-campo">Use o EAN/GTIN ou um código interno único.</small>
+                    <small class="erro-campo" data-error-for="codigo_produto"></small>
                 </div>
+<div class="campo-formulario">
+                    <label for="cadastro-nome">Nome do produto</label>
+                    <input
+                        type="text"
+                        id="cadastro-nome"
+                        name="nome"
+                        required
+                        minlength="2"
+                        maxlength="100"
+                    >
+                    <small class="erro-campo" data-error-for="nome"></small>
+                </div>
+<div class="campo-formulario">
+                    <label for="cadastro-categoria">Categoria</label>
+                    <input
+                        type="text"
+                        id="cadastro-categoria"
+                        name="categoria"
+                        list="categorias-cantina"
+                        placeholder="Ex.: Bebidas, Lanches"
+                        required
+                        minlength="2"
+                        maxlength="50"
+                    >
+                    <small class="erro-campo" data-error-for="categoria"></small>
+                </div>
+</div></section>
 
-                <div class="campo-formulario">
-
-                    <label for="preco-produto">
-                        Preço
-                    </label>
-
+                <section class="form-secao" aria-labelledby="cadastro-secao-02">
+                    <div class="form-secao-titulo">
+                        <span>02</span>
+                        <div><h3 id="cadastro-secao-02">Preço e estoque</h3><p>Defina o valor, a validade e os limites de reposição.</p></div>
+                    </div>
+                    <div class="form-grade">
+<div class="campo-formulario">
+                    <label for="cadastro-preco">Preço (R$)</label>
                     <input
                         type="number"
-                        id="preco-produto"
-                        name="preco-produto"
-                        min="0"
-                        step="0.01"
+                        id="cadastro-preco"
+                        name="preco"
                         required
+                        min="0.01"
+                        step="0.01"
                     >
-
+                    <small class="erro-campo" data-error-for="preco"></small>
                 </div>
-
-                <div class="campo-formulario">
-
-                    <label for="validade-produto">
-                        Validade
-                    </label>
-
+<div class="campo-formulario">
+                    <label for="cadastro-validade">Validade</label>
                     <input
                         type="date"
-                        id="validade-produto"
-                        name="validade-produto"
-                        required
+                        id="cadastro-validade"
+                        name="validade"
                     >
-
+                    <small class="erro-campo" data-error-for="validade"></small>
                 </div>
+<div class="campo-formulario">
+                    <label for="cadastro-quantidade_estoque">Quantidade em estoque</label>
+                    <input
+                        type="number"
+                        id="cadastro-quantidade_estoque"
+                        name="quantidade_estoque"
+                        min="0"
+                        step="1"
+                        value="0"
+                    >
+                    <small class="erro-campo" data-error-for="quantidade_estoque"></small>
+                </div>
+<div class="campo-formulario">
+                    <label for="cadastro-estoque_minimo">Estoque mínimo</label>
+                    <input
+                        type="number"
+                        id="cadastro-estoque_minimo"
+                        name="estoque_minimo"
+                        min="0"
+                        step="1"
+                        value="0"
+                    >
+                    <small class="erro-campo" data-error-for="estoque_minimo"></small>
+                </div>
+<div class="campo-formulario">
+                    <label for="cadastro-estoque_maximo">Estoque máximo</label>
+                    <input
+                        type="number"
+                        id="cadastro-estoque_maximo"
+                        name="estoque_maximo"
+                        min="0"
+                        step="1"
+                        value="0"
+                    >
+                    <small class="erro-campo" data-error-for="estoque_maximo"></small>
+                </div>
+</div></section>
 
-                <div class="campo-formulario">
-
-                    <label for="categoria-produto">
-                        Categoria
-                    </label>
-
+                <section class="form-secao" aria-labelledby="cadastro-secao-03">
+                    <div class="form-secao-titulo">
+                        <span>03</span>
+                        <div><h3 id="cadastro-secao-03">Detalhes e características</h3><p>Essas informações ajudam a apresentar o produto no catálogo.</p></div>
+                    </div>
+                    <div class="form-grade">
+<div class="campo-formulario">
+                    <label for="cadastro-descricao">Descrição</label>
+                    <textarea
+                        id="cadastro-descricao"
+                        name="descricao"
+                        rows="3"
+                        maxlength="500"
+                    ></textarea>
+                    <small class="erro-campo" data-error-for="descricao"></small>
+                </div>
+<div class="campo-formulario">
+                    <label for="cadastro-foto_caminho">Caminho da foto</label>
                     <input
                         type="text"
-                        id="categoria-produto"
-                        name="categoria-produto"
+                        id="cadastro-foto_caminho"
+                        name="foto_caminho"
+                        maxlength="255"
+                        placeholder="assets/produtos/foto.jpg"
                     >
-
+                    <small class="dica-campo">Opcional. Informe o caminho de um arquivo já existente.</small>
+                    <small class="erro-campo" data-error-for="foto_caminho"></small>
                 </div>
-
-                <div class="campo-formulario">
-
-                    <label for="descricao-produto">
-                        Descrição
-                    </label>
-
-                    <textarea
-                        id="descricao-produto"
-                        name="descricao-produto"
-                        rows="3"
-                    ></textarea>
-
+<div class="opcoes-produto" aria-label="Características do produto">
+<div class="campo-checkbox">
+                    <input type="checkbox" id="cadastro-zero_lactose" name="zero_lactose">
+                    <label for="cadastro-zero_lactose">Zero lactose</label>
                 </div>
-
-                <button
-                    type="submit"
-                    class="botao botao-principal"
-                >
-                    Cadastrar produto
-                </button>
-
-            </form>
+<div class="campo-checkbox">
+                    <input type="checkbox" id="cadastro-zero_acucar" name="zero_acucar">
+                    <label for="cadastro-zero_acucar">Zero açúcar</label>
+                </div>
+</div>
+</div></section>
+<p class="feedback-form" role="alert" aria-live="polite"></p>
+<button type="submit" class="botao botao-principal">Cadastrar produto</button>
+</form>
 
         </div>
 
@@ -377,7 +281,7 @@
         id="modal-editar-produto"
         aria-hidden="true"
     >
-        <div class="modal-conteudo">
+        <div class="modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="titulo-editar-produto">
 
             <button
                 type="button"
@@ -388,68 +292,167 @@
                 &times;
             </button>
 
-            <h2>Editar produto</h2>
+            <span class="sobretitulo">ATUALIZAÇÃO DO CATÁLOGO</span>
+            <h2 id="titulo-editar-produto">Editar produto</h2>
+            <p class="texto-modal">Atualize os dados e salve as alterações no estoque.</p>
 
             <form id="form-editar-produto">
 
-                <div class="campo-formulario">
-                    <label for="editar-nome-produto">Nome do produto</label>
+                <section class="form-secao" aria-labelledby="editar-secao-01">
+                    <div class="form-secao-titulo">
+                        <span>01</span>
+                        <div><h3 id="editar-secao-01">Identificação</h3><p>Código, nome e categoria do produto.</p></div>
+                    </div>
+                    <div class="form-grade">
+<div class="campo-formulario">
+                    <label for="editar-codigo_produto">Código do produto</label>
                     <input
                         type="text"
-                        id="editar-nome-produto"
-                        name="nome-produto"
+                        id="editar-codigo_produto"
+                        name="codigo_produto"
                         required
+                        minlength="3"
+                        maxlength="32"
+                        autocomplete="off"
                     >
+                    <small class="dica-campo">Use o EAN/GTIN ou um código interno único.</small>
+                    <small class="erro-campo" data-error-for="codigo_produto"></small>
                 </div>
+<div class="campo-formulario">
+                    <label for="editar-nome">Nome do produto</label>
+                    <input
+                        type="text"
+                        id="editar-nome"
+                        name="nome"
+                        required
+                        minlength="2"
+                        maxlength="100"
+                    >
+                    <small class="erro-campo" data-error-for="nome"></small>
+                </div>
+<div class="campo-formulario">
+                    <label for="editar-categoria">Categoria</label>
+                    <input
+                        type="text"
+                        id="editar-categoria"
+                        name="categoria"
+                        list="categorias-cantina"
+                        placeholder="Ex.: Bebidas, Lanches"
+                        required
+                        minlength="2"
+                        maxlength="50"
+                    >
+                    <small class="erro-campo" data-error-for="categoria"></small>
+                </div>
+</div></section>
 
-                <div class="campo-formulario">
-                    <label for="editar-preco-produto">Preço</label>
+                <section class="form-secao" aria-labelledby="editar-secao-02">
+                    <div class="form-secao-titulo">
+                        <span>02</span>
+                        <div><h3 id="editar-secao-02">Preço e estoque</h3><p>Defina o valor, a validade e os limites de reposição.</p></div>
+                    </div>
+                    <div class="form-grade">
+<div class="campo-formulario">
+                    <label for="editar-preco">Preço (R$)</label>
                     <input
                         type="number"
-                        id="editar-preco-produto"
-                        name="preco-produto"
-                        min="0"
-                        step="0.01"
+                        id="editar-preco"
+                        name="preco"
                         required
+                        min="0.01"
+                        step="0.01"
                     >
+                    <small class="erro-campo" data-error-for="preco"></small>
                 </div>
-
-                <div class="campo-formulario">
-                    <label for="editar-validade-produto">Validade</label>
+<div class="campo-formulario">
+                    <label for="editar-validade">Validade</label>
                     <input
                         type="date"
-                        id="editar-validade-produto"
-                        name="validade-produto"
-                        required
+                        id="editar-validade"
+                        name="validade"
                     >
+                    <small class="erro-campo" data-error-for="validade"></small>
                 </div>
+<div class="campo-formulario">
+                    <label for="editar-quantidade_estoque">Quantidade em estoque</label>
+                    <input
+                        type="number"
+                        id="editar-quantidade_estoque"
+                        name="quantidade_estoque"
+                        min="0"
+                        step="1"
+                        value="0"
+                    >
+                    <small class="erro-campo" data-error-for="quantidade_estoque"></small>
+                </div>
+<div class="campo-formulario">
+                    <label for="editar-estoque_minimo">Estoque mínimo</label>
+                    <input
+                        type="number"
+                        id="editar-estoque_minimo"
+                        name="estoque_minimo"
+                        min="0"
+                        step="1"
+                        value="0"
+                    >
+                    <small class="erro-campo" data-error-for="estoque_minimo"></small>
+                </div>
+<div class="campo-formulario">
+                    <label for="editar-estoque_maximo">Estoque máximo</label>
+                    <input
+                        type="number"
+                        id="editar-estoque_maximo"
+                        name="estoque_maximo"
+                        min="0"
+                        step="1"
+                        value="0"
+                    >
+                    <small class="erro-campo" data-error-for="estoque_maximo"></small>
+                </div>
+</div></section>
 
-                <div class="campo-formulario">
-                    <label for="editar-categoria-produto">Categoria</label>
+                <section class="form-secao" aria-labelledby="editar-secao-03">
+                    <div class="form-secao-titulo">
+                        <span>03</span>
+                        <div><h3 id="editar-secao-03">Detalhes e características</h3><p>Essas informações ajudam a apresentar o produto no catálogo.</p></div>
+                    </div>
+                    <div class="form-grade">
+<div class="campo-formulario">
+                    <label for="editar-descricao">Descrição</label>
+                    <textarea
+                        id="editar-descricao"
+                        name="descricao"
+                        rows="3"
+                        maxlength="500"
+                    ></textarea>
+                    <small class="erro-campo" data-error-for="descricao"></small>
+                </div>
+<div class="campo-formulario">
+                    <label for="editar-foto_caminho">Caminho da foto</label>
                     <input
                         type="text"
-                        id="editar-categoria-produto"
-                        name="categoria-produto"
+                        id="editar-foto_caminho"
+                        name="foto_caminho"
+                        maxlength="255"
+                        placeholder="assets/produtos/foto.jpg"
                     >
+                    <small class="dica-campo">Opcional. Informe o caminho de um arquivo já existente.</small>
+                    <small class="erro-campo" data-error-for="foto_caminho"></small>
                 </div>
-
-                <div class="campo-formulario">
-                    <label for="editar-descricao-produto">Descrição</label>
-                    <textarea
-                        id="editar-descricao-produto"
-                        name="descricao-produto"
-                        rows="3"
-                    ></textarea>
+<div class="opcoes-produto" aria-label="Características do produto">
+<div class="campo-checkbox">
+                    <input type="checkbox" id="editar-zero_lactose" name="zero_lactose">
+                    <label for="editar-zero_lactose">Zero lactose</label>
                 </div>
-
-                <button
-                    type="submit"
-                    class="botao botao-principal"
-                >
-                    Salvar alterações
-                </button>
-
-            </form>
+<div class="campo-checkbox">
+                    <input type="checkbox" id="editar-zero_acucar" name="zero_acucar">
+                    <label for="editar-zero_acucar">Zero açúcar</label>
+                </div>
+</div>
+</div></section>
+<p class="feedback-form" role="alert" aria-live="polite"></p>
+<button type="submit" class="botao botao-principal">Salvar alterações</button>
+</form>
 
         </div>
     </div>
@@ -476,34 +479,24 @@
                 &times;
             </button>
 
-            <h2 id="titulo-excluir-produto">Excluir produto</h2>
+            <h2 id="titulo-excluir-produto">Inativar produto</h2>
 
-            <div class="campo-formulario">
+            <p id="texto-confirmacao-exclusao" class="texto-confirmacao">Deseja inativar este produto?</p>
 
-                <label for="senha-confirmacao-exclusao">
-                    Informe sua senha para confirmar a exclusão:
-                </label>
-
-                <input
-                    type="password"
-                    id="senha-confirmacao-exclusao"
-                    name="senha-confirmacao-exclusao"
-                    autocomplete="current-password"
-                    required
-                >
-
-            </div>
-
-            <button
-                type="button"
-                class="botao botao-excluir"
-                id="botao-confirmar-senha-exclusao"
-            >
-                Confirmar exclusão
+            <button type="button" class="botao botao-excluir" id="botao-confirmar-exclusao">
+                Confirmar inativação
             </button>
 
         </div>
     </div>
+
+    <datalist id="categorias-cantina">
+        <option value="Bebidas"></option>
+        <option value="Lanches"></option>
+        <option value="Salgados"></option>
+        <option value="Doces"></option>
+        <option value="Frutas"></option>
+    </datalist>
 
     <!-- FOOTER -->
     <div id="footer-container"></div>
