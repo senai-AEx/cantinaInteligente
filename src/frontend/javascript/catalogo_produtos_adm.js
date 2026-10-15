@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const formularioCadastro = document.getElementById("form-cadastro-produto");
     const formularioEdicao = document.getElementById("form-editar-produto");
     const textoConfirmacao = document.getElementById("texto-confirmacao-exclusao");
+    const tituloConfirmacao = document.getElementById("titulo-confirmacao-produto");
     const botaoConfirmarExclusao = document.getElementById("botao-confirmar-exclusao");
     const buscaProdutos = document.getElementById("busca-produtos");
     const contadorProdutos = document.getElementById("contador-produtos");
@@ -18,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let filtroAtual = "TODOS";
     let estoqueBaixoAtivo = false;
     let produtoSelecionado = null;
+    let acaoConfirmacao = null;
     const focosAnteriores = new WeakMap();
 
     function mostrarMensagem(elemento, mensagem, tipo = "") {
@@ -156,6 +158,11 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             acoes.append(criarBotao("Reativar", "reativar", "botao botao-principal"));
         }
+        acoes.append(criarBotao(
+            "Excluir definitivamente",
+            "excluir",
+            "botao botao-exclusao-definitiva",
+        ));
         conteudo.append(acoes);
         card.append(conteudo);
         return card;
@@ -398,10 +405,23 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (botao.dataset.acao === "inativar") {
+        if (botao.dataset.acao === "inativar" || botao.dataset.acao === "excluir") {
             produtoSelecionado = produto;
-            textoConfirmacao.textContent = "Deseja inativar \"" + produto.nome
-                + "\"? O registro será mantido no banco.";
+            acaoConfirmacao = botao.dataset.acao === "excluir" ? "EXCLUIR" : "INATIVAR";
+            const excluirDefinitivamente = acaoConfirmacao === "EXCLUIR";
+            tituloConfirmacao.textContent = excluirDefinitivamente
+                ? "Excluir produto definitivamente"
+                : "Inativar produto";
+            textoConfirmacao.textContent = excluirDefinitivamente
+                ? `Deseja excluir "${produto.nome}"? O produto sairá do banco; o histórico de auditoria será mantido e não será possível reativá-lo.`
+                : `Deseja inativar "${produto.nome}"? Ele sairá do catálogo, mas continuará salvo e poderá ser reativado.`;
+            botaoConfirmarExclusao.textContent = excluirDefinitivamente
+                ? "Excluir definitivamente"
+                : "Inativar produto";
+            botaoConfirmarExclusao.classList.toggle(
+                "botao-exclusao-definitiva",
+                excluirDefinitivamente,
+            );
             abrirModal(modalExclusao);
             return;
         }
@@ -424,11 +444,22 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!produtoSelecionado) return;
         botaoConfirmarExclusao.disabled = true;
         try {
-            await requisitar(API_URL + "/" + produtoSelecionado.id_produto, { method: "DELETE" });
+            const excluindoDefinitivamente = acaoConfirmacao === "EXCLUIR";
+            const url = API_URL + "/" + produtoSelecionado.id_produto
+                + (excluindoDefinitivamente ? "" : "/inativar");
+            await requisitar(url, { method: excluindoDefinitivamente ? "DELETE" : "PATCH" });
             fecharModal(modalExclusao);
             produtoSelecionado = null;
+            acaoConfirmacao = null;
             await carregarProdutos();
-            mostrarMensagem(mensagemApi, "Produto inativado.", "sucesso");
+            buscaProdutos.focus({ preventScroll: true });
+            mostrarMensagem(
+                mensagemApi,
+                excluindoDefinitivamente
+                    ? "Produto excluído. O histórico de auditoria foi preservado."
+                    : "Produto inativado.",
+                "sucesso",
+            );
         } catch (erro) {
             mostrarMensagem(mensagemApi, erro.message, "erro");
         } finally {

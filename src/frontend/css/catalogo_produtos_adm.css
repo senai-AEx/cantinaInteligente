@@ -1089,3 +1089,24 @@ textarea:focus-visible {
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+.acoes-produto [data-acao="excluir"] {
+    grid-column: 1 / -1;
+    border-color: #e6b8b3;
+    background: #fffafa;
+    color: #a43b35;
+    font-size: 12px;
+}
+
+.acoes-produto [data-acao="excluir"]:hover,
+.botao-exclusao-definitiva:hover {
+    border-color: #cf8d85;
+    background: #fff0ee;
+    color: #812c27;
+}
+
+.botao-exclusao-definitiva {
+    border: 1px solid #d9a19a;
+    background: #fff7f6;
+    color: #96352f;
+}
