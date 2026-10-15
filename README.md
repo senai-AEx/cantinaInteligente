@@ -1,6 +1,6 @@
 # Cantina Inteligente — AV04 (Grupo 4)
 
-Base de trabalho para apresentar **Manter Produto** com banco de dados. A stack definida pelo grupo é **Python + Flask + MySQL**. O backend fornece o CRUD de produto, validações, persistência e auditoria; a interface permanece com a equipe de frontend.
+Base de trabalho para apresentar **Manter Produto** com banco de dados. A stack definida pelo grupo é **Python + Flask + MySQL**. O backend fornece o CRUD de produtos, validações, persistência e auditoria.
 
 ## Entrega
 
@@ -8,137 +8,78 @@ Projeto Aplicado II do Centro Universitário SENAI Santa Catarina para a Cantina
 
 Acompanhe as tarefas no [Kanban AV04](https://github.com/orgs/senai-AEx/projects/1) e no [marco AV04 — CRUD de Produto](https://github.com/senai-AEx/cantinaInteligente/milestone/1).
 
-## Estrutura de Produto
+## Executar localmente
 
-O modelo comum está em [docs/modelo-produto.md](docs/modelo-produto.md); as regras da entrega estão em [docs/requisitos-av04.md](docs/requisitos-av04.md). A tabela MySQL mantém código único, preço positivo em centavos, quantidades válidas, validade, foto, selos, situação e datas. A exclusão do CRUD será inativação para preservar o produto e a auditoria.
+É necessário ter **Python**, **Docker Desktop** e **GNU Make** instalados. No Windows, abra o Docker Desktop e espere o serviço ficar pronto. No terminal, entre na pasta principal do repositório — a que contém este README e `requirements.txt`.
 
-A migração antiga `001_produtos.sql` é específica para **SQLite**. Para a stack do grupo, use somente as migrações MySQL `002_produtos_mysql.sql` e `003_auditoria_produtos_mysql.sql`, nessa ordem.
+Na primeira execução daquele computador:
 
-## Preparar o ambiente no Windows
-
-Faça a preparação inicial uma vez por computador. Os comandos abaixo devem ser executados no PowerShell, na pasta principal do repositório (a que contém `requirements.txt`). Para acompanhar o frontend chamando a API, use o VS Code com a extensão Live Server ou Vite.
-
-### 1. Instalar as dependências Python
-
-Confirme que o Python está instalado e crie o ambiente virtual do projeto:
-
-```powershell
-python --version
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```sh
+make setup
 ```
 
-Se `python` não for reconhecido, instale o Python e abra um novo PowerShell. O ambiente `.venv` e as dependências não precisam ser recriados a cada execução.
+Esse comando cria `.env` a partir de `.env.example` se ainda não existir e prepara o ambiente Python em `.venv`. O arquivo `.env` é local e não deve ser enviado ao GitHub. Os valores de exemplo usam a senha `masterkey` para desenvolvimento local; se o container MySQL existente tiver outra senha root, informe a senha atual em `MYSQL_ROOT_PASSWORD` no `.env`. O comando não apaga nem recria containers existentes.
 
-### 2. Preparar o MySQL
+Para iniciar o banco, aplicar as migrações pendentes e subir os servidores:
 
-O caminho recomendado para desenvolvimento é Docker Desktop com MySQL 8.4. Abra o Docker Desktop e espere ele iniciar.
-
-Se já existir um container chamado `cantina-mysql`, inicie-o:
-
-```powershell
-docker start cantina-mysql
+```sh
+make up
 ```
 
-Se ainda não existir, crie-o uma única vez:
+O Make cria ou inicia o container `cantina-mysql` com o volume persistente `cantina-mysql-data`, aguarda o MySQL, aplica as migrações MySQL necessárias e inicia o Flask. Quando as telas estiverem presentes na branch, inicia também um servidor local para o frontend.
 
-```powershell
-docker run --name cantina-mysql -e MYSQL_ROOT_PASSWORD=rootCantinaLocal123! -e MYSQL_DATABASE=cantina_inteligente -e MYSQL_USER=cantina_app -e MYSQL_PASSWORD=appCantinaLocal123! -p 3306:3306 -d mysql:8.4
-```
+- API: http://127.0.0.1:5000/api/health
+- Conexão com banco: http://127.0.0.1:5000/api/health/db
+- Painel admin, quando integrado: http://127.0.0.1:5500/src/frontend/html/catalogo_produtos_adm.html
+- Catálogo cliente, quando integrado: http://127.0.0.1:5500/src/frontend/html/catalogo_produtos.html
 
-As senhas acima são exemplos apenas para desenvolvimento local. Se você já tiver um container, não o recrie: use no `.env` a senha configurada nele. Se a porta `3306` estiver ocupada, será necessário liberar essa porta ou mapear outra porta do computador e usar o mesmo número em `MYSQL_PORT` no `.env`.
+Mantenha o terminal aberto enquanto apresenta ou testa. `Ctrl+C` encerra os servidores Flask e frontend; o MySQL continua ligado. Para parar o container e preservar os dados, use `make down`. O volume não é removido por esses comandos.
 
-### 3. Configurar a conexão da aplicação
+### Comandos disponíveis
 
-Crie o arquivo local `.env` a partir do exemplo e abra para edição:
+| Comando | Ação |
+| --- | --- |
+| `make help` | Lista os comandos |
+| `make setup` | Prepara `.env` e o ambiente Python |
+| `make up` | Inicia banco, migrações, API e frontend disponível |
+| `make api` | Inicia banco, migrações e API |
+| `make web` | Serve as telas em `http://127.0.0.1:5500` |
+| `make db-up` | Inicia somente o MySQL |
+| `make db-down` ou `make down` | Para somente o MySQL, preservando os dados |
+| `make migrate` | Inicia o MySQL se necessário e confere/aplica migrações |
+| `make status` | Mostra o estado do MySQL, Flask e frontend |
+| `make test` | Executa os testes automatizados |
 
-```powershell
-Copy-Item .env.example .env
-notepad .env
-```
+Se a porta `3306`, `5000` ou `5500` já estiver ocupada, encerre o serviço que a utiliza antes de iniciar. O frontend chama a API Flask; por isso, abra as telas pelo servidor local (porta `5500`), não diretamente como arquivo `file://`.
 
-Para o container criado no passo anterior, deixe os valores assim:
+Cada integrante possui seu próprio banco local. Os dados cadastrados em um computador não aparecem automaticamente nos demais.
 
-```text
-MYSQL_HOST=127.0.0.1
-MYSQL_PORT=3306
-MYSQL_DATABASE=cantina_inteligente
-MYSQL_USER=cantina_app
-MYSQL_PASSWORD=appCantinaLocal123!
-```
+## Estrutura de produto e banco
 
-Salve o arquivo. Ele é ignorado pelo Git; não o envie ao GitHub.
+O modelo comum está em [docs/modelo-produto.md](docs/modelo-produto.md), e as regras da entrega em [docs/requisitos-av04.md](docs/requisitos-av04.md). A tabela MySQL mantém código único, preço positivo em centavos, quantidades válidas, validade, foto, selos, situação e datas.
 
-### 4. Criar as tabelas do banco
+A exclusão da tela administrativa deve seguir o contrato da funcionalidade e preservar a auditoria. As migrações MySQL ficam em `database/migrations`; `001_produtos.sql` é específica para SQLite e não deve ser usada no MySQL. O Make aplica `002` e `003` e, se estiver presente na branch, também confere a `004` antes de aplicá-la, evitando repetir a alteração de auditoria.
 
-Faça este passo uma única vez para cada banco novo. Se as tabelas `produtos` e `auditoria_produtos` já existem, pule para o passo 5. A primeira migração abaixo cria `produtos`; a segunda cria a auditoria e depende da primeira.
+## Rotas da API
 
-Na pasta principal do projeto, copie os arquivos para o container e conecte como root:
-
-```powershell
-docker cp .\database\migrations\002_produtos_mysql.sql cantina-mysql:/tmp/002_produtos_mysql.sql
-docker cp .\database\migrations\003_auditoria_produtos_mysql.sql cantina-mysql:/tmp/003_auditoria_produtos_mysql.sql
-docker exec -it cantina-mysql mysql -u root -p
-```
-
-Digite a senha de root do container. No prompt `mysql>`, rode cada linha:
-
-```sql
-source /tmp/002_produtos_mysql.sql;
-source /tmp/003_auditoria_produtos_mysql.sql;
-SHOW TABLES;
-exit;
-```
-
-Devem aparecer `produtos` e `auditoria_produtos`. Não execute essas migrações novamente nesse mesmo banco. `001_produtos.sql` é uma migração antiga de SQLite; para MySQL, use somente `002` e `003`.
-
-### 5. Iniciar o backend (faça isso quando for testar)
-
-Em um PowerShell na pasta principal do projeto, inicie o container se estiver parado e depois a API:
-
-```powershell
-docker start cantina-mysql
-.\.venv\Scripts\python.exe -m flask --app src.backend.app run --debug
-```
-
-Se o Docker responder que o container já está em execução, pode seguir. Deixe essa janela aberta enquanto usa a API. Para parar o Flask, pressione `Ctrl+C` nessa janela.
-
-### 6. Iniciar o frontend e testar a conexão
-
-Abra o frontend pelo Live Server do VS Code (normalmente `http://localhost:5500`) ou pelo Vite (normalmente `http://localhost:5173`). Não abra o HTML diretamente como arquivo (`file://`): o navegador precisa servir a tela por uma dessas origens para a chamada à API funcionar.
-
-Com o Flask aberto, visite estes endereços:
-
-- `http://127.0.0.1:5000/api/health` — confirma que o Flask iniciou.
-- `http://127.0.0.1:5000/api/health/db` — confirma a conexão MySQL; a resposta deve indicar `"banco": "conectado"` e `"resultado": 1`.
-
-Se o segundo endereço falhar, confira se o container está rodando e se usuário, senha e porta no `.env` correspondem ao MySQL local. Cada pessoa tem seu próprio banco local: os dados cadastrados no computador de uma integrante não aparecem automaticamente no computador das outras.
-
-A preparação do Python, do `.env` e das tabelas é feita uma vez por computador/banco. Nas próximas sessões, basta iniciar o Docker, iniciar o Flask e abrir o frontend pelo servidor local.
-
-### Rotas da API
-
-Com o backend iniciado, estas rotas ficam disponíveis:
-
-- `GET /` — mensagem de que a API iniciou.
-- `GET /api/health` — saúde do Flask.
+- `GET /` — confirma que a API iniciou.
+- `GET /api/health` — estado do Flask.
 - `GET /api/health/db` — verifica a conexão MySQL com `SELECT 1`.
 - `GET /api/produtos?q=&status=` — lista, busca e filtra produtos.
 - `GET /api/produtos/<id>` — consulta detalhes.
 - `POST /api/produtos` — cadastra produto.
 - `PUT /api/produtos/<id>` — edita produto.
-- `DELETE /api/produtos/<id>` — inativa produto sem apagá-lo.
+- `DELETE /api/produtos/<id>` — inativa produto.
 - `PATCH /api/produtos/<id>/reativar` — reativa produto.
 - `GET /api/produtos/<id>/auditoria` — consulta o histórico de alterações.
 
-Para nomes de campos, exemplos de JSON e regras de erro, consulte o [contrato da API](docs/contrato-crud.md). Faça operações administrativas em ambiente local; não publique a API sem autenticação e autorização.
+Para campos, exemplos de JSON e respostas de erro, consulte o [contrato do CRUD](docs/contrato-crud.md).
 
-## Decisões e materiais da entrega
+## Materiais da entrega
 
 - [Decisões da stack e do produto](docs/decisoes.md)
-- [Contrato do CRUD](docs/contrato-crud.md)
 - [Checklist manual](docs/testes-manuais-av04.md)
 - [Roteiro da apresentação](docs/roteiro-apresentacao-av04.md)
-- [Contribuir: branches, commits e PRs](CONTRIBUTING.md)
+- [Contribuição, branches e commits](CONTRIBUTING.md)
 
-As telas e o ensaio integrado seguem com a equipe de frontend. Use o [checklist manual](docs/testes-manuais-av04.md) para conferir inclusão, consulta, edição, inativação, reativação, persistência e validações antes da apresentação.
+Faça operações administrativas em ambiente local; não publique a API sem autenticação e autorização.
