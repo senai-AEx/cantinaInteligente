@@ -1,68 +1,92 @@
-
-from flask import Flask, jsonify
-from conexao import conectar
 import mysql.connector
-#Aplicação Flask criada
+from flask import Flask, jsonify
+from werkzeug.exceptions import HTTPException
+
+from .conexao import conectar
+
 app = Flask(__name__)
+app.json.ensure_ascii = False
 
-# Rota de teste para verificar se a API está funcionando
-@app.route("/")
+
+@app.get("/")
 def inicio():
-    return jsonify({
-        "mensagem": "API Cantina Inteligente funcionando!"
-    })
+    return jsonify(mensagem="API Cantina Inteligente funcionando!")
 
-# Rota para listar todos os produtos cadastrados no banco de dados
-@app.route("/api/produtos", methods=["GET"])
-def listar_produtos():
-    conexao = None
+
+@app.get("/api/health")
+def health():
+    return jsonify(status="ok")
+
+
+@app.get("/api/health/db")
+def health_db():
+    connection = None
     cursor = None
-
     try:
-        conexao = conectar()
-        cursor = conexao.cursor(dictionary=True)
-
-        cursor.execute("""
-            SELECT
-                id_produto,
-                codigo_produto,
-                nome,
-                descricao,
-                categoria,
-                preco_centavos,
-                quantidade_estoque,
-                estoque_minimo,
-                estoque_maximo,
-                validade,
-                foto_caminho,
-                zero_lactose,
-                zero_acucar,
-                status
-            FROM produtos
-            ORDER BY nome
-        """)
-
-        produtos = cursor.fetchall()
-        # Converte a data de validade para o formato ISO 8601 (YYYY-MM-DD) antes de retornar a resposta
-        for produto in produtos:
-            if produto["validade"] is not None:
-                produto["validade"] = produto["validade"].isoformat()
-
-        return jsonify(produtos), 200
-
+        connection = conectar()
+        cursor = connection.cursor()
+        cursor.execute("SELECT 1 AS resultado")
+        row = cursor.fetchone()
+        return jsonify(status="ok", banco="conectado", resultado=row[0])
     except mysql.connector.Error:
-        app.logger.exception("Erro ao consultar produtos")
-        return jsonify({
-            "erro": "Erro ao consultar produtos no banco de dados"
-        }), 500
-    
+        app.logger.exception("Falha ao verificar conexão com o MySQL")
+        return jsonify(status="erro", banco="indisponivel"), 503
+    except RuntimeError as exc:
+        app.logger.error("Configuração do MySQL incompleta: %s", exc)
+        return jsonify(status="erro", banco="configuracao_incompleta"), 503
     finally:
         if cursor is not None:
             cursor.close()
+        if connection is not None and connection.is_connected():
+            connection.close()
 
-        if conexao is not None and conexao.is_connected():
-            conexao.close()
 
-# Inicia a aplicação Flask
+@app.get("/api/produtos")
+def listar_produtos():
+    connection = None
+    cursor = None
+    try:
+        connection = conectar()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(
+            """SELECT
+                   id_produto, codigo_produto, nome, descricao, categoria,
+                   preco_centavos, quantidade_estoque, estoque_minimo,
+                   estoque_maximo, validade, foto_caminho, zero_lactose,
+                   zero_acucar, status, criado_em, atualizado_em
+               FROM produtos
+               ORDER BY nome, id_produto"""
+        )
+        products = cursor.fetchall()
+        for product in products:
+            if product["validade"] is not None:
+                product["validade"] = product["validade"].isoformat()
+            for key in ("criado_em", "atualizado_em"):
+                if product[key] is not None:
+                    product[key] = product[key].isoformat() + "Z"
+            product["zero_lactose"] = bool(product["zero_lactose"])
+            product["zero_acucar"] = bool(product["zero_acucar"])
+        return jsonify(products), 200
+    except mysql.connector.Error:
+        app.logger.exception("Falha ao consultar produtos")
+        return jsonify(erro="Banco indisponível ou estrutura ainda não criada."), 503
+    except RuntimeError as exc:
+        app.logger.error("Configuração do MySQL incompleta: %s", exc)
+        return jsonify(erro="Configure a conexão com o banco no arquivo .env."), 503
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if connection is not None and connection.is_connected():
+            connection.close()
+
+
+@app.errorhandler(HTTPException)
+def erro_http(exc):
+    response = exc.get_response()
+    response.data = app.json.dumps({"erro": exc.description})
+    response.content_type = "application/json"
+    return response
+
+
 if __name__ == "__main__":
     app.run(debug=True)

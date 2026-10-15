@@ -1,63 +1,79 @@
 # Cantina Inteligente — AV04 (Grupo 4)
 
-Base de trabalho para apresentar **Manter Produto** com banco de dados. Este projeto contém a organização, as decisões e a primeira migração SQL; **a aplicação e as telas ainda serão desenvolvidas pela equipe**.
+Base de trabalho para apresentar **Manter Produto** com banco de dados. A stack definida pelo grupo é **Python + Flask + MySQL**. Esta branch prepara o backend, a conexão, as tabelas e a consulta inicial de produtos; as demais operações do CRUD e as telas continuam nas issues seguintes.
 
-## Contexto
+## Entrega
 
-Projeto Aplicado II do Centro Universitário SENAI Santa Catarina para a Cantina da Honestidade da unidade Fraiburgo (SC). Equipe 4: Ana Cecília Pereira Lacerda Costa, Eduardo Peixoto dos Passos da Silva, Luan Lima de Souza, Pablo Santos e Vanessa Kathleen Góes Leite. A apresentação da AV04 está marcada para **15/10/2026, às 20h40** no cronograma fornecido.
+Projeto Aplicado II do Centro Universitário SENAI Santa Catarina para a Cantina da Honestidade, unidade Fraiburgo (SC), Grupo 4. Apresentação da AV04: **15/10/2026 às 20h40**.
 
-Acompanhar as tarefas no [Kanban da AV04](https://github.com/orgs/senai-AEx/projects/1) e a entrega no [marco AV04 — CRUD de Produto](https://github.com/senai-AEx/cantinaInteligente/milestone/1).
+Acompanhe as tarefas no [Kanban AV04](https://github.com/orgs/senai-AEx/projects/1) e no [marco AV04 — CRUD de Produto](https://github.com/senai-AEx/cantinaInteligente/milestone/1).
 
-## Decisões de partida
+## Estrutura de Produto
 
-- **Funcionalidade:** incluir, consultar, alterar e inativar/reativar produtos. A inativação representa a exclusão na AV04 e preserva compras e auditoria.
-- **Identificação:** `codigo_produto` único. Usar EAN/GTIN da embalagem quando existir; caso contrário, gerar código interno. O QR identifica a cantina, não cada produto.
-- **Produto:** nome, descrição, categoria, preço, estoque, mínimo, máximo, validade, foto, selos e situação. Ver regras em [modelo-produto.md](docs/modelo-produto.md).
-- **Stack pendente de decisão do grupo:** Python + Flask, SQLite e HTML/CSS/JavaScript são a proposta inicial da estrutura. Os arquivos atuais de dependências e migração refletem essa proposta e deverão ser alinhados ao resultado da votação.
-- **Dinheiro:** preço armazenado em centavos inteiros; exibição em reais.
+O modelo comum está em [docs/modelo-produto.md](docs/modelo-produto.md); as regras da entrega estão em [docs/requisitos-av04.md](docs/requisitos-av04.md). A tabela MySQL mantém código único, preço positivo em centavos, quantidades válidas, validade, foto, selos, situação e datas. A exclusão do CRUD será inativação para preservar o produto e a auditoria.
 
-Na proposta inicial, Flask integra com SQLite, que não precisa de servidor separado. A interface responsiva atende à direção de PWA apresentada na AV02; a instalação como PWA depende de manifesto, ícones e contexto seguro e fica depois do CRUD funcional.
+A migração antiga `001_produtos.sql` é específica para **SQLite**. Para a stack do grupo, use somente as migrações MySQL `002_produtos_mysql.sql` e `003_auditoria_produtos_mysql.sql`, nessa ordem.
 
-## Pastas e arquivos
+## Preparar o ambiente no Windows
 
-```text
-cantinaInteligente/
-├── .editorconfig             # Padrão de edição de arquivos de texto
-├── .gitattributes            # Quebras de linha e tratamento de binários
-├── CONTRIBUTING.md           # Fluxo de trabalho da equipe
-├── assets/produtos/          # Fotos locais dos produtos
-├── database/migrations/      # Esquema inicial SQLite, sujeito à stack escolhida
-├── docs/                     # Requisitos, modelo, decisões, contrato e roteiros
-├── src/backend/              # Aplicação e acesso ao banco (a criar)
-├── src/frontend/             # Telas responsivas (a criar)
-├── tests/                    # Testes dos fluxos (a criar)
-└── requirements.txt          # Dependência da proposta inicial com Flask
+No PowerShell, na raiz do repositório:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
 ```
 
-## Guia para a equipe
+Abra `.env` no editor e preencha as credenciais do seu MySQL local. Mantenha esse arquivo local: o Git o ignora.
 
-- [Como contribuir](CONTRIBUTING.md): escolher issue, criar branch, fazer commit e abrir PR.
-- [Requisitos da AV04](docs/requisitos-av04.md): funcionalidade e critérios da avaliação.
-- [Modelo de Produto](docs/modelo-produto.md): campos e regras de negócio.
-- [Contrato do CRUD](docs/contrato-crud.md): operações e respostas esperadas.
-- [Decisões de projeto](docs/decisoes.md): escolhas iniciais e motivos.
-- [Testes manuais](docs/testes-manuais-av04.md): casos para conferir quando a aplicação existir.
-- [Roteiro da apresentação](docs/roteiro-apresentacao-av04.md): preparação e sequência da demonstração.
+O exemplo usa MySQL em Docker com container chamado `cantina-mysql` e a porta local `3306`:
 
-## Ordem de trabalho
+```powershell
+docker start cantina-mysql
+```
 
-1. Confirmar a stack com o grupo e alinhar as decisões, dependências, migração e issues.
-2. Preparar o ambiente e o banco de desenvolvimento. Se a proposta inicial for aprovada, usar `requirements.txt` e `database/migrations/001_produtos.sql`.
-3. Implementar as rotas e regras de [contrato-crud.md](docs/contrato-crud.md).
-4. Construir tela de lista/consulta e formulário de inclusão/edição com validação.
-5. Executar o checklist manual, conferir persistência após reiniciar e ensaiar a apresentação.
+Para criar as tabelas em uma instalação nova, copie as duas migrações para o container e aplique uma única vez. A segunda depende da primeira:
 
-Os comandos reais de instalação, execução e testes deverão ser adicionados ao README durante a implementação.
+```powershell
+docker cp .\database\migrations\002_produtos_mysql.sql cantina-mysql:/tmp/002_produtos_mysql.sql
+docker cp .\database\migrations\003_auditoria_produtos_mysql.sql cantina-mysql:/tmp/003_auditoria_produtos_mysql.sql
+docker exec -it cantina-mysql mysql -u root -p
+```
 
-## Fontes do projeto
+No prompt do MySQL, digite a senha de root e execute:
 
-- `AV02_Cantina_Inteligente_Solucao_e_Requisitos.pdf`: proposta de PWA, EAN/GTIN, banco relacional e critérios de produto.
-- `AV03_GRUPO_4.pdf`: RF02/RF03, atributos do DER e requisitos não funcionais.
-- Enunciado e tabela da AV04 enviados nesta conversa.
+```sql
+source /tmp/002_produtos_mysql.sql;
+source /tmp/003_auditoria_produtos_mysql.sql;
+SHOW TABLES;
+exit;
+```
 
-Referências técnicas da proposta inicial: [Flask e SQLite](https://flask.palletsprojects.com/en/stable/tutorial/database/), [SQLite em Python](https://docs.python.org/3/library/sqlite3.html) e [instalação de PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable).
+Isso cria o banco `cantina_inteligente` e as tabelas `produtos` e `auditoria_produtos`. Não rode as migrações de novo: os índices já terão sido criados.
+
+## Executar
+
+Com MySQL ligado, migrações aplicadas e `.env` preenchido:
+
+```powershell
+.\.venv\Scripts\python.exe -m flask --app src.backend.app run --debug
+```
+
+Rotas disponíveis nesta etapa:
+
+- `GET /` — mensagem de que a API iniciou.
+- `GET /api/health` — saúde do Flask.
+- `GET /api/health/db` — verifica a conexão MySQL com `SELECT 1`.
+- `GET /api/produtos` — consulta a lista de produtos.
+
+Para verificar a conexão, acesse [http://127.0.0.1:5000/api/health/db](http://127.0.0.1:5000/api/health/db). A resposta esperada inclui `"banco": "conectado"` e `"resultado": 1`. A lista de produtos retorna vazia se ainda não houver itens.
+
+## Decisões e próximas entregas
+
+- [Decisões da stack e do produto](docs/decisoes.md)
+- [Contrato do CRUD](docs/contrato-crud.md)
+- [Checklist manual](docs/testes-manuais-av04.md)
+- [Roteiro da apresentação](docs/roteiro-apresentacao-av04.md)
+- [Contribuir: branches, commits e PRs](CONTRIBUTING.md)
+
+As operações de cadastrar, consultar por ID, editar, inativar/reativar, auditoria pela API, validação de payload e telas seguem nas issues **02–05**. Não publique o backend administrativo em uma rede pública sem autenticação e autorização.
