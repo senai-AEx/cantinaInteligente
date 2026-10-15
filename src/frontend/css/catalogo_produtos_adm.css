@@ -12,13 +12,16 @@
     width: 100%;
 }
 
+.secao-produtos-admin {
+    min-width: 0;
+}
+
+
 /* MENU LATERAL */
 
 .menu-admin {
-    display: block;
-    width: 100%;
-    min-width: 0;
     box-sizing: border-box;
+    width: 100%;
     padding: 20px;
     background-color: #ffffff;
     border: 1px solid #eeeeee;
@@ -54,11 +57,8 @@
     box-sizing: border-box;
 }
 
-.secao-produtos-admin {
-    min-width: 0;
-}
 
-/* CATÁLOGO */
+/* INTRODUÇÃO E CATÁLOGO */
 
 .introducao {
     margin-bottom: 25px;
@@ -66,7 +66,7 @@
 
 .introducao h1 {
     margin-bottom: 8px;
-    color: #333;
+    color: #333333;
     font-size: 28px;
 }
 
@@ -77,12 +77,13 @@
     align-items: start;
 }
 
-/* CARDS */
+
+/* CARDS DE PRODUTOS */
 
 .card-produto {
     min-width: 0;
     overflow: hidden;
-    background: #ffffff;
+    background-color: #ffffff;
     border: 1px solid #eeeeee;
     border-radius: 10px;
     box-shadow: 0 2px 8px #0000000a;
@@ -111,6 +112,7 @@
     font-size: 20px;
     font-weight: bold;
 }
+
 
 /* VALIDADE E SELOS */
 
@@ -142,7 +144,8 @@
     font-size: 12px;
 }
 
-/* BOTÕES EDITAR E EXCLUIR */
+
+/* BOTÕES DOS PRODUTOS */
 
 .acoes-produto {
     display: grid;
@@ -152,6 +155,7 @@
 
 .acoes-produto .botao {
     width: 100%;
+    box-sizing: border-box;
 }
 
 .botao-excluir {
@@ -168,7 +172,8 @@
     background-color: #fff0e4;
 }
 
-/* MODAL CADASTRO */
+
+/* MODAIS */
 
 .modal-overlay {
     display: none;
@@ -188,6 +193,7 @@
 
 .modal-conteudo {
     position: relative;
+    box-sizing: border-box;
     width: 100%;
     max-width: 600px;
     max-height: 90vh;
@@ -214,9 +220,11 @@
     cursor: pointer;
 }
 
-/* FORMULÁRIO */
 
-#form-cadastro-produto {
+/* CAMPOS DOS FORMULÁRIOS */
+
+#form-cadastro-produto,
+#form-editar-produto {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -235,55 +243,57 @@
 
 .campo-formulario input,
 .campo-formulario textarea {
+    box-sizing: border-box;
     width: 100%;
     padding: 10px;
     border: 1px solid #dddddd;
     border-radius: 6px;
+    outline: none;
     font: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.campo-formulario input:focus,
+.campo-formulario textarea:focus {
+    border-color: #e87522;
+    box-shadow: 0 0 0 2px #e8752220;
 }
 
 .campo-formulario textarea {
     resize: vertical;
 }
 
-#form-cadastro-produto .botao {
+#form-cadastro-produto .botao,
+#form-editar-produto .botao {
     width: 100%;
     margin-top: 5px;
 }
 
-/* RESPEITA O ATRIBUTO HIDDEN */
+
+/* MODAL DE EXCLUSÃO */
+
+#modal-excluir-produto .campo-formulario {
+    margin-bottom: 20px;
+}
+
+#botao-confirmar-senha-exclusao {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 8px;
+    border: 1px solid #e87522;
+    background-color: #e87522;
+    color: #ffffff;
+}
+
+#botao-confirmar-senha-exclusao:hover {
+    border-color: #c95d12;
+    background-color: #c95d12;
+}
+
+
+/* ATRIBUTO HIDDEN */
 
 [hidden] {
     display: none !important;
-}
-
-/* RESPONSIVIDADE */
-
-@media (max-width: 800px) {
-    .layout-admin {
-        grid-template-columns: 1fr;
-        gap: 24px;
-    }
-
-    .menu-admin {
-        width: 100%;
-    }
-
-    .lista-produtos {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 520px) {
-    .lista-produtos {
-        grid-template-columns: 1fr;
-    }
-
-    .introducao h1 {
-        font-size: 24px;
-    }
-
-    .modal-conteudo {
-        padding: 24px 20px;
-    }
 }

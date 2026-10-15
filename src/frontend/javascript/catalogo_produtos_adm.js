@@ -34,4 +34,50 @@ document.addEventListener("DOMContentLoaded", function () {
         modalEditar.setAttribute("aria-hidden", "true");
     });
 
+    // MODAL DE EXCLUSÃO DE PRODUTOS
+
+    // MODAL DE EXCLUSÃO DE PRODUTOS
+
+    const modalExcluir = document.getElementById("modal-excluir-produto");
+    const botaoFecharExcluir = document.getElementById("fechar-excluir-produto");
+    const botaoConfirmarSenhaExcluir = document.getElementById("botao-confirmar-senha-exclusao");
+    const campoSenhaExcluir = document.getElementById("senha-confirmacao-exclusao");
+
+    let produtoSelecionadoParaExcluir = null;
+
+    const botoesExcluir = document.querySelectorAll(".acoes-produto .botao-excluir");
+
+    botoesExcluir.forEach(function (botao) {
+        botao.addEventListener("click", function () {
+            produtoSelecionadoParaExcluir = botao.closest(".card-produto");
+
+            campoSenhaExcluir.value = "";
+
+            modalExcluir.classList.add("aberto");
+            modalExcluir.setAttribute("aria-hidden", "false");
+
+            campoSenhaExcluir.focus();
+        });
+    });
+
+    function fecharModalExcluir() {
+        modalExcluir.classList.remove("aberto");
+        modalExcluir.setAttribute("aria-hidden", "true");
+
+        campoSenhaExcluir.value = "";
+        produtoSelecionadoParaExcluir = null;
+    }
+
+    botaoFecharExcluir.addEventListener("click", fecharModalExcluir);
+
+    botaoConfirmarSenhaExcluir.addEventListener("click", function () {
+        if (!campoSenhaExcluir.value.trim()) {
+            campoSenhaExcluir.focus();
+            return;
+        }
+
+        // A validação real da senha será implementada no backend.
+        alert("A validação da senha ainda não foi implementada.");
+    });
+
 });

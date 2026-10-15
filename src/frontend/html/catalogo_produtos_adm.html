@@ -454,6 +454,57 @@
         </div>
     </div>
 
+    <!-- MODAL DE EXCLUSÃO DE PRODUTO -->
+    <div
+        class="modal-overlay"
+        id="modal-excluir-produto"
+        aria-hidden="true"
+    >
+        <div
+            class="modal-conteudo modal-confirmacao"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="titulo-excluir-produto"
+        >
+
+            <button
+                type="button"
+                class="modal-fechar"
+                id="fechar-excluir-produto"
+                aria-label="Fechar"
+            >
+                &times;
+            </button>
+
+            <h2 id="titulo-excluir-produto">Excluir produto</h2>
+
+            <div class="campo-formulario">
+
+                <label for="senha-confirmacao-exclusao">
+                    Informe sua senha para confirmar a exclusão:
+                </label>
+
+                <input
+                    type="password"
+                    id="senha-confirmacao-exclusao"
+                    name="senha-confirmacao-exclusao"
+                    autocomplete="current-password"
+                    required
+                >
+
+            </div>
+
+            <button
+                type="button"
+                class="botao botao-excluir"
+                id="botao-confirmar-senha-exclusao"
+            >
+                Confirmar exclusão
+            </button>
+
+        </div>
+    </div>
+
     <!-- FOOTER -->
     <div id="footer-container"></div>
 
