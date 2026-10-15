@@ -1,420 +1,108 @@
-<!-- PAGINA QUE LISTA OS PRODUTOS PARA O USUÁRIO, 
-     APRESENTA O CARRINHO DE COMPRAS E O VALOR TOTAL DA COMPRA-->
-
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Catálogo de Produtos | Cantina da Honestidade</title>
-
-    <!-- CSS geral e CSS específico da tela -->
+    <meta name="theme-color" content="#fffaf4">
+    <title>Catálogo | Cantina da Honestidade</title>
     <link rel="stylesheet" href="../css/base.css">
     <link rel="stylesheet" href="../css/catalogo_produtos.css">
 </head>
-
 <body>
-
-    <!-- CABEÇALHO -->
     <div id="header-container"></div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="container pagina-catalogo">
-
-        <section class="introducao">
-            <h1>Catálogo de Produtos</h1>
-
-            <p>
-                Escolha seus produtos e contribua com a
-                Cantina da Honestidade.
-            </p>
+    <main>
+        <section class="hero-catalogo">
+            <div class="container hero-conteudo">
+                <div class="hero-texto">
+                    <span class="eyebrow">CANTINA DA HONESTIDADE</span>
+                    <h1>Escolha com carinho.<br><span>Contribua com confiança.</span></h1>
+                    <p>Confira o que está disponível hoje e monte sua sacola com tranquilidade.</p>
+                    <a class="botao botao-principal" href="#produtos">Ver produtos <span aria-hidden="true">↓</span></a>
+                </div>
+                <div class="hero-selo" aria-hidden="true">
+                    <span>🍊</span>
+                    <p>Consumo consciente<br>e preço justo</p>
+                </div>
+            </div>
         </section>
 
-        <!-- ÁREA DE PRODUTOS -->
-        <div class="layout-catalogo">
-
-            <section class="secao-produtos" id="produtos">
-
-                <h2>Produtos disponíveis</h2>
-
-                <div class="lista-produtos">
-
-                    <!-- PRODUTO 1 -->
-                    <article class="card-produto">
-
-                        <img
-                            src="img/biscoito.jpg"
-                            alt="Pacote de biscoitos"
-                            class="imagem-produto"
-                        >
-
-                        <div class="conteudo-produto">
-
-                            <h3>Biscoito integral</h3>
-
-                            <p class="preco-produto">R$ 3,00</p>
-
-                            <div class="validade-selos">
-                                <p class="validade">
-                                    Validade: 20/10/2026
-                                </p>
-
-                                <div class="selos-produto">
-                                    <span class="selo">
-                                        Zero lactose
-                                    </span>
-                                </div>
-                            </div>
-
-                            <button
-                                type="button"
-                                class="botao botao-principal"
-                            >
-                                Adicionar ao carrinho
-                            </button>
-
+        <div class="container pagina-catalogo">
+            <div class="layout-catalogo">
+                <section class="secao-produtos" id="produtos" aria-labelledby="titulo-produtos">
+                    <div class="cabecalho-secao">
+                        <div>
+                            <span class="eyebrow">FEITO PARA VOCÊ</span>
+                            <h2 id="titulo-produtos">Produtos da cantina</h2>
+                            <p>Encontre seu lanche e confira os ingredientes importantes.</p>
                         </div>
+                        <p class="contador-produtos" id="contador-produtos" aria-live="polite"></p>
+                    </div>
 
-                    </article>
-
-                    <!-- PRODUTO 2 -->
-                    <article class="card-produto">
-
-                        <img
-                            src="img/suco.jpg"
-                            alt="Caixa de suco"
-                            class="imagem-produto"
-                        >
-
-                        <div class="conteudo-produto">
-
-                            <h3>Suco de uva</h3>
-
-                            <p class="preco-produto">R$ 4,50</p>
-
-                            <div class="validade-selos">
-                                <p class="validade">
-                                    Validade: 25/10/2026
-                                </p>
-
-                                <div class="selos-produto">
-                                    <span class="selo">
-                                        Zero açúcar
-                                    </span>
-                                </div>
-                            </div>
-
-                            <button
-                                type="button"
-                                class="botao botao-principal"
-                            >
-                                Adicionar ao carrinho
-                            </button>
-
+                    <section class="ferramentas-catalogo" aria-label="Busca e filtros do catálogo">
+                        <label class="busca-produtos" for="busca-produtos">
+                            <span aria-hidden="true">⌕</span>
+                            <input type="search" id="busca-produtos" placeholder="Buscar produto ou categoria" autocomplete="off">
+                            <kbd>⌕</kbd>
+                        </label>
+                        <div class="categorias-produtos" id="categorias-produtos" role="group" aria-label="Filtrar por categoria">
+                            <button type="button" class="filtro-categoria selecionado" data-categoria="TODAS" aria-pressed="true">Todas</button>
                         </div>
+                    </section>
 
-                    </article>
+                    <p id="mensagem-api" class="mensagem-api" role="status" aria-live="polite"></p>
+                    <div class="lista-produtos" id="lista-produtos" aria-live="polite" aria-busy="true">
+                        <p class="estado-lista">Carregando produtos...</p>
+                    </div>
+                </section>
 
-                    <!-- PRODUTO 3 -->
-                    <article class="card-produto">
-
-                        <img
-                            src="img/sanduiche.jpg"
-                            alt="Sanduíche embalado"
-                            class="imagem-produto"
-                        >
-
-                        <div class="conteudo-produto">
-
-                            <h3>Sanduíche natural</h3>
-
-                            <p class="preco-produto">R$ 7,00</p>
-
-                            <p class="validade">
-                                Validade: 16/10/2026
-                            </p>
-
-                            <button
-                                type="button"
-                                class="botao botao-principal"
-                            >
-                                Adicionar ao carrinho
-                            </button>
-
+                <aside class="carrinho" id="carrinho" aria-labelledby="titulo-carrinho">
+                    <div class="cabecalho-carrinho">
+                        <div>
+                            <span class="eyebrow">SUA ESCOLHA</span>
+                            <h2 id="titulo-carrinho">Minha sacola</h2>
                         </div>
-
-                    </article>
-
-                    <!-- PRODUTO 4 -->
-                    <article class="card-produto">
-
-                        <img
-                            src="img/barra-cereal.jpg"
-                            alt="Barra de cereal"
-                            class="imagem-produto"
-                        >
-
-                        <div class="conteudo-produto">
-
-                            <h3>Barra de cereal</h3>
-
-                            <p class="preco-produto">R$ 2,50</p>
-
-                            <div class="validade-selos">
-                                <p class="validade">
-                                    Validade: 30/10/2026
-                                </p>
-
-                                <div class="selos-produto">
-                                    <span class="selo">
-                                        Zero lactose
-                                    </span>
-                                </div>
-                            </div>
-
-                            <button
-                                type="button"
-                                class="botao botao-principal"
-                            >
-                                Adicionar ao carrinho
-                            </button>
-
+                        <span class="contador-sacola" id="contador-sacola" aria-label="0 itens">0</span>
+                    </div>
+                    <p class="texto-carrinho">Os produtos escolhidos ficam salvos neste dispositivo.</p>
+                    <div id="itens-carrinho" class="itens-carrinho" aria-live="polite">
+                        <div class="sacola-vazia">
+                            <span aria-hidden="true">🛍️</span>
+                            <strong>Sua sacola está vazia</strong>
+                            <p>Adicione algo gostoso para começar.</p>
+                            <a href="#produtos">Explorar produtos</a>
                         </div>
+                    </div>
+                    <div class="resumo-carrinho" id="resumo-carrinho" hidden>
+                        <div class="linha-total"><span>Total dos produtos</span><strong id="total-carrinho">R$ 0,00</strong></div>
+                        <p class="aviso-finalizacao">Esta tela ainda não envia pedidos nem processa pagamentos. Confira sua sacola antes de falar com a equipe da cantina.</p>
+                        <button type="button" class="botao botao-principal botao-revisar" id="revisar-sacola">Revisar sacola</button>
+                        <button type="button" class="botao-limpar" id="limpar-sacola">Limpar sacola</button>
+                    </div>
+                </aside>
+            </div>
 
-                    </article>
-
-                </div>
-
-                <!-- FUNCIONALIDADE CUMPRE REQUISITO MAS NÃO ENTRA NO CRUD -->
-
-                <a href="#relatar-problema" class="link-problema">
-                    Relatar um problema com um produto
-                </a>
-
+            <section class="mensagem-honestidade" aria-label="Sobre a cantina">
+                <span aria-hidden="true">♡</span>
+                <div><h2>Uma cantina feita de confiança</h2><p>Escolha o que deseja levar e contribua com um valor justo para você e para a comunidade.</p></div>
             </section>
-
-            <!-- CARRINHO -->
-            <aside class="carrinho" id="carrinho">
-
-                <h2>Meu carrinho</h2>
-
-                <p class="carrinho-vazio">
-                    Confira os produtos selecionados.
-                </p>
-
-                <!-- Exemplo visual de produto adicionado -->
-                <div class="item-carrinho">
-
-                    <div class="informacoes-item">
-                        <h3>Biscoito integral</h3>
-                        <p>R$ 3,00 por unidade</p>
-                    </div>
-
-                    <div class="quantidade-item">
-                        <label for="quantidade-biscoito">
-                            Quantidade
-                        </label>
-
-                        <input
-                            type="number"
-                            id="quantidade-biscoito"
-                            name="quantidade-biscoito"
-                            min="1"
-                            value="2"
-                        >
-                    </div>
-
-                    <p class="subtotal-item">
-                        Subtotal: R$ 6,00
-                    </p>
-
-                </div>
-
-                <div class="item-carrinho">
-
-                    <div class="informacoes-item">
-                        <h3>Suco de uva</h3>
-                        <p>R$ 4,50 por unidade</p>
-                    </div>
-
-                    <div class="quantidade-item">
-                        <label for="quantidade-suco">
-                            Quantidade
-                        </label>
-
-                        <input
-                            type="number"
-                            id="quantidade-suco"
-                            name="quantidade-suco"
-                            min="1"
-                            value="1"
-                        >
-                    </div>
-
-                    <p class="subtotal-item">
-                        Subtotal: R$ 4,50
-                    </p>
-
-                </div>
-
-                <!-- TOTAL ABAIXO DOS ITENS -->
-                <div class="resumo-carrinho">
-
-                    <p class="total-carrinho">
-                        Total dos produtos:
-                        <strong>R$ 10,50</strong>
-                    </p>
-
-                    <button
-                        type="button"
-                        class="botao botao-principal botao-finalizar"
-                    >
-                        Finalizar compra
-                    </button>
-
-                </div>
-
-            </aside>
-
         </div>
-
-        <!-- RELATO DE PROBLEMAS -->
-        <section class="secao-problema" id="relatar-problema">
-
-            <h2>Encontrou algum problema?</h2>
-
-            <p>
-                Informe se um produto estiver indisponível,
-                danificado, vencido ou com informações incorretas.
-            </p>
-
-            <button
-                type="button"
-                class="botao botao-secundario"
-            >
-                Relatar problema
-            </button>
-
-        </section>
-
     </main>
 
-    
-    <!-- MODAL DE FINALIZAÇÃO DA COMPRA 
-         E APRESENTAÇÃO DO QRCODE -->
-    <div class="modal-overlay" id="modal-pix" aria-hidden="true">
-        <div class="modal-conteudo" role="dialog" aria-modal="true"
-            aria-labelledby="titulo-modal-pix">
-
-            <button type="button" class="modal-fechar"
-                    id="fechar-modal-pix" aria-label="Fechar modal">
-                &times;
-            </button>
-
-            <div class="modal-corpo" id="modal-corpo">
-
-                
-            <!-- INFORMAÇÕES DA COMPRA -->
-            <section class="informacoes-pix">
-                <div class="mensagem-pix">
-                    <h2 id="titulo-modal-pix">
-                        Sua compra faz a diferença!
-                    </h2>
-
-                    <p>
-                        A Cantina da Honestidade existe graças à
-                        confiança de cada pessoa. Contribua com o
-                        valor que considerar justo e ajude a manter
-                        essa iniciativa funcionando.
-                    </p>
-                </div>
-
-                <div class="valor-pix">
-                    <p>
-                        Total dos produtos:
-                        <strong id="total-produtos-pix">R$ 10,50</strong>
-                    </p>
-
-                    
-                <div class="campo-valor-pix">
-                    <label for="valor-pagamento" id="rotulo-valor-pagamento">
-                        Quanto você deseja pagar?
-                    </label>
-
-                    <input
-                        type="number"
-                        id="valor-pagamento"
-                        min="0.01"
-                        step="0.01"
-                        value="10.50"
-                    />
-
-                    <p id="valor-pagamento-fixo" hidden></p>
-                </div>
-
-                </div>
-
-                <button
-                    type="button"
-                    class="botao botao-principal"
-                    id="gerar-pix"
-                >
-                    Confirmar e gerar Pix
-                </button>
-
-                <button
-                    type="button"
-                    class="botao botao-secundario"
-                    id="voltar-editar-valor"
-                    hidden
-                >
-                    Voltar e alterar valor
-                </button>
-            </section>
-
-            <!-- ÁREA DO QR CODE -->
-            <section class="area-qrcode" id="area-qrcode" hidden>
-                <h3>Faça seu pagamento</h3>
-
-                <div class="qrcode-imagem" id="qrcode-imagem">
-                    <!-- O QR Code será inserido aqui -->
-                </div>
-
-                <p>
-                    Escaneie o QR Code com o aplicativo do seu banco.
-                </p>
-
-                <label for="codigo-pix">Ou copie o código Pix:</label>
-
-                <textarea
-                    id="codigo-pix"
-                    readonly
-                    placeholder="O código Pix aparecerá aqui"
-                ></textarea>
-
-                <button
-                    type="button"
-                    class="botao botao-principal"
-                    id="copiar-pix"
-                >
-                    Copiar código Pix
-                </button>
-            </section>
-
-
-            </div>
-        </div>
+    <div class="modal-overlay" id="modal-revisao" aria-hidden="true">
+        <section class="modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="titulo-revisao">
+            <button type="button" class="modal-fechar" id="fechar-revisao" aria-label="Fechar">&times;</button>
+            <span class="eyebrow">SUA ESCOLHA</span>
+            <h2 id="titulo-revisao">Confira sua sacola</h2>
+            <div id="resumo-revisao" class="resumo-revisao"></div>
+            <div class="linha-total"><span>Total dos produtos</span><strong id="total-revisao">R$ 0,00</strong></div>
+            <p class="aviso-finalizacao">O sistema ainda não envia pedidos nem gera cobrança. Use esta conferência ao combinar sua compra com a equipe da cantina.</p>
+            <button type="button" class="botao botao-principal botao-revisar" id="voltar-catalogo">Voltar ao catálogo</button>
+        </section>
     </div>
 
-    <!-- RODAPÉ -->
     <div id="footer-container"></div>
-
-    <!-- SCRIPTS P/ VINCULAR FUNÇÕES DE PAGAMENTO E LAYOUT PADRÃO -->
-    <script src="../javascript/catalogo_produtos.js"></script>
     <script src="../javascript/base.js"></script>
-
+    <script src="../javascript/catalogo_produtos.js"></script>
 </body>
-
 </html>
