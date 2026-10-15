@@ -28,7 +28,7 @@ Somente **Administrador** altera produtos. O catálogo de cliente é somente lei
 
 ## Aceite para a equipe conferir
 
-- [ ] Inclusão, consulta, alteração e inativação/reativação funcionam com SQLite, inclusive após reiniciar a aplicação.
+- [ ] Inclusão, consulta, alteração e inativação/reativação funcionam com MySQL, inclusive após reiniciar a aplicação.
 - [ ] Código duplicado, preço não positivo, estoque negativo e máximo menor que mínimo são recusados.
 - [ ] Campos obrigatórios e data inválida têm mensagem junto ao campo; o banco também contém restrições para os dados que consegue validar.
 - [ ] Inativar preserva o registro; a lista de ativos e o catálogo não o exibem.
