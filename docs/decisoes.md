@@ -22,7 +22,7 @@ As variáveis ficam em `.env`, ignorado pelo Git. Use `.env.example` como refer�
 - **Auditoria:** cada inclusão, alteração, inativação e reativação deve registrar autor, origem, data/hora e valores antes/depois na mesma transação da mudança.
 - **PWA:** interface responsiva está no escopo; instalação offline fica para depois do CRUD.
 
-A migração `001_produtos.sql` é legada, exclusiva para SQLite. Para preparar um banco MySQL novo, aplique `002_produtos_mysql.sql` e depois `003_auditoria_produtos_mysql.sql` uma única vez.
+A migração `001_produtos.sql` é legada, exclusiva para SQLite. Para preparar um banco MySQL novo, aplique `002_produtos_mysql.sql`, `003_auditoria_produtos_mysql.sql` e `004_auditoria_exclusao_mysql.sql` uma única vez e nessa ordem. Em bancos que já têm as duas tabelas, aplique somente a migração `004` uma vez.
 
 ## Estado do backend
 

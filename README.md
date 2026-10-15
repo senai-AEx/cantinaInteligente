@@ -61,7 +61,7 @@ Cada integrante possui seu próprio banco local. Os dados cadastrados em um comp
 
 O modelo comum está em [docs/modelo-produto.md](docs/modelo-produto.md), e as regras da entrega em [docs/requisitos-av04.md](docs/requisitos-av04.md). A tabela MySQL mantém código único, preço positivo em centavos, quantidades válidas, validade, foto, selos, situação e datas.
 
-A exclusão da tela administrativa deve seguir o contrato da funcionalidade e preservar a auditoria. As migrações MySQL ficam em `database/migrations`; `001_produtos.sql` é específica para SQLite e não deve ser usada no MySQL. O Make aplica `002` e `003` e, se estiver presente na branch, também confere a `004` antes de aplicá-la, evitando repetir a alteração de auditoria.
+A tela administrativa permite inativar e reativar produtos; a exclusão definitiva preserva o histórico de auditoria. As migrações MySQL ficam em `database/migrations`; `001_produtos.sql` é específica para SQLite e não deve ser usada no MySQL. O Make confere e aplica as migrações `002`, `003` e `004` sem repetir alterações já aplicadas.
 
 ## Rotas da API
 
@@ -70,10 +70,12 @@ A exclusão da tela administrativa deve seguir o contrato da funcionalidade e pr
 - `GET /api/health/db` — verifica a conexão MySQL com `SELECT 1`.
 - `GET /api/produtos?q=&status=` — lista, busca e filtra produtos.
 - `GET /api/produtos/<id>` — consulta detalhes.
+- `POST /api/uploads/produtos` — envia uma foto JPG, PNG ou WebP de até 5 MB.
 - `POST /api/produtos` — cadastra produto.
 - `PUT /api/produtos/<id>` — edita produto.
-- `DELETE /api/produtos/<id>` — inativa produto.
+- `PATCH /api/produtos/<id>/inativar` — inativa produto, mantendo-o para reativação.
 - `PATCH /api/produtos/<id>/reativar` — reativa produto.
+- `DELETE /api/produtos/<id>` — exclui produto definitivamente, preservando a auditoria.
 - `GET /api/produtos/<id>/auditoria` — consulta o histórico de alterações.
 
 Para campos, exemplos de JSON e respostas de erro, consulte o [contrato do CRUD](docs/contrato-crud.md).

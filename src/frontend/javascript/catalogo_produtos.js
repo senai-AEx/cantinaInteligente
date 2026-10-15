@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function caminhoFoto(caminho) {
         if (!caminho) return null;
         try {
-            const url = new URL("../" + caminho.replace(/^\/+/, ""), document.baseURI);
+            const url = new URL("../../../" + caminho.replace(/^\/+/, ""), document.baseURI);
             return url.origin === window.location.origin ? url.href : null;
         } catch {
             return null;

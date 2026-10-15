@@ -12,6 +12,22 @@ FRONTEND = ROOT / "src" / "frontend"
 
 
 class FrontendHandler(SimpleHTTPRequestHandler):
+    def translate_path(self, path):
+        parsed = urlsplit(path)
+        prefix = "/assets/produtos/"
+        if parsed.path.startswith(prefix):
+            relativo = parsed.path[len(prefix):]
+            pasta_imagens = ROOT / "assets" / "produtos"
+            arquivo = (pasta_imagens / relativo).resolve()
+            try:
+                arquivo.relative_to(pasta_imagens.resolve())
+            except ValueError:
+                return str(pasta_imagens / "arquivo-inexistente")
+            if not relativo or not arquivo.is_file():
+                return str(pasta_imagens / "arquivo-inexistente")
+            return str(arquivo)
+        return super().translate_path(path)
+
     def _rewrite_url(self):
         parsed = urlsplit(self.path)
         path = parsed.path

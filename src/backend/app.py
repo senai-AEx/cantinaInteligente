@@ -1,5 +1,8 @@
 import mysql.connector
-from flask import Flask, jsonify
+from pathlib import Path
+from uuid import uuid4
+
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 
@@ -8,6 +11,9 @@ from .produtos import produtos_api
 
 app = Flask(__name__)
 app.json.ensure_ascii = False
+LIMITE_IMAGEM_BYTES = 5 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
+app.config["PRODUCT_IMAGE_FOLDER"] = Path(__file__).resolve().parents[2] / "assets" / "produtos"
 CORS(
     app,
     resources={
@@ -15,6 +21,8 @@ CORS(
             "origins": [
                 "http://localhost:5500",
                 "http://127.0.0.1:5500",
+                "http://localhost:5501",
+                "http://127.0.0.1:5501",
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
             ]
@@ -24,6 +32,37 @@ CORS(
     methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 )
 app.register_blueprint(produtos_api)
+
+
+@app.post("/api/uploads/produtos")
+def enviar_foto_produto():
+    imagem = request.files.get("imagem")
+    if imagem is None or not imagem.filename:
+        return jsonify(erro="Selecione uma imagem para enviar.", campos={"imagem": "Selecione uma imagem."}), 422
+
+    extensao = Path(imagem.filename).suffix.lower()
+    validar_assinatura = {
+        ".jpg": lambda dados: dados.startswith(b"\xff\xd8\xff"),
+        ".jpeg": lambda dados: dados.startswith(b"\xff\xd8\xff"),
+        ".png": lambda dados: dados.startswith(b"\x89PNG\r\n\x1a\n"),
+        ".webp": lambda dados: len(dados) >= 12 and dados[:4] == b"RIFF" and dados[8:12] == b"WEBP",
+    }.get(extensao)
+    if validar_assinatura is None:
+        return jsonify(erro="Formato de imagem não aceito.", campos={"imagem": "Use JPG, PNG ou WebP."}), 422
+
+    dados = imagem.stream.read(LIMITE_IMAGEM_BYTES + 1)
+    if not dados:
+        return jsonify(erro="A imagem está vazia.", campos={"imagem": "Selecione uma imagem válida."}), 422
+    if len(dados) > LIMITE_IMAGEM_BYTES:
+        return jsonify(erro="A imagem excede o limite de 5 MB.", campos={"imagem": "Escolha uma imagem de até 5 MB."}), 413
+    if not validar_assinatura(dados):
+        return jsonify(erro="O conteúdo não corresponde a uma imagem válida.", campos={"imagem": "O arquivo não parece ser uma imagem JPG, PNG ou WebP válida."}), 422
+
+    nome = f"{uuid4().hex}{extensao}"
+    pasta = Path(app.config["PRODUCT_IMAGE_FOLDER"])
+    pasta.mkdir(parents=True, exist_ok=True)
+    (pasta / nome).write_bytes(dados)
+    return jsonify(foto_caminho=f"assets/produtos/{nome}"), 201
 
 
 @app.get("/")
