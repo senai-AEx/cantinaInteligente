@@ -18,6 +18,7 @@ DB_VOLUME = "cantina-mysql-data"
 API_PORT = 5000
 WEB_PORT = 5500
 MAX_MYSQL_WAIT_SECONDS = 90
+FRONTEND_ROOT = ROOT / "src" / "frontend"
 
 
 def read_env_file():
@@ -223,10 +224,9 @@ def serve_web():
     python = python_venv()
     if not python.exists():
         raise RuntimeError("Ambiente Python ausente. Rode make setup primeiro.")
-    frontend = ROOT / "src" / "frontend" / "html"
-    if not frontend.is_dir():
-        raise RuntimeError("As telas ainda não estão nesta branch; o servidor do frontend foi omitido.")
-    return [str(python), "-m", "http.server", str(WEB_PORT), "--bind", "127.0.0.1"]
+    if not (FRONTEND_ROOT / "index.html").is_file():
+        raise RuntimeError("Página inicial do frontend não encontrada em src/frontend/index.html.")
+    return [str(python), "scripts/serve_frontend.py", str(WEB_PORT)]
 
 
 def port_is_open(port):
@@ -249,7 +249,7 @@ def start_process(name, command, port):
 def run_services(include_web=True):
     ensure_database()
     services = [("Flask", serve_api(), API_PORT)]
-    frontend_exists = (ROOT / "src" / "frontend" / "html").is_dir()
+    frontend_exists = (FRONTEND_ROOT / "index.html").is_file()
     if include_web and frontend_exists:
         services.append(("Frontend", serve_web(), WEB_PORT))
 
@@ -262,10 +262,11 @@ def run_services(include_web=True):
         print(f"API: http://127.0.0.1:{API_PORT}/api/health")
         print(f"Banco: http://127.0.0.1:{API_PORT}/api/health/db")
         if frontend_exists and include_web:
+            print(f"Início: http://127.0.0.1:{WEB_PORT}/")
             print(f"Admin: http://127.0.0.1:{WEB_PORT}/src/frontend/html/catalogo_produtos_adm.html")
             print(f"Catálogo: http://127.0.0.1:{WEB_PORT}/src/frontend/html/catalogo_produtos.html")
         elif include_web:
-            print("Telas frontend ainda não existem nesta branch; quando forem integradas, make up também as servirá.")
+            print("Página inicial do frontend não encontrada; confira src/frontend/index.html.")
         print("Pressione Ctrl+C para parar os servidores. O MySQL continuará ligado.")
         while True:
             for name, process in children:

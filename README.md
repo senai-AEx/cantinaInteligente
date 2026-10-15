@@ -30,8 +30,11 @@ O Make cria ou inicia o container `cantina-mysql` com o volume persistente `cant
 
 - API: http://127.0.0.1:5000/api/health
 - Conexão com banco: http://127.0.0.1:5000/api/health/db
-- Painel admin, quando integrado: http://127.0.0.1:5500/src/frontend/html/catalogo_produtos_adm.html
-- Catálogo cliente, quando integrado: http://127.0.0.1:5500/src/frontend/html/catalogo_produtos.html
+- Início: http://127.0.0.1:5500/
+- Catálogo cliente: http://127.0.0.1:5500/html/catalogo_produtos.html
+- Login: http://127.0.0.1:5500/html/login.html
+- Cadastro: http://127.0.0.1:5500/html/cadastro.html
+- Painel admin: http://127.0.0.1:5500/html/catalogo_produtos_adm.html
 
 Mantenha o terminal aberto enquanto apresenta ou testa. `Ctrl+C` encerra os servidores Flask e frontend; o MySQL continua ligado. Para parar o container e preservar os dados, use `make down`. O volume não é removido por esses comandos.
 
