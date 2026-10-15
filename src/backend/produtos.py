@@ -250,7 +250,7 @@ def _mudar_status(id_produto, status_novo, acao):
         return _db_error(exc, "Não foi possível alterar a situação do produto.")
 
 
-@produtos_api.delete("/api/produtos/<int:id_produto>")
+@produtos_api.patch("/api/produtos/<int:id_produto>/inativar")
 def inativar_produto(id_produto):
     return _mudar_status(id_produto, "INATIVO", "INATIVAR")
 
@@ -258,6 +258,44 @@ def inativar_produto(id_produto):
 @produtos_api.patch("/api/produtos/<int:id_produto>/reativar")
 def reativar_produto(id_produto):
     return _mudar_status(id_produto, "ATIVO", "REATIVAR")
+
+
+@produtos_api.delete("/api/produtos/<int:id_produto>")
+def excluir_produto(id_produto):
+    """Remove o produto, registrando a exclusão e preservando a auditoria."""
+    try:
+        with transacao() as connection:
+            cursor = connection.cursor(dictionary=True)
+            try:
+                antes = _carregar(cursor, id_produto, bloquear=True)
+                if antes is None:
+                    return jsonify(erro="Produto não encontrado."), 404
+
+                _auditoria(
+                    cursor,
+                    id_produto,
+                    "EXCLUIR",
+                    antes,
+                    {"id_produto": id_produto, "excluido": True},
+                )
+                cursor.execute("DELETE FROM produtos WHERE id_produto = %s", (id_produto,))
+            finally:
+                cursor.close()
+        return jsonify(
+            mensagem="Produto excluído definitivamente. O histórico foi preservado.",
+            id_produto=id_produto,
+        ), 200
+    except RuntimeError as exc:
+        return jsonify(erro=str(exc)), 503
+    except mysql.connector.Error as exc:
+        if getattr(exc, "errno", None) == 1451:
+            return jsonify(
+                erro=(
+                    "A exclusão definitiva depende da migração "
+                    "004_auditoria_exclusao_mysql.sql."
+                )
+            ), 409
+        return _db_error(exc, "Não foi possível excluir o produto.")
 
 
 @produtos_api.get("/api/produtos/<int:id_produto>/auditoria")
@@ -268,8 +306,7 @@ def listar_auditoria(id_produto):
         connection = conectar()
         cursor = connection.cursor(dictionary=True)
         cursor.execute("SELECT id_produto FROM produtos WHERE id_produto = %s", (id_produto,))
-        if cursor.fetchone() is None:
-            return jsonify(erro="Produto não encontrado."), 404
+        produto_existe = cursor.fetchone() is not None
         cursor.execute(
             """SELECT id_auditoria, id_produto, acao, autor, origem,
                       antes_json, depois_json, registrado_em
@@ -292,6 +329,8 @@ def listar_auditoria(id_produto):
                 "+00:00", "Z"
             )
             records.append(item)
+        if not produto_existe and not records:
+            return jsonify(erro="Produto não encontrado."), 404
         return jsonify(auditorias=records), 200
     except RuntimeError as exc:
         return jsonify(erro=str(exc)), 503
