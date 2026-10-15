@@ -16,7 +16,7 @@
 | `validade` | data ISO `AAAA-MM-DD` | Opcional; representa a **menor validade** do estoque atual. |
 | `foto_caminho` | caminho relativo | Opcional; arquivo local em `assets/produtos/`. |
 | `zero_lactose`, `zero_acucar` | booleanos | Selos opcionais do RF03. |
-| `status` | `ATIVO` ou `INATIVO` | Padrão `ATIVO`; a exclusão da AV04 muda para `INATIVO`. |
+| `status` | `ATIVO` ou `INATIVO` | Padrão `ATIVO`; inativar muda para `INATIVO` e permite reativação. Excluir remove definitivamente a linha de produto. |
 | `criado_em`, `atualizado_em` | data e hora UTC | Controle de alterações. |
 
 ## Identificador e QR
@@ -31,6 +31,6 @@ O estoque inicial fica no produto para atender ao DER da AV03 e ao CRUD da AV04.
 
 ## Auditoria
 
-A tabela `auditoria_produtos` guarda produto, ação, autor, origem, data/hora e dados antes/depois para inclusão, alteração, inativação e reativação. O backend deve gravar a mudança e a auditoria na **mesma transação**. Não há exclusão física pelo CRUD.
+A tabela `auditoria_produtos` guarda produto, ação, autor, origem, data/hora e dados antes/depois para inclusão, alteração, inativação, reativação e exclusão definitiva. A exclusão registra uma cópia final do produto antes de remover sua linha. A migração `004_auditoria_exclusao_mysql.sql` remove a chave estrangeira da auditoria para que o histórico sobreviva à exclusão. O backend grava a mudança e a auditoria na **mesma transação**.
 
 Fontes: RF02/RF03 e DER de `AV03_GRUPO_4.pdf`; RF04/RF18 e arquitetura de `AV02_Cantina_Inteligente_Solucao_e_Requisitos.pdf`.

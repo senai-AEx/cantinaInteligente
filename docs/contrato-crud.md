@@ -1,18 +1,90 @@
-# Contrato inicial do CRUD de produtos
+# API de Produtos — contrato para o frontend
 
-Este contrato orienta a implementação; **as rotas ainda não existem**.
+Backend da AV04: Python + Flask + MySQL. A API usa JSON e fica em `http://127.0.0.1:5000`. Os endpoints administrativos são para execução local na apresentação; ainda não há login nem autorização por perfil.
 
-| Operação | Rota sugerida | Resultado esperado |
+## Produto e convenções
+
+Os nomes de campo seguem [o modelo de Produto](modelo-produto.md). `preco_centavos` é inteiro: R$ 4,50 é enviado como `450`, sem ponto flutuante. `validade` usa `AAAA-MM-DD` ou `null`; `foto_caminho` é um caminho relativo em `assets/produtos/` ou `null`. Selos são booleanos JSON. A API responde datas de auditoria em UTC com sufixo `Z`.
+
+Exemplo de corpo para `POST` e `PUT`:
+
+```json
+{
+  "codigo_produto": "CI-AV04-001",
+  "nome": "Suco de uva 200 ml",
+  "descricao": "Produto de demonstração",
+  "categoria": "Bebidas",
+  "preco_centavos": 450,
+  "quantidade_estoque": 10,
+  "estoque_minimo": 3,
+  "estoque_maximo": 20,
+  "validade": "2026-12-15",
+  "foto_caminho": "assets/produtos/suco-uva.jpg",
+  "zero_lactose": true,
+  "zero_acucar": false
+}
+```
+
+`codigo_produto`, `nome`, `categoria` e `preco_centavos` são obrigatórios. A descrição começa vazia, estoque e mínimos/máximos começam em zero, validade e foto começam nulas e selos começam falsos quando omitidos. `PUT` substitui os dados editáveis: a tela deve enviar o produto completo que está editando. A situação (`status`) e os identificadores são controlados pelo servidor.
+
+## Rotas
+
+| Método e rota | Uso | Sucesso |
 | --- | --- | --- |
-| Listar/buscar | `GET /api/produtos?q=&status=` | Lista com filtros; por padrão, incluir ativos e inativos na área administrativa. |
-| Consultar um | `GET /api/produtos/{id}` | Detalhes do produto ou 404. |
-| Incluir | `POST /api/produtos` | Valida, insere e audita; responde 201. |
-| Alterar | `PUT /api/produtos/{id}` | Valida, atualiza e audita; responde 200 ou 404. |
-| Inativar | `DELETE /api/produtos/{id}` | Muda `status` para `INATIVO`, audita e responde 200 ou 404. |
-| Reativar | `PATCH /api/produtos/{id}/reativar` | Muda para `ATIVO`, audita e responde 200 ou 404. |
+| `GET /api/health` | Verificar Flask | `200` `{"status":"ok"}` |
+| `GET /api/health/db` | Verificar MySQL com `SELECT 1` | `200`; indisponível: `503` |
+| `POST /api/uploads/produtos` | Enviar foto como `multipart/form-data`, campo `imagem` | `201` com `{"foto_caminho":"assets/produtos/<nome-gerado>.png"}`; aceita JPG, PNG ou WebP até 5 MB |
+| `GET /api/produtos?q=suco&status=ATIVO` | Listar e filtrar por código, nome ou categoria e situação | `200` com uma lista JSON; sem resultados: `[]` |
+| `GET /api/produtos/{id}` | Abrir detalhes para visualizar/editar | `200` com `{"produto": {...}}`; não existe: `404` |
+| `POST /api/produtos` | Cadastrar | `201` com `{"produto": {...}}` e cabeçalho `Location` |
+| `PUT /api/produtos/{id}` | Salvar edição | `200` com `{"produto": {...}}`; não existe: `404` |
+| `PATCH /api/produtos/{id}/inativar` | Inativar após confirmação da interface | `200` com o produto inativo; não existe: `404` |
+| `PATCH /api/produtos/{id}/reativar` | Reativar produto | `200` com o produto ativo; não existe: `404` |
+| `DELETE /api/produtos/{id}` | Excluir definitivamente após confirmação explícita | `200` com a mensagem de confirmação; não existe: `404`; migração 004 pendente: `409` |
+| `GET /api/produtos/{id}/auditoria` | Consultar até 100 alterações mais recentes, inclusive após exclusão | `200` com `{"auditorias": [...]}`; id desconhecido: `404` |
 
-Erros de validação devem responder **422** com mensagens por campo. Código duplicado, preço não positivo, estoque negativo, data inválida e máximo menor que mínimo são casos essenciais. A interface deve mostrar a mensagem no campo correspondente e impedir perda dos dados já digitados.
+O filtro `status` aceita `TODOS`, `ATIVO` ou `INATIVO`; o padrão é `TODOS`, para a tela administrativa poder localizar itens inativos. `q` é opcional. As rotas de catálogo devem exibir apenas produtos ativos, com estoque maior que zero e validade não vencida; a listagem administrativa continua mostrando todos.
 
-Telas mínimas: **lista/consulta** (busca, filtro de situação e ações), **formulário de inclusão/edição** (campos e mensagens de erro) e **confirmação de inativação**. O botão de reativar aparece em produtos inativos. A visão de catálogo usa apenas produtos `ATIVO`, com estoque positivo e validade vigente ou não informada.
+Para fotos, o frontend envia o arquivo selecionado para `POST /api/uploads/produtos` antes do `POST` ou `PUT` do produto e inclui o `foto_caminho` retornado no JSON. O backend aceita JPG, PNG e WebP de até 5 MB e salva com nome aleatório em `assets/produtos/`.
 
-Todas as operações administrativas devem exigir perfil Administrador quando houver autenticação. Para a AV04 local, não expor essas rotas em rede pública sem essa camada.
+Inativar é reversível: o produto sai do catálogo, continua no banco e pode ser reativado. Excluir é definitivo: remove a linha de `produtos`, grava a ação `EXCLUIR` com a cópia final do produto e mantém todo o histórico em `auditoria_produtos`. Depois da exclusão, `GET /api/produtos/{id}/auditoria` continua disponível para consultar esse histórico. A migração `004_auditoria_exclusao_mysql.sql` é obrigatória para remover a chave estrangeira restritiva e permitir essa operação. Inativar um produto já inativo ou reativar um já ativo não duplica registros de auditoria.
+
+## Respostas de erro
+
+Campos inválidos respondem `422` e indicam o problema por campo:
+
+```json
+{
+  "erro": "Revise os campos informados.",
+  "campos": {
+    "preco_centavos": "O valor está fora do limite permitido.",
+    "estoque_maximo": "Deve ser maior ou igual ao estoque mínimo."
+  }
+}
+```
+
+O front deve mostrar `campos[nome_do_campo]` junto ao respectivo controle e preservar os outros valores digitados. Código duplicado, texto fora dos limites, preço não positivo, quantidade negativa, máximo menor que mínimo, data inválida e chaves desconhecidas são recusados. JSON malformado ou tipo de conteúdo incorreto responde `400`; identificador inexistente responde `404`; banco indisponível ou não configurado responde `503`.
+
+## Auditoria e transações
+
+Inclusão, edição, inativação, reativação e exclusão registram ação, produto, autor, origem, horário UTC e valores antes/depois. Cada alteração e seu registro de auditoria ficam na mesma transação MySQL; se uma falhar, ambas são revertidas. A interface pode enviar `X-Actor` para identificar o operador na demonstração; sem o cabeçalho, fica `administrador-local`. Esse valor é informativo e não comprova identidade enquanto o sistema não tiver autenticação.
+
+## Integração local do frontend
+
+Para desenvolvimento separado, CORS aceita as origens de Live Server nas portas `5500` e `5501`, e Vite na porta `5173`, em `localhost` e `127.0.0.1`. A interface pode usar `fetch("http://127.0.0.1:5000/api/produtos")`, enviar/receber JSON e tratar códigos HTTP. Não abra o CRUD administrativo para uma rede pública antes de adicionar autenticação e autorização de Administrador.
+
+Exemplo de chamada do navegador:
+
+```js
+const resposta = await fetch("http://127.0.0.1:5000/api/produtos", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", "X-Actor": "administrador-local" },
+  body: JSON.stringify(produto), // preco_centavos deve ser inteiro, por exemplo 450
+});
+const resultado = await resposta.json();
+
+if (!resposta.ok) {
+  // Exiba resultado.campos perto dos campos inválidos, quando existir.
+  throw new Error(resultado.erro);
+}
+```
