@@ -1,4 +1,5 @@
 // FUNÇÃO P/ CARREGAR HEADER E FOOTER DO ARQUIVO PADRÃO (base.html)
+// EM OUTRAS PGS
 
 async function carregarBase() {
     try {
