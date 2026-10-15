@@ -1,6 +1,6 @@
 # Cantina Inteligente — AV04 (Grupo 4)
 
-Base de trabalho para apresentar **Manter Produto** com banco de dados. A stack definida pelo grupo é **Python + Flask + MySQL**. Esta branch prepara o backend, a conexão, as tabelas e a consulta inicial de produtos; as demais operações do CRUD e as telas continuam nas issues seguintes.
+Base de trabalho para apresentar **Manter Produto** com banco de dados. A stack definida pelo grupo é **Python + Flask + MySQL**. O backend fornece o CRUD de produto, validações, persistência e auditoria; a interface permanece com a equipe de frontend.
 
 ## Entrega
 
@@ -59,16 +59,24 @@ Com MySQL ligado, migrações aplicadas e `.env` preenchido:
 .\.venv\Scripts\python.exe -m flask --app src.backend.app run --debug
 ```
 
-Rotas disponíveis nesta etapa:
+Rotas disponíveis no backend:
 
 - `GET /` — mensagem de que a API iniciou.
 - `GET /api/health` — saúde do Flask.
 - `GET /api/health/db` — verifica a conexão MySQL com `SELECT 1`.
-- `GET /api/produtos` — consulta a lista de produtos.
+- `GET /api/produtos?q=&status=` — lista por código, nome ou categoria e filtra por situação.
+- `GET /api/produtos/<id>` — consulta detalhes.
+- `POST /api/produtos` — cadastra e audita.
+- `PUT /api/produtos/<id>` — edita e audita.
+- `DELETE /api/produtos/<id>` — inativa e audita sem apagar.
+- `PATCH /api/produtos/<id>/reativar` — reativa e audita.
+- `GET /api/produtos/<id>/auditoria` — consulta o histórico.
 
 Para verificar a conexão, acesse [http://127.0.0.1:5000/api/health/db](http://127.0.0.1:5000/api/health/db). A resposta esperada inclui `"banco": "conectado"` e `"resultado": 1`. A lista de produtos retorna vazia se ainda não houver itens.
 
-## Decisões e próximas entregas
+Para o frontend, use os nomes, formatos, respostas e regras de erro descritos no [contrato da API](docs/contrato-crud.md). A API aceita CORS somente dos endereços locais de Live Server e Vite documentados ali. Faça as operações administrativas em ambiente local; não publique sem autenticação e autorização.
+
+## Decisões e materiais da entrega
 
 - [Decisões da stack e do produto](docs/decisoes.md)
 - [Contrato do CRUD](docs/contrato-crud.md)
@@ -76,4 +84,4 @@ Para verificar a conexão, acesse [http://127.0.0.1:5000/api/health/db](http://1
 - [Roteiro da apresentação](docs/roteiro-apresentacao-av04.md)
 - [Contribuir: branches, commits e PRs](CONTRIBUTING.md)
 
-As operações de cadastrar, consultar por ID, editar, inativar/reativar, auditoria pela API, validação de payload e telas seguem nas issues **02–05**. Não publique o backend administrativo em uma rede pública sem autenticação e autorização.
+As telas e o ensaio integrado seguem com a equipe de frontend. Use o [checklist manual](docs/testes-manuais-av04.md) para conferir inclusão, consulta, edição, inativação, reativação, persistência e validações antes da apresentação.

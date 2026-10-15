@@ -22,10 +22,10 @@ As variáveis ficam em `.env`, ignorado pelo Git. Use `.env.example` como refer�
 - **Auditoria:** cada inclusão, alteração, inativação e reativação deve registrar autor, origem, data/hora e valores antes/depois na mesma transação da mudança.
 - **PWA:** interface responsiva está no escopo; instalação offline fica para depois do CRUD.
 
-A migração `001_produtos.sql` é legada, exclusiva para SQLite. Para a stack definida, criar tabelas com `002_produtos_mysql.sql` e depois `003_auditoria_produtos_mysql.sql`.
+A migração `001_produtos.sql` é legada, exclusiva para SQLite. Para preparar um banco MySQL novo, aplique `002_produtos_mysql.sql` e depois `003_auditoria_produtos_mysql.sql` uma única vez.
 
 ## Estado do backend
 
-A estrutura inicial Flask conecta ao MySQL, expõe verificações de saúde e lista produtos. Cadastro, consulta individual, alteração, inativação/reativação, auditoria via API, validações do corpo JSON e interface seguem em outras issues.
+A API Flask conecta ao MySQL e implementa listagem com busca/filtro, consulta por ID, cadastro, edição, inativação/reativação e consulta de auditoria. As operações de escrita validam os dados e registram produto e auditoria na mesma transação. A interface consome o contrato em [contrato-crud.md](contrato-crud.md); sua implementação continua com a equipe de frontend.
 
-Todas as rotas administrativas de Produto devem ficar locais para a apresentação até que autenticação e autorização estejam implementadas. A tabela do modelo e os contratos do CRUD são a referência comum entre as issues.
+Todas as rotas administrativas de Produto devem ficar locais para a apresentação até que autenticação e autorização estejam implementadas. `X-Actor` identifica apenas o operador informado pela interface e não substitui login.
