@@ -1,0 +1,101 @@
+/* AUTENTICAÇÃO */
+
+.pagina-autenticacao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 30px;
+    background-color: #f7f7f7;
+}
+
+.card-autenticacao {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 430px;
+    padding: 32px;
+    background-color: #ffffff;
+    border: 1px solid #eeeeee;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px #0000000a;
+}
+
+.card-autenticacao h1 {
+    margin-bottom: 10px;
+    color: #333333;
+    font-size: 26px;
+    text-align: center;
+}
+
+.subtitulo-autenticacao {
+    margin-bottom: 28px;
+    color: #666666;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* FORMULÁRIO */
+
+#form-login,
+#form-cadastro {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.campo-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.campo-formulario label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333333;
+}
+
+.campo-formulario input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #dddddd;
+    border-radius: 6px;
+    outline: none;
+    font: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.campo-formulario input:focus {
+    border-color: #e87522;
+    box-shadow: 0 0 0 2px #e8752220;
+}
+
+/* BOTÃO */
+
+#form-login .botao,
+#form-cadastro .botao {
+    width: 100%;
+    margin-top: 4px;
+}
+
+/* LINK ENTRE AS TELAS */
+
+.texto-alternativo {
+    margin-top: 24px;
+    color: #666666;
+    font-size: 14px;
+    text-align: center;
+}
+
+.texto-alternativo a {
+    color: #e87522;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.texto-alternativo a:hover {
+    color: #c95d12;
+    text-decoration: underline;
+}
