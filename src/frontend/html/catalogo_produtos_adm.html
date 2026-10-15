@@ -111,7 +111,7 @@
 
             <span class="sobretitulo">NOVO ITEM DO CATÁLOGO</span>
             <h2 id="titulo-cadastro-produto">Cadastrar produto</h2>
-            <p class="texto-modal">Preencha as informações para disponibilizar o produto na cantina.</p>
+            <p class="texto-modal">Campos com * são obrigatórios. O produto será cadastrado como ativo.</p>
 
             <form id="form-cadastro-produto">
 
@@ -187,7 +187,9 @@
                         type="date"
                         id="cadastro-validade"
                         name="validade"
+                        aria-describedby="cadastro-validade-ajuda"
                     >
+                    <small class="dica-campo" id="cadastro-validade-ajuda">Informe a validade mais próxima entre as unidades que estão no estoque.</small>
                     <small class="erro-campo" data-error-for="validade"></small>
                 </div>
 <div class="campo-formulario">
@@ -223,7 +225,9 @@
                         min="0"
                         step="1"
                         value="0"
+                        aria-describedby="cadastro-estoque_maximo-ajuda"
                     >
+                    <small class="dica-campo" id="cadastro-estoque_maximo-ajuda">Meta para orientar a reposição; não impede que o estoque ultrapasse esse valor.</small>
                     <small class="erro-campo" data-error-for="estoque_maximo"></small>
                 </div>
 </div></section>
@@ -245,16 +249,19 @@
                     <small class="erro-campo" data-error-for="descricao"></small>
                 </div>
 <div class="campo-formulario">
-                    <label for="cadastro-foto_caminho">Caminho da foto</label>
+                    <label for="cadastro-imagem">Foto do produto</label>
                     <input
-                        type="text"
-                        id="cadastro-foto_caminho"
-                        name="foto_caminho"
-                        maxlength="255"
-                        placeholder="assets/produtos/foto.jpg"
+                        type="file"
+                        id="cadastro-imagem"
+                        name="imagem"
+                        accept="image/jpeg,image/png,image/webp"
+                        aria-describedby="cadastro-imagem-ajuda"
                     >
-                    <small class="dica-campo">Opcional. Informe o caminho de um arquivo já existente.</small>
+                    <small class="dica-campo" id="cadastro-imagem-ajuda">Opcional. JPG, PNG ou WebP; até 5 MB.</small>
+                    <img class="preview-imagem" alt="Prévia da foto do produto" hidden>
+                    <input type="hidden" name="foto_caminho">
                     <small class="erro-campo" data-error-for="foto_caminho"></small>
+                    <small class="erro-campo" data-error-for="imagem"></small>
                 </div>
 <div class="opcoes-produto" aria-label="Características do produto">
 <div class="campo-checkbox">
@@ -294,7 +301,7 @@
 
             <span class="sobretitulo">ATUALIZAÇÃO DO CATÁLOGO</span>
             <h2 id="titulo-editar-produto">Editar produto</h2>
-            <p class="texto-modal">Atualize os dados e salve as alterações no estoque.</p>
+            <p class="texto-modal">Campos com * são obrigatórios. Atualize os dados e salve as alterações no estoque.</p>
 
             <form id="form-editar-produto">
 
@@ -370,7 +377,9 @@
                         type="date"
                         id="editar-validade"
                         name="validade"
+                        aria-describedby="editar-validade-ajuda"
                     >
+                    <small class="dica-campo" id="editar-validade-ajuda">Informe a validade mais próxima entre as unidades que estão no estoque.</small>
                     <small class="erro-campo" data-error-for="validade"></small>
                 </div>
 <div class="campo-formulario">
@@ -406,7 +415,9 @@
                         min="0"
                         step="1"
                         value="0"
+                        aria-describedby="editar-estoque_maximo-ajuda"
                     >
+                    <small class="dica-campo" id="editar-estoque_maximo-ajuda">Meta para orientar a reposição; não impede que o estoque ultrapasse esse valor.</small>
                     <small class="erro-campo" data-error-for="estoque_maximo"></small>
                 </div>
 </div></section>
@@ -428,16 +439,19 @@
                     <small class="erro-campo" data-error-for="descricao"></small>
                 </div>
 <div class="campo-formulario">
-                    <label for="editar-foto_caminho">Caminho da foto</label>
+                    <label for="editar-imagem">Foto do produto</label>
                     <input
-                        type="text"
-                        id="editar-foto_caminho"
-                        name="foto_caminho"
-                        maxlength="255"
-                        placeholder="assets/produtos/foto.jpg"
+                        type="file"
+                        id="editar-imagem"
+                        name="imagem"
+                        accept="image/jpeg,image/png,image/webp"
+                        aria-describedby="editar-imagem-ajuda"
                     >
-                    <small class="dica-campo">Opcional. Informe o caminho de um arquivo já existente.</small>
+                    <small class="dica-campo" id="editar-imagem-ajuda">Opcional. JPG, PNG ou WebP; até 5 MB. Selecione outra imagem para substituir a atual.</small>
+                    <img class="preview-imagem" alt="Prévia da foto do produto" hidden>
+                    <input type="hidden" name="foto_caminho">
                     <small class="erro-campo" data-error-for="foto_caminho"></small>
+                    <small class="erro-campo" data-error-for="imagem"></small>
                 </div>
 <div class="opcoes-produto" aria-label="Características do produto">
 <div class="campo-checkbox">

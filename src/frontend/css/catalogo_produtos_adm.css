@@ -815,6 +815,28 @@
     accent-color: #54805c;
 }
 
+.campo-formulario input[type="file"] {
+    padding: 10px;
+    border: 1px dashed #cbd8ca;
+    background: #f8faf7;
+    cursor: pointer;
+}
+
+.preview-imagem {
+    display: block;
+    width: min(100%, 240px);
+    max-height: 180px;
+    margin-top: 4px;
+    border: 1px solid #e2e9e0;
+    border-radius: 10px;
+    background: #fff;
+    object-fit: contain;
+}
+
+.preview-imagem[hidden] {
+    display: none;
+}
+
 #form-cadastro-produto > .botao,
 #form-editar-produto > .botao,
 #botao-confirmar-exclusao {

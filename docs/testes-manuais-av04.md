@@ -57,6 +57,7 @@ Em cada tentativa inválida, conferir que nada foi gravado e que os outros campo
 - [ ] **T10 — Preço:** tentar zero, valor negativo e texto inválido. Recusar os valores e exibir orientação. Um preço válido deve aparecer em reais com duas casas decimais.
 - [ ] **T11 — Estoque:** testar valores negativos e fracionados em quantidade, mínimo e máximo; testar máximo menor que mínimo. Recusar. Aceitar quantidade zero e máximo igual ao mínimo.
 - [ ] **T12 — Validade e opcionais:** rejeitar data inexistente, como `2026-02-30`. Aceitar validade, descrição e foto não informadas, pois são opcionais.
+- [ ] **T12A — Foto do produto:** selecionar JPG, PNG e WebP válidos; conferir prévia antes de salvar e imagem no catálogo. Recusar formatos não suportados e arquivos acima de 5 MB, mantendo os demais dados digitados.
 - [ ] **T13 — Validação no servidor:** enviar uma requisição inválida diretamente à API, sem depender da validação da tela. Exemplos: preço zero, código duplicado e data inexistente. Esperar HTTP 422 com mensagens por campo e nenhuma gravação.
 - [ ] **T14 — Celular e desktop:** conferir listagem, formulário e confirmação em 360 × 800 px e em desktop. Não deve haver rolagem horizontal; rótulos, mensagens e botões precisam estar legíveis e acessíveis.
 - [ ] **T15 — Feedback:** conferir mensagens de sucesso e erro; navegação pelo teclado com foco visível; abrir edição sem perder os valores já salvos.

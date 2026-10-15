@@ -33,6 +33,7 @@ Exemplo de corpo para `POST` e `PUT`:
 | --- | --- | --- |
 | `GET /api/health` | Verificar Flask | `200` `{"status":"ok"}` |
 | `GET /api/health/db` | Verificar MySQL com `SELECT 1` | `200`; indisponível: `503` |
+| `POST /api/uploads/produtos` | Enviar foto como `multipart/form-data`, campo `imagem` | `201` com `{"foto_caminho":"assets/produtos/<nome-gerado>.png"}`; aceita JPG, PNG ou WebP até 5 MB |
 | `GET /api/produtos?q=suco&status=ATIVO` | Listar e filtrar por código, nome ou categoria e situação | `200` com uma lista JSON; sem resultados: `[]` |
 | `GET /api/produtos/{id}` | Abrir detalhes para visualizar/editar | `200` com `{"produto": {...}}`; não existe: `404` |
 | `POST /api/produtos` | Cadastrar | `201` com `{"produto": {...}}` e cabeçalho `Location` |
@@ -43,6 +44,8 @@ Exemplo de corpo para `POST` e `PUT`:
 | `GET /api/produtos/{id}/auditoria` | Consultar até 100 alterações mais recentes, inclusive após exclusão | `200` com `{"auditorias": [...]}`; id desconhecido: `404` |
 
 O filtro `status` aceita `TODOS`, `ATIVO` ou `INATIVO`; o padrão é `TODOS`, para a tela administrativa poder localizar itens inativos. `q` é opcional. As rotas de catálogo devem exibir apenas produtos ativos, com estoque maior que zero e validade não vencida; a listagem administrativa continua mostrando todos.
+
+Para fotos, o frontend envia o arquivo selecionado para `POST /api/uploads/produtos` antes do `POST` ou `PUT` do produto e inclui o `foto_caminho` retornado no JSON. O backend aceita JPG, PNG e WebP de até 5 MB e salva com nome aleatório em `assets/produtos/`.
 
 Inativar é reversível: o produto sai do catálogo, continua no banco e pode ser reativado. Excluir é definitivo: remove a linha de `produtos`, grava a ação `EXCLUIR` com a cópia final do produto e mantém todo o histórico em `auditoria_produtos`. Depois da exclusão, `GET /api/produtos/{id}/auditoria` continua disponível para consultar esse histórico. A migração `004_auditoria_exclusao_mysql.sql` é obrigatória para remover a chave estrangeira restritiva e permitir essa operação. Inativar um produto já inativo ou reativar um já ativo não duplica registros de auditoria.
 

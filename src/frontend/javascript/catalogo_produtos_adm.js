@@ -1,6 +1,7 @@
 // Integração da tela administrativa com a API de produtos.
 document.addEventListener("DOMContentLoaded", () => {
     const API_URL = "http://127.0.0.1:5000/api/produtos";
+    const UPLOAD_URL = "http://127.0.0.1:5000/api/uploads/produtos";
     const lista = document.getElementById("lista-produtos");
     const mensagemApi = document.getElementById("mensagem-api");
     const modalCadastro = document.getElementById("modal-cadastro-produto");
@@ -223,12 +224,27 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function limparErrosFormulario(formulario) {
-        formulario.querySelectorAll("[aria-invalid='true']").forEach((campo) => {
+    function limparErroCampo(formulario, nomeCampo) {
+        const campo = formulario.elements.namedItem(nomeCampo);
+        const mensagem = [...formulario.querySelectorAll("[data-error-for]")]
+            .find((elemento) => elemento.dataset.errorFor === nomeCampo);
+        if (campo) {
             campo.removeAttribute("aria-invalid");
-        });
+            const descricoes = (campo.getAttribute("aria-describedby") || "")
+                .split(/\s+/)
+                .filter((id) => id && id !== mensagem?.id);
+            if (descricoes.length) campo.setAttribute("aria-describedby", descricoes.join(" "));
+            else campo.removeAttribute("aria-describedby");
+        }
+        if (mensagem) mensagem.textContent = "";
+        if (!formulario.querySelector("[aria-invalid='true']")) {
+            formulario.querySelector(".feedback-form").textContent = "";
+        }
+    }
+
+    function limparErrosFormulario(formulario) {
         formulario.querySelectorAll("[data-error-for]").forEach((mensagem) => {
-            mensagem.textContent = "";
+            limparErroCampo(formulario, mensagem.dataset.errorFor);
         });
         formulario.querySelector(".feedback-form").textContent = "";
     }
@@ -241,20 +257,49 @@ document.addEventListener("DOMContentLoaded", () => {
             const controle = formulario.elements.namedItem(campoVisual);
             const mensagemCampo = [...formulario.querySelectorAll("[data-error-for]")]
                 .find((elemento) => elemento.dataset.errorFor === campoVisual);
-            if (controle && mensagemCampo) {
+            if (controle && controle.type !== "hidden" && mensagemCampo) {
+                if (!mensagemCampo.id) {
+                    mensagemCampo.id = `${formulario.id}-erro-${campoVisual}`;
+                }
                 controle.setAttribute("aria-invalid", "true");
+                const descricoes = new Set((controle.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean));
+                descricoes.add(mensagemCampo.id);
+                controle.setAttribute("aria-describedby", [...descricoes].join(" "));
                 mensagemCampo.textContent = mensagem;
             } else {
-                feedback.textContent = mensagem;
+                feedback.textContent += `${feedback.textContent ? " " : ""}${mensagem}`;
             }
         });
+        if (Object.keys(erros).length) {
+            feedback.textContent = `Revise os campos destacados. ${feedback.textContent}`.trim();
+            formulario.querySelector("[aria-invalid='true']")?.focus();
+        }
+    }
+
+    function atualizarPreview(formulario, caminho = null, arquivo = null) {
+        const preview = formulario.querySelector(".preview-imagem");
+        if (!preview) return;
+        if (preview.dataset.urlTemporaria) URL.revokeObjectURL(preview.dataset.urlTemporaria);
+        delete preview.dataset.urlTemporaria;
+        if (arquivo) {
+            const url = URL.createObjectURL(arquivo);
+            preview.src = url;
+            preview.dataset.urlTemporaria = url;
+            preview.hidden = false;
+        } else if (caminho) {
+            preview.src = new URL("../../../" + caminho, document.baseURI).href;
+            preview.hidden = false;
+        } else {
+            preview.removeAttribute("src");
+            preview.hidden = true;
+        }
     }
 
     function obterCampo(formulario, nome) {
         return formulario.elements.namedItem(nome);
     }
 
-    function montarPayload(formulario) {
+    function montarPayload(formulario, fotoCaminho = null) {
         const numero = (nome) => Number(obterCampo(formulario, nome).value || 0);
         const validade = obterCampo(formulario, "validade").value;
         const foto = obterCampo(formulario, "foto_caminho").value.trim();
@@ -269,7 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
             estoque_minimo: numero("estoque_minimo"),
             estoque_maximo: numero("estoque_maximo"),
             validade: validade || null,
-            foto_caminho: foto || null,
+            foto_caminho: fotoCaminho === null ? (foto || null) : fotoCaminho,
             zero_lactose: obterCampo(formulario, "zero_lactose").checked,
             zero_acucar: obterCampo(formulario, "zero_acucar").checked,
         };
@@ -287,6 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
         obterCampo(formulario, "estoque_maximo").value = produto.estoque_maximo;
         obterCampo(formulario, "validade").value = produto.validade || "";
         obterCampo(formulario, "foto_caminho").value = produto.foto_caminho || "";
+        atualizarPreview(formulario, produto.foto_caminho);
         obterCampo(formulario, "zero_lactose").checked = produto.zero_lactose;
         obterCampo(formulario, "zero_acucar").checked = produto.zero_acucar;
     }
@@ -299,15 +345,29 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!formulario.reportValidity()) return;
 
         const botaoEnviar = formulario.querySelector("button[type='submit']");
+        const textoBotaoOriginal = botaoEnviar.textContent;
         botaoEnviar.disabled = true;
+        botaoEnviar.textContent = metodo === "POST" ? "Cadastrando…" : "Salvando…";
         try {
+            let fotoCaminho = null;
+            const imagem = obterCampo(formulario, "imagem").files[0];
+            if (imagem) {
+                const dadosImagem = new FormData();
+                dadosImagem.append("imagem", imagem);
+                const resultadoUpload = await requisitar(UPLOAD_URL, {
+                    method: "POST",
+                    body: dadosImagem,
+                });
+                fotoCaminho = resultadoUpload.foto_caminho;
+            }
             await requisitar(idProduto ? API_URL + "/" + idProduto : API_URL, {
                 method: metodo,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(montarPayload(formulario)),
+                body: JSON.stringify(montarPayload(formulario, fotoCaminho)),
             });
             fecharModal(idProduto ? modalEdicao : modalCadastro);
             formulario.reset();
+            atualizarPreview(formulario);
             await carregarProdutos();
             mostrarMensagem(
                 mensagemApi,
@@ -322,14 +382,46 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         } finally {
             botaoEnviar.disabled = false;
+            botaoEnviar.textContent = textoBotaoOriginal;
         }
     }
 
     function abrirCadastro() {
         formularioCadastro.reset();
+        atualizarPreview(formularioCadastro);
         limparErrosFormulario(formularioCadastro);
         abrirModal(modalCadastro, obterCampo(formularioCadastro, "codigo_produto"));
     }
+
+    [formularioCadastro, formularioEdicao].forEach((formulario) => {
+        formulario.querySelectorAll("[data-error-for]").forEach((mensagem) => {
+            const campo = formulario.elements.namedItem(mensagem.dataset.errorFor);
+            if (!campo) return;
+            const limparErro = () => limparErroCampo(formulario, mensagem.dataset.errorFor);
+            campo.addEventListener("input", limparErro);
+            campo.addEventListener("change", limparErro);
+        });
+        const seletorImagem = obterCampo(formulario, "imagem");
+        seletorImagem.addEventListener("change", () => {
+            const arquivo = seletorImagem.files[0];
+            limparErroCampo(formulario, "imagem");
+            if (!arquivo) {
+                atualizarPreview(formulario, obterCampo(formulario, "foto_caminho").value);
+                return;
+            }
+            const permitido = ["image/jpeg", "image/png", "image/webp"].includes(arquivo.type);
+            if (!permitido || arquivo.size > 5 * 1024 * 1024) {
+                exibirErrosFormulario(formulario, {
+                    imagem: !permitido ? "Use uma imagem JPG, PNG ou WebP." : "Escolha uma imagem de até 5 MB.",
+                });
+                seletorImagem.value = "";
+                atualizarPreview(formulario, obterCampo(formulario, "foto_caminho").value);
+                return;
+            }
+            obterCampo(formulario, "foto_caminho").value = "";
+            atualizarPreview(formulario, null, arquivo);
+        });
+    });
 
     document.getElementById("abrir-cadastro-produto").addEventListener("click", abrirCadastro);
     document.getElementById("abrir-cadastro-produto-topo").addEventListener("click", abrirCadastro);
@@ -376,6 +468,30 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("fechar-cadastro-produto").addEventListener("click", () => fecharModal(modalCadastro));
     document.getElementById("fechar-editar-produto").addEventListener("click", () => fecharModal(modalEdicao));
     document.getElementById("fechar-excluir-produto").addEventListener("click", () => fecharModal(modalExclusao));
+
+    document.addEventListener("keydown", (evento) => {
+        const modalAberto = document.querySelector(".modal-overlay.aberto");
+        if (!modalAberto) return;
+        if (evento.key === "Escape") {
+            evento.preventDefault();
+            fecharModal(modalAberto);
+            return;
+        }
+        if (evento.key !== "Tab") return;
+        const focaveis = [...modalAberto.querySelectorAll(
+            "button:not([disabled]), input:not([type='hidden']):not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex='-1'])",
+        )].filter((elemento) => !elemento.hidden);
+        if (!focaveis.length) return;
+        const primeiro = focaveis[0];
+        const ultimo = focaveis[focaveis.length - 1];
+        if (evento.shiftKey && document.activeElement === primeiro) {
+            evento.preventDefault();
+            ultimo.focus();
+        } else if (!evento.shiftKey && document.activeElement === ultimo) {
+            evento.preventDefault();
+            primeiro.focus();
+        }
+    });
 
     formularioCadastro.addEventListener("submit", (evento) => {
         enviarFormulario(evento, formularioCadastro, "POST");
