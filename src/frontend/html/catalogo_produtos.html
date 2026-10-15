@@ -1,0 +1,420 @@
+<!-- PAGINA QUE LISTA OS PRODUTOS PARA O USUÁRIO, 
+     APRESENTA O CARRINHO DE COMPRAS E O VALOR TOTAL DA COMPRA-->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Catálogo de Produtos | Cantina da Honestidade</title>
+
+    <!-- CSS geral e CSS específico da tela -->
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/catalogo_produtos.css">
+</head>
+
+<body>
+
+    <!-- CABEÇALHO -->
+    <div id="header-container"></div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="container pagina-catalogo">
+
+        <section class="introducao">
+            <h1>Catálogo de Produtos</h1>
+
+            <p>
+                Escolha seus produtos e contribua com a
+                Cantina da Honestidade.
+            </p>
+        </section>
+
+        <!-- ÁREA DE PRODUTOS -->
+        <div class="layout-catalogo">
+
+            <section class="secao-produtos" id="produtos">
+
+                <h2>Produtos disponíveis</h2>
+
+                <div class="lista-produtos">
+
+                    <!-- PRODUTO 1 -->
+                    <article class="card-produto">
+
+                        <img
+                            src="img/biscoito.jpg"
+                            alt="Pacote de biscoitos"
+                            class="imagem-produto"
+                        >
+
+                        <div class="conteudo-produto">
+
+                            <h3>Biscoito integral</h3>
+
+                            <p class="preco-produto">R$ 3,00</p>
+
+                            <div class="validade-selos">
+                                <p class="validade">
+                                    Validade: 20/10/2026
+                                </p>
+
+                                <div class="selos-produto">
+                                    <span class="selo">
+                                        Zero lactose
+                                    </span>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="botao botao-principal"
+                            >
+                                Adicionar ao carrinho
+                            </button>
+
+                        </div>
+
+                    </article>
+
+                    <!-- PRODUTO 2 -->
+                    <article class="card-produto">
+
+                        <img
+                            src="img/suco.jpg"
+                            alt="Caixa de suco"
+                            class="imagem-produto"
+                        >
+
+                        <div class="conteudo-produto">
+
+                            <h3>Suco de uva</h3>
+
+                            <p class="preco-produto">R$ 4,50</p>
+
+                            <div class="validade-selos">
+                                <p class="validade">
+                                    Validade: 25/10/2026
+                                </p>
+
+                                <div class="selos-produto">
+                                    <span class="selo">
+                                        Zero açúcar
+                                    </span>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="botao botao-principal"
+                            >
+                                Adicionar ao carrinho
+                            </button>
+
+                        </div>
+
+                    </article>
+
+                    <!-- PRODUTO 3 -->
+                    <article class="card-produto">
+
+                        <img
+                            src="img/sanduiche.jpg"
+                            alt="Sanduíche embalado"
+                            class="imagem-produto"
+                        >
+
+                        <div class="conteudo-produto">
+
+                            <h3>Sanduíche natural</h3>
+
+                            <p class="preco-produto">R$ 7,00</p>
+
+                            <p class="validade">
+                                Validade: 16/10/2026
+                            </p>
+
+                            <button
+                                type="button"
+                                class="botao botao-principal"
+                            >
+                                Adicionar ao carrinho
+                            </button>
+
+                        </div>
+
+                    </article>
+
+                    <!-- PRODUTO 4 -->
+                    <article class="card-produto">
+
+                        <img
+                            src="img/barra-cereal.jpg"
+                            alt="Barra de cereal"
+                            class="imagem-produto"
+                        >
+
+                        <div class="conteudo-produto">
+
+                            <h3>Barra de cereal</h3>
+
+                            <p class="preco-produto">R$ 2,50</p>
+
+                            <div class="validade-selos">
+                                <p class="validade">
+                                    Validade: 30/10/2026
+                                </p>
+
+                                <div class="selos-produto">
+                                    <span class="selo">
+                                        Zero lactose
+                                    </span>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="botao botao-principal"
+                            >
+                                Adicionar ao carrinho
+                            </button>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+                <!-- FUNCIONALIDADE CUMPRE REQUISITO MAS NÃO ENTRA NO CRUD -->
+
+                <a href="#relatar-problema" class="link-problema">
+                    Relatar um problema com um produto
+                </a>
+
+            </section>
+
+            <!-- CARRINHO -->
+            <aside class="carrinho" id="carrinho">
+
+                <h2>Meu carrinho</h2>
+
+                <p class="carrinho-vazio">
+                    Confira os produtos selecionados.
+                </p>
+
+                <!-- Exemplo visual de produto adicionado -->
+                <div class="item-carrinho">
+
+                    <div class="informacoes-item">
+                        <h3>Biscoito integral</h3>
+                        <p>R$ 3,00 por unidade</p>
+                    </div>
+
+                    <div class="quantidade-item">
+                        <label for="quantidade-biscoito">
+                            Quantidade
+                        </label>
+
+                        <input
+                            type="number"
+                            id="quantidade-biscoito"
+                            name="quantidade-biscoito"
+                            min="1"
+                            value="2"
+                        >
+                    </div>
+
+                    <p class="subtotal-item">
+                        Subtotal: R$ 6,00
+                    </p>
+
+                </div>
+
+                <div class="item-carrinho">
+
+                    <div class="informacoes-item">
+                        <h3>Suco de uva</h3>
+                        <p>R$ 4,50 por unidade</p>
+                    </div>
+
+                    <div class="quantidade-item">
+                        <label for="quantidade-suco">
+                            Quantidade
+                        </label>
+
+                        <input
+                            type="number"
+                            id="quantidade-suco"
+                            name="quantidade-suco"
+                            min="1"
+                            value="1"
+                        >
+                    </div>
+
+                    <p class="subtotal-item">
+                        Subtotal: R$ 4,50
+                    </p>
+
+                </div>
+
+                <!-- TOTAL ABAIXO DOS ITENS -->
+                <div class="resumo-carrinho">
+
+                    <p class="total-carrinho">
+                        Total dos produtos:
+                        <strong>R$ 10,50</strong>
+                    </p>
+
+                    <button
+                        type="button"
+                        class="botao botao-principal botao-finalizar"
+                    >
+                        Finalizar compra
+                    </button>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+        <!-- RELATO DE PROBLEMAS -->
+        <section class="secao-problema" id="relatar-problema">
+
+            <h2>Encontrou algum problema?</h2>
+
+            <p>
+                Informe se um produto estiver indisponível,
+                danificado, vencido ou com informações incorretas.
+            </p>
+
+            <button
+                type="button"
+                class="botao botao-secundario"
+            >
+                Relatar problema
+            </button>
+
+        </section>
+
+    </main>
+
+    
+    <!-- MODAL DE FINALIZAÇÃO DA COMPRA 
+         E APRESENTAÇÃO DO QRCODE -->
+    <div class="modal-overlay" id="modal-pix" aria-hidden="true">
+        <div class="modal-conteudo" role="dialog" aria-modal="true"
+            aria-labelledby="titulo-modal-pix">
+
+            <button type="button" class="modal-fechar"
+                    id="fechar-modal-pix" aria-label="Fechar modal">
+                &times;
+            </button>
+
+            <div class="modal-corpo" id="modal-corpo">
+
+                
+            <!-- INFORMAÇÕES DA COMPRA -->
+            <section class="informacoes-pix">
+                <div class="mensagem-pix">
+                    <h2 id="titulo-modal-pix">
+                        Sua compra faz a diferença!
+                    </h2>
+
+                    <p>
+                        A Cantina da Honestidade existe graças à
+                        confiança de cada pessoa. Contribua com o
+                        valor que considerar justo e ajude a manter
+                        essa iniciativa funcionando.
+                    </p>
+                </div>
+
+                <div class="valor-pix">
+                    <p>
+                        Total dos produtos:
+                        <strong id="total-produtos-pix">R$ 10,50</strong>
+                    </p>
+
+                    
+                <div class="campo-valor-pix">
+                    <label for="valor-pagamento" id="rotulo-valor-pagamento">
+                        Quanto você deseja pagar?
+                    </label>
+
+                    <input
+                        type="number"
+                        id="valor-pagamento"
+                        min="0.01"
+                        step="0.01"
+                        value="10.50"
+                    />
+
+                    <p id="valor-pagamento-fixo" hidden></p>
+                </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="botao botao-principal"
+                    id="gerar-pix"
+                >
+                    Confirmar e gerar Pix
+                </button>
+
+                <button
+                    type="button"
+                    class="botao botao-secundario"
+                    id="voltar-editar-valor"
+                    hidden
+                >
+                    Voltar e alterar valor
+                </button>
+            </section>
+
+            <!-- ÁREA DO QR CODE -->
+            <section class="area-qrcode" id="area-qrcode" hidden>
+                <h3>Faça seu pagamento</h3>
+
+                <div class="qrcode-imagem" id="qrcode-imagem">
+                    <!-- O QR Code será inserido aqui -->
+                </div>
+
+                <p>
+                    Escaneie o QR Code com o aplicativo do seu banco.
+                </p>
+
+                <label for="codigo-pix">Ou copie o código Pix:</label>
+
+                <textarea
+                    id="codigo-pix"
+                    readonly
+                    placeholder="O código Pix aparecerá aqui"
+                ></textarea>
+
+                <button
+                    type="button"
+                    class="botao botao-principal"
+                    id="copiar-pix"
+                >
+                    Copiar código Pix
+                </button>
+            </section>
+
+
+            </div>
+        </div>
+    </div>
+
+    <!-- RODAPÉ -->
+    <div id="footer-container"></div>
+
+    <!-- SCRIPTS P/ VINCULAR FUNÇÕES DE PAGAMENTO E LAYOUT PADRÃO -->
+    <script src="../javascript/catalogo_produtos.js"></script>
+    <script src="../javascript/base.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login - Cantina da Honestidade</title>
+
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/login_cadastro.css">
+</head>
+
+<body>
+
+    <main class="pagina-autenticacao">
+
+        <section class="card-autenticacao">
+
+            <h1>Cantina da Honestidade</h1>
+            <p class="subtitulo-autenticacao">
+                Entre com seus dados para acessar o sistema.
+            </p>
+
+            <form id="form-login">
+
+                <div class="campo-formulario">
+                    <label for="matricula-login">Matrícula</label>
+                    <input
+                        type="text"
+                        id="matricula-login"
+                        name="matricula"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="senha-login">Senha</label>
+                    <input
+                        type="password"
+                        id="senha-login"
+                        name="senha"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="botao botao-principal">
+                    Entrar
+                </button>
+
+            </form>
+
+            <p class="texto-alternativo">
+                Ainda não tem cadastro?
+                <a href="cadastro.html">Cadastre-se</a>
+            </p>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>
