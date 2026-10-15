@@ -16,23 +16,64 @@ A migração antiga `001_produtos.sql` é específica para **SQLite**. Para a st
 
 ## Preparar o ambiente no Windows
 
-No PowerShell, na raiz do repositório:
+Faça a preparação inicial uma vez por computador. Os comandos abaixo devem ser executados no PowerShell, na pasta principal do repositório (a que contém `requirements.txt`). Para acompanhar o frontend chamando a API, use o VS Code com a extensão Live Server ou Vite.
+
+### 1. Instalar as dependências Python
+
+Confirme que o Python está instalado e crie o ambiente virtual do projeto:
 
 ```powershell
+python --version
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-Copy-Item .env.example .env
 ```
 
-Abra `.env` no editor e preencha as credenciais do seu MySQL local. Mantenha esse arquivo local: o Git o ignora.
+Se `python` não for reconhecido, instale o Python e abra um novo PowerShell. O ambiente `.venv` e as dependências não precisam ser recriados a cada execução.
 
-O exemplo usa MySQL em Docker com container chamado `cantina-mysql` e a porta local `3306`:
+### 2. Preparar o MySQL
+
+O caminho recomendado para desenvolvimento é Docker Desktop com MySQL 8.4. Abra o Docker Desktop e espere ele iniciar.
+
+Se já existir um container chamado `cantina-mysql`, inicie-o:
 
 ```powershell
 docker start cantina-mysql
 ```
 
-Para criar as tabelas em uma instalação nova, copie as duas migrações para o container e aplique uma única vez. A segunda depende da primeira:
+Se ainda não existir, crie-o uma única vez:
+
+```powershell
+docker run --name cantina-mysql -e MYSQL_ROOT_PASSWORD=rootCantinaLocal123! -e MYSQL_DATABASE=cantina_inteligente -e MYSQL_USER=cantina_app -e MYSQL_PASSWORD=appCantinaLocal123! -p 3306:3306 -d mysql:8.4
+```
+
+As senhas acima são exemplos apenas para desenvolvimento local. Se você já tiver um container, não o recrie: use no `.env` a senha configurada nele. Se a porta `3306` estiver ocupada, será necessário liberar essa porta ou mapear outra porta do computador e usar o mesmo número em `MYSQL_PORT` no `.env`.
+
+### 3. Configurar a conexão da aplicação
+
+Crie o arquivo local `.env` a partir do exemplo e abra para edição:
+
+```powershell
+Copy-Item .env.example .env
+notepad .env
+```
+
+Para o container criado no passo anterior, deixe os valores assim:
+
+```text
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_DATABASE=cantina_inteligente
+MYSQL_USER=cantina_app
+MYSQL_PASSWORD=appCantinaLocal123!
+```
+
+Salve o arquivo. Ele é ignorado pelo Git; não o envie ao GitHub.
+
+### 4. Criar as tabelas do banco
+
+Faça este passo uma única vez para cada banco novo. Se as tabelas `produtos` e `auditoria_produtos` já existem, pule para o passo 5. A primeira migração abaixo cria `produtos`; a segunda cria a auditoria e depende da primeira.
+
+Na pasta principal do projeto, copie os arquivos para o container e conecte como root:
 
 ```powershell
 docker cp .\database\migrations\002_produtos_mysql.sql cantina-mysql:/tmp/002_produtos_mysql.sql
@@ -40,7 +81,7 @@ docker cp .\database\migrations\003_auditoria_produtos_mysql.sql cantina-mysql:/
 docker exec -it cantina-mysql mysql -u root -p
 ```
 
-No prompt do MySQL, digite a senha de root e execute:
+Digite a senha de root do container. No prompt `mysql>`, rode cada linha:
 
 ```sql
 source /tmp/002_produtos_mysql.sql;
@@ -49,32 +90,48 @@ SHOW TABLES;
 exit;
 ```
 
-Isso cria o banco `cantina_inteligente` e as tabelas `produtos` e `auditoria_produtos`. Não rode as migrações de novo: os índices já terão sido criados.
+Devem aparecer `produtos` e `auditoria_produtos`. Não execute essas migrações novamente nesse mesmo banco. `001_produtos.sql` é uma migração antiga de SQLite; para MySQL, use somente `002` e `003`.
 
-## Executar
+### 5. Iniciar o backend (faça isso quando for testar)
 
-Com MySQL ligado, migrações aplicadas e `.env` preenchido:
+Em um PowerShell na pasta principal do projeto, inicie o container se estiver parado e depois a API:
 
 ```powershell
+docker start cantina-mysql
 .\.venv\Scripts\python.exe -m flask --app src.backend.app run --debug
 ```
 
-Rotas disponíveis no backend:
+Se o Docker responder que o container já está em execução, pode seguir. Deixe essa janela aberta enquanto usa a API. Para parar o Flask, pressione `Ctrl+C` nessa janela.
+
+### 6. Iniciar o frontend e testar a conexão
+
+Abra o frontend pelo Live Server do VS Code (normalmente `http://localhost:5500`) ou pelo Vite (normalmente `http://localhost:5173`). Não abra o HTML diretamente como arquivo (`file://`): o navegador precisa servir a tela por uma dessas origens para a chamada à API funcionar.
+
+Com o Flask aberto, visite estes endereços:
+
+- `http://127.0.0.1:5000/api/health` — confirma que o Flask iniciou.
+- `http://127.0.0.1:5000/api/health/db` — confirma a conexão MySQL; a resposta deve indicar `"banco": "conectado"` e `"resultado": 1`.
+
+Se o segundo endereço falhar, confira se o container está rodando e se usuário, senha e porta no `.env` correspondem ao MySQL local. Cada pessoa tem seu próprio banco local: os dados cadastrados no computador de uma integrante não aparecem automaticamente no computador das outras.
+
+A preparação do Python, do `.env` e das tabelas é feita uma vez por computador/banco. Nas próximas sessões, basta iniciar o Docker, iniciar o Flask e abrir o frontend pelo servidor local.
+
+### Rotas da API
+
+Com o backend iniciado, estas rotas ficam disponíveis:
 
 - `GET /` — mensagem de que a API iniciou.
 - `GET /api/health` — saúde do Flask.
 - `GET /api/health/db` — verifica a conexão MySQL com `SELECT 1`.
-- `GET /api/produtos?q=&status=` — lista por código, nome ou categoria e filtra por situação.
+- `GET /api/produtos?q=&status=` — lista, busca e filtra produtos.
 - `GET /api/produtos/<id>` — consulta detalhes.
-- `POST /api/produtos` — cadastra e audita.
-- `PUT /api/produtos/<id>` — edita e audita.
-- `DELETE /api/produtos/<id>` — inativa e audita sem apagar.
-- `PATCH /api/produtos/<id>/reativar` — reativa e audita.
-- `GET /api/produtos/<id>/auditoria` — consulta o histórico.
+- `POST /api/produtos` — cadastra produto.
+- `PUT /api/produtos/<id>` — edita produto.
+- `DELETE /api/produtos/<id>` — inativa produto sem apagá-lo.
+- `PATCH /api/produtos/<id>/reativar` — reativa produto.
+- `GET /api/produtos/<id>/auditoria` — consulta o histórico de alterações.
 
-Para verificar a conexão, acesse [http://127.0.0.1:5000/api/health/db](http://127.0.0.1:5000/api/health/db). A resposta esperada inclui `"banco": "conectado"` e `"resultado": 1`. A lista de produtos retorna vazia se ainda não houver itens.
-
-Para o frontend, use os nomes, formatos, respostas e regras de erro descritos no [contrato da API](docs/contrato-crud.md). A API aceita CORS somente dos endereços locais de Live Server e Vite documentados ali. Faça as operações administrativas em ambiente local; não publique sem autenticação e autorização.
+Para nomes de campos, exemplos de JSON e regras de erro, consulte o [contrato da API](docs/contrato-crud.md). Faça operações administrativas em ambiente local; não publique a API sem autenticação e autorização.
 
 ## Decisões e materiais da entrega
 
