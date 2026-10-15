@@ -134,3 +134,28 @@ input {
         max-width: 100%;
     }
 }
+
+/* Navegação comum entre loja e administração */
+.navegacao .link-administracao {
+    border: 1px solid #e2e9df;
+    border-radius: 9px;
+    background: #f6f8f3;
+    color: #3d6545;
+    font-weight: 700;
+}
+
+.navegacao .link-administracao:hover {
+    background: #edf4e9;
+    color: #2d5637;
+}
+
+@media (max-width: 600px) {
+    .header-conteudo {
+        gap: 8px;
+    }
+
+    .navegacao {
+        width: 100%;
+        max-width: 100%;
+    }
+}

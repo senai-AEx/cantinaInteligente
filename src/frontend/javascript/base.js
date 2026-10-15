@@ -25,6 +25,7 @@ async function carregarBase() {
         if (footer && localFooter) {
             localFooter.replaceWith(footer);
         }
+        document.dispatchEvent(new Event("layoutbase:carregada"));
     } catch (erro) {
         console.error("Erro ao carregar header e footer:", erro);
     }
