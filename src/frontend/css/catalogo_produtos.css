@@ -1,0 +1,385 @@
+
+/* CATÁLOGO DE PRODUTOS */
+
+.pagina-catalogo {
+    padding-top: 30px;
+}
+
+.introducao {
+    margin-bottom: 25px;
+}
+
+.introducao h1 {
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 28px;
+}
+
+.layout-catalogo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+    gap: 25px;
+}
+
+.secao-produtos h2,
+.carrinho h2 {
+    margin-bottom: 18px;
+    font-size: 21px;
+}
+
+/* CARDS DOS PRODUTOS */
+
+.lista-produtos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.card-produto {
+    min-width: 0;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #0000000a;
+}
+
+.imagem-produto {
+    display: block;
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    background: #f2f2f2;
+}
+
+.conteudo-produto {
+    padding: 16px;
+}
+
+.conteudo-produto h3 {
+    margin-bottom: 8px;
+    font-size: 18px;
+}
+
+.preco-produto {
+    margin-bottom: 8px;
+    color: #e87522;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.validade-selos {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.validade-selos .validade {
+    margin-bottom: 0;
+}
+
+.validade-selos .selos-produto {
+    margin-bottom: 0;
+}
+
+.validade {
+    margin-bottom: 12px;
+    color: #666;
+    font-size: 14px;
+}
+
+.selos-produto {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 15px;
+}
+
+.selo {
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #e8f5e9;
+    color: #28743a;
+    font-size: 12px;
+}
+
+.card-produto .botao,
+.botao-finalizar {
+    width: 100%;
+}
+
+/* RELATAR PROBLEMA */
+
+.link-problema {
+    display: inline-block;
+    margin-top: 20px;
+    color: #c95d12;
+    text-decoration: underline;
+}
+
+.secao-problema {
+    margin-top: 35px;
+    padding: 22px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+}
+
+.secao-problema h2 {
+    margin-bottom: 10px;
+}
+
+/* CARRINHO */
+
+.carrinho {
+    min-width: 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #0000000a;
+}
+
+.carrinho-vazio {
+    padding: 15px 0;
+    color: #777;
+}
+
+.item-carrinho {
+    padding: 14px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.informacoes-item h3 {
+    margin-bottom: 5px;
+    font-size: 15px;
+    overflow-wrap: anywhere;
+}
+
+.quantidade-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.quantidade-item input {
+    width: 55px;
+    max-width: 100%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.subtotal-item {
+    margin-top: 8px;
+    font-weight: bold;
+}
+
+.resumo-carrinho {
+    margin-top: 18px;
+}
+
+.total-carrinho {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* MODAL PIX */
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.modal-overlay.aberto {
+    display: flex;
+}
+
+.modal-conteudo {
+    position: relative;
+    width: 100%;
+    max-width: 760px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 32px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px #00000030;
+}
+
+.modal-fechar {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.modal-corpo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 28px;
+}
+
+.informacoes-pix {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto;
+}
+
+.mensagem-pix {
+    text-align: center;
+}
+
+.mensagem-pix h2 {
+    margin-bottom: 12px;
+    color: #e87522;
+    font-size: 25px;
+}
+
+.mensagem-pix p {
+    color: #555;
+    line-height: 1.6;
+}
+
+.valor-pix {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.valor-pix > p:first-child {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.valor-pix label,
+.area-qrcode label {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#valor-pagamento,
+#valor-pagamento-fixo {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 20px;
+}
+
+#valor-pagamento-fixo {
+    margin: 0;
+    background: #f8f8f8;
+    color: #2e7d32;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* QR CODE */
+
+.area-qrcode {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 0;
+    text-align: center;
+}
+
+.area-qrcode h3 {
+    margin-bottom: 16px;
+}
+
+.qrcode-imagem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 240px;
+    aspect-ratio: 1;
+    margin: 0 auto 16px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.area-qrcode > p {
+    margin-bottom: 18px;
+    color: #555;
+    font-size: 14px;
+}
+
+#codigo-pix {
+    display: block;
+    width: 100%;
+    min-height: 85px;
+    margin: 10px 0;
+    padding: 10px;
+    resize: vertical;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow-wrap: anywhere;
+}
+
+#copiar-pix {
+    width: 100%;
+}
+
+/* MODAL APÓS CONFIRMAR O VALOR */
+
+.modal-corpo.pix-gerado {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    align-items: stretch;
+    gap: 24px;
+}
+
+.modal-corpo.pix-gerado .informacoes-pix {
+    max-width: none;
+    height: 100%;
+}
+
+.modal-corpo.pix-gerado .mensagem-pix {
+    text-align: left;
+}
+
+.modal-corpo.pix-gerado .mensagem-pix h2 {
+    font-size: 22px;
+}
+
+.informacoes-pix #voltar-editar-valor {
+    width: 100%;
+    margin-top: auto;
+}
+
+/* RESPEITA O ATRIBUTO HIDDEN */
+
+[hidden] {
+    display: none !important;
+}
