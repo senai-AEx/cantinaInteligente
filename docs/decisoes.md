@@ -1,3 +1,5 @@
+> **Estado em 16/10/2026:** a stack Flask/MySQL e as telas estão implementadas no develop; a correção do modelo de produto e a validação ponta a ponta continuam pendentes. Há uma rota de exclusão física legada que deve sair do fluxo comum. Consulte [estado atual e próximas entregas](estado-atual-e-proximas-entregas.md).
+
 # Decisões de projeto para a AV04
 
 ## Stack definida pelo grupo

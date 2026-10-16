@@ -1,3 +1,5 @@
+> **Situação em 16/10/2026:** 5 testes automatizados locais passaram (upload e exclusão/auditoria). CRUD integrado ao MySQL e responsividade ainda não têm evidências. A exclusão física presente no código é legado e não deve ser demonstrada como regra aprovada; veja [issue #10](https://github.com/senai-AEx/cantinaInteligente/issues/10).
+
 # Testes manuais da AV04
 
 Checklist para executar quando o CRUD estiver implementado. **Nenhum caso abaixo foi executado nesta base de estrutura.** Os passos são independentes da linguagem, do framework e do banco escolhido.

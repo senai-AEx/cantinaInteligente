@@ -1,3 +1,5 @@
+> **Contrato legado da AV04:** API atual ainda tem campos e operação de exclusão que serão removidos conforme a devolutiva. Consulte [issue #10](https://github.com/senai-AEx/cantinaInteligente/issues/10) e [estado atual e próximas entregas](estado-atual-e-proximas-entregas.md).
+
 # API de Produtos — contrato para o frontend
 
 Backend da AV04: Python + Flask + MySQL. A API usa JSON e fica em `http://127.0.0.1:5000`. Os endpoints administrativos são para execução local na apresentação; ainda não há login nem autorização por perfil.

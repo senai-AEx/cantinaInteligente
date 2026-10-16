@@ -1,3 +1,5 @@
+> **Modelo legado da AV04:** esta página lista código manual, validade e limites de estoque. A devolutiva pede removê-los e incluir preço de compra/venda; essas mudanças estão pendentes na [issue #10](https://github.com/senai-AEx/cantinaInteligente/issues/10). Consulte [estado atual e próximas entregas](estado-atual-e-proximas-entregas.md).
+
 # Modelo de produto definido para a AV04
 
 ## Entidade `produtos`

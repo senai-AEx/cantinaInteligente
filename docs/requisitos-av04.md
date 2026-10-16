@@ -1,3 +1,5 @@
+> **Registro da AV04:** apresentada em 15/10/2026, nota 85/100. As devolutivas posteriores corrigem escopo para próximas entregas; veja [estado atual e próximas entregas](estado-atual-e-proximas-entregas.md).
+
 # Requisitos fechados para a AV04
 
 ## Objetivo da demonstração

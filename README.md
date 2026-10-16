@@ -1,3 +1,5 @@
+> **Escopo atualizado (16/10/2026):** este repositório registra o CRUD legado da AV04. As correções pedidas para AV05 (ID automático, sem validade/limites de estoque, dois preços e sem exclusão física no fluxo comum) ainda não estão implementadas. Consulte [estado atual e próximas entregas](docs/estado-atual-e-proximas-entregas.md).
+
 # Cantina Inteligente — AV04 (Grupo 4)
 
 Base de trabalho para apresentar **Manter Produto** com banco de dados. A stack definida pelo grupo é **Python + Flask + MySQL**. O backend fornece o CRUD de produtos, validações, persistência e auditoria.
@@ -61,7 +63,7 @@ Cada integrante possui seu próprio banco local. Os dados cadastrados em um comp
 
 O modelo comum está em [docs/modelo-produto.md](docs/modelo-produto.md), e as regras da entrega em [docs/requisitos-av04.md](docs/requisitos-av04.md). A tabela MySQL mantém código único, preço positivo em centavos, quantidades válidas, validade, foto, selos, situação e datas.
 
-A tela administrativa permite inativar e reativar produtos; a exclusão definitiva preserva o histórico de auditoria. As migrações MySQL ficam em `database/migrations`; `001_produtos.sql` é específica para SQLite e não deve ser usada no MySQL. O Make confere e aplica as migrações `002`, `003` e `004` sem repetir alterações já aplicadas.
+A tela administrativa atual permite inativar/reativar e ainda contém exclusão física. A regra aprovada é preservar histórico por inativação; a remoção definitiva deve sair do fluxo comum conforme a issue #10. As migrações MySQL ficam em `database/migrations`; `001_produtos.sql` é específica para SQLite e não deve ser usada no MySQL. O Make confere e aplica as migrações `002`, `003` e `004` sem repetir alterações já aplicadas.
 
 ## Rotas da API
 
@@ -75,7 +77,7 @@ A tela administrativa permite inativar e reativar produtos; a exclusão definiti
 - `PUT /api/produtos/<id>` — edita produto.
 - `PATCH /api/produtos/<id>/inativar` — inativa produto, mantendo-o para reativação.
 - `PATCH /api/produtos/<id>/reativar` — reativa produto.
-- `DELETE /api/produtos/<id>` — exclui produto definitivamente, preservando a auditoria.
+- `DELETE /api/produtos/<id>` — endpoint legado da AV04; não usar no fluxo aprovado e remover conforme a issue #10.
 - `GET /api/produtos/<id>/auditoria` — consulta o histórico de alterações.
 
 Para campos, exemplos de JSON e respostas de erro, consulte o [contrato do CRUD](docs/contrato-crud.md).
