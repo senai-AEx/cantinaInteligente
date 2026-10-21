@@ -2,13 +2,11 @@
 from contextlib import contextmanager
 import os
 from pathlib import Path
-
 import mysql.connector
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-RAIZ_PROJETO = Path(__file__).resolve().parents[2]
-load_dotenv(RAIZ_PROJETO / ".env")
-
+# Carrega as variáveis de ambiente .ENV
+load_dotenv(find_dotenv())
 
 def conectar():
     """Abre conexão do request e configura timestamps da sessão em UTC."""
