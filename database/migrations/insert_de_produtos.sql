@@ -1,0 +1,77 @@
+USE cantina_inteligente;
+
+INSERT INTO produtos (
+    codigo_produto,
+    nome,
+    descricao,
+    categoria,
+    preco_centavos,
+    quantidade_estoque,
+    estoque_minimo,
+    estoque_maximo,
+    validade,
+    foto_caminho,
+    zero_lactose,
+    zero_acucar,
+    status
+) VALUES
+(
+    'BEB001',
+    'Suco de Laranja',
+    'Suco de laranja integral 300 ml.',
+    'Bebidas',
+    750,
+    20,
+    5,
+    50,
+    '2026-11-30',
+    NULL,
+    FALSE,
+    FALSE,
+    'ATIVO'
+),
+(
+    'LAN001',
+    'Sanduiche Natural',
+    'Sanduiche natural de frango com alface e cenoura.',
+    'Lanches',
+    1200,
+    15,
+    5,
+    30,
+    '2026-10-25',
+    NULL,
+    FALSE,
+    FALSE,
+    'ATIVO'
+),
+(
+    'SNK001',
+    'Barra de Cereal',
+    'Barra de cereal de castanhas, embalagem individual.',
+    'Snacks',
+    450,
+    40,
+    10,
+    100,
+    '2027-06-30',
+    NULL,
+    FALSE,
+    FALSE,
+    'ATIVO'
+),
+(
+    'BEB002',
+    'Leite Zero Lactose',
+    'Leite UHT zero lactose, embalagem de 1 litro.',
+    'Bebidas',
+    899,
+    12,
+    4,
+    24,
+    '2026-12-15',
+    NULL,
+    TRUE,
+    FALSE,
+    'ATIVO'
+);

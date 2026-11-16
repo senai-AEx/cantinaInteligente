@@ -12,8 +12,10 @@ from .produtos import produtos_api
 app = Flask(__name__)
 app.json.ensure_ascii = False
 LIMITE_IMAGEM_BYTES = 5 * 1024 * 1024
+
 app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
 app.config["PRODUCT_IMAGE_FOLDER"] = Path(__file__).resolve().parents[2] / "assets" / "produtos"
+
 CORS(
     app,
     resources={
