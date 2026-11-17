@@ -1,0 +1,50 @@
+flowchart TD
+    inicio(("Início"))
+    catalogo["Cliente consulta o catálogo"]
+    sacola["Cliente adiciona produtos à sacola"]
+    finalizar["Cliente clica em Finalizar compra"]
+    logado{"Está logado?"}
+    entrar["Cliente faz login ou cria a conta"]
+    resumo["Sistema mostra o total, o saldo atual e o saldo após a compra"]
+    confirma{"Cliente confirma?"}
+    transacao["Sistema inicia a transação e bloqueia a carteira e os produtos"]
+    estoque{"Produtos ativos e com estoque suficiente?"}
+    semEstoque["Sistema desfaz a transação e informa os produtos indisponíveis"]
+    ajusta["Cliente ajusta a sacola"]
+    saldo{"Saldo suficiente?"}
+    semSaldo["Sistema desfaz a transação e informa o saldo insuficiente"]
+    querCredito{"Adicionar crédito agora?"}
+    credito["Cliente declara o depósito feito na caixa e o sistema soma o crédito ao saldo"]
+    grava["Sistema grava a compra e os itens"]
+    baixa["Sistema baixa o estoque dos produtos"]
+    debita["Sistema debita o saldo e registra a movimentação de débito"]
+    commit["Sistema confirma a transação"]
+    obrigado["Sistema mostra o agradecimento e o novo saldo"]
+    fim(("Fim"))
+
+    inicio --> catalogo
+    catalogo --> sacola
+    sacola --> finalizar
+    finalizar --> logado
+    logado -->|"Não"| entrar
+    entrar --> finalizar
+    logado -->|"Sim"| resumo
+    resumo --> confirma
+    confirma -->|"Não"| sacola
+    confirma -->|"Sim"| transacao
+    transacao --> estoque
+    estoque -->|"Não"| semEstoque
+    semEstoque --> ajusta
+    ajusta --> finalizar
+    estoque -->|"Sim"| saldo
+    saldo -->|"Não"| semSaldo
+    semSaldo --> querCredito
+    querCredito -->|"Sim"| credito
+    credito --> finalizar
+    querCredito -->|"Não"| fim
+    saldo -->|"Sim"| grava
+    grava --> baixa
+    baixa --> debita
+    debita --> commit
+    commit --> obrigado
+    obrigado --> fim

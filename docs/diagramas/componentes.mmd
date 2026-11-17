@@ -1,0 +1,45 @@
+flowchart LR
+    subgraph navegador["Navegador (lado do cliente)"]
+        telas["Telas HTML e CSS<br/>início, catálogo, login, cadastro,<br/>minha conta e painel administrativo"]
+        scripts["JavaScript de cada tela"]
+        basejs["base.js (objeto Cantina)<br/>chamadas à API, sessão,<br/>máscaras e validações"]
+    end
+
+    subgraph servidor["Aplicação Flask (src/backend) na porta 5000"]
+        app["app.py<br/>registra os módulos, entrega as telas<br/>e padroniza os erros"]
+        seg["seguranca.py<br/>sessão por cookie e perfis"]
+        subgraph modulos["Módulos de negócio em camadas: routes, controller, service e repository"]
+            usuarios["usuarios<br/>/api/auth"]
+            produtos["produtos<br/>/api/produtos"]
+            carteira["carteira<br/>/api/carteira"]
+            compras["compras<br/>/api/compras"]
+            admin["admin<br/>/api/admin"]
+        end
+        uploads["uploads.py<br/>/api/uploads/produtos"]
+        conexao["conexao.py<br/>conexão e transações"]
+    end
+
+    bd[("MySQL 8<br/>banco cantina_inteligente")]
+    fotos[["Pasta assets/produtos<br/>fotos dos produtos"]]
+
+    telas --> scripts
+    scripts --> basejs
+    basejs -->|"HTTP e JSON com cookie de sessão"| app
+    app -->|"confere login e perfil"| seg
+    app --> usuarios
+    app --> produtos
+    app --> carteira
+    app --> compras
+    app --> admin
+    app --> uploads
+    seg -.->|"lê o usuário logado"| usuarios
+    compras -.->|"debita o saldo"| carteira
+    admin -.->|"ajuste de saldo"| carteira
+    admin -.->|"validações de usuário"| usuarios
+    usuarios --> conexao
+    produtos --> conexao
+    carteira --> conexao
+    compras --> conexao
+    admin --> conexao
+    conexao -->|"SQL em transações"| bd
+    uploads --> fotos

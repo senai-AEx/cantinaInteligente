@@ -1,0 +1,55 @@
+sequenceDiagram
+    autonumber
+    actor C as Cliente
+    participant T as Tela do catálogo (navegador)
+    participant A as API Flask (routes e controller)
+    participant S as Serviço de compras (service)
+    participant R as Repositórios (compras e carteira)
+    participant B as MySQL
+
+    C->>T: Revisa a sacola e clica em Finalizar compra
+    T->>T: Gera a chave de idempotência (UUID)
+    T->>A: POST /api/compras (itens, chave, cookie de sessão)
+    A->>A: Confere a sessão (login obrigatório)
+    alt Usuário sem login
+        A-->>T: 401 - faça login para continuar
+    else Usuário logado
+        A->>S: registrar_compra(usuario, dados)
+        S->>S: Valida os itens e a chave
+        alt Dados inválidos
+            S-->>A: Erro de validação
+            A-->>T: 422 - campos inválidos
+        else Dados válidos
+            S->>B: Inicia a transação
+            S->>R: bloquear_carteira
+            R->>B: SELECT em carteiras FOR UPDATE
+            S->>R: carregar_por_chave
+            R->>B: SELECT em compras pela chave
+            alt Chave já utilizada (envio repetido)
+                S-->>A: Compra já registrada
+                A-->>T: 200 - mesma compra, sem duplicar
+            else Chave nova
+                S->>R: bloquear_produtos
+                R->>B: SELECT em produtos FOR UPDATE
+                B-->>R: Preços, estoque e situação atuais
+                S->>S: Confere produtos ativos, estoque e saldo
+                alt Produto indisponível, estoque ou saldo insuficiente
+                    S->>B: ROLLBACK - nada é gravado
+                    S-->>A: Erro de negócio com código
+                    A-->>T: 409 - PRODUTO_INDISPONIVEL, ESTOQUE_INSUFICIENTE ou SALDO_INSUFICIENTE
+                    T-->>C: Mostra o motivo e oferece Adicionar crédito
+                else Tudo certo
+                    S->>R: inserir_compra e inserir_itens
+                    R->>B: INSERT em compras e itens_compra
+                    S->>R: baixar_estoque
+                    R->>B: UPDATE em produtos (quantidade_estoque)
+                    S->>R: lancar_movimentacao (DEBITO)
+                    R->>B: UPDATE em carteiras (saldo) e INSERT em movimentacoes
+                    S->>B: COMMIT
+                    S-->>A: Compra e carteira atualizadas
+                    A-->>T: 201 - compra e carteira
+                    T-->>C: Agradecimento, novo saldo e sacola vazia
+                end
+            end
+        end
+    end

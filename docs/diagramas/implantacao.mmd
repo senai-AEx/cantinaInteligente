@@ -1,0 +1,22 @@
+flowchart LR
+    subgraph dispositivo["Dispositivo do usuário (celular ou computador)"]
+        navegador["Navegador web<br/>Chrome, Edge, Safari ou Opera"]
+    end
+
+    subgraph maquina["Computador servidor (ambiente de desenvolvimento e demonstração)"]
+        subgraph python["Python 3 com ambiente virtual .venv"]
+            flask["Aplicação Flask<br/>telas e API na porta 5000"]
+        end
+        subgraph docker["Docker"]
+            mysql[("Contêiner cantina-mysql<br/>MySQL 8.4 na porta 3306")]
+            volume[("Volume cantina-mysql-data<br/>dados persistentes")]
+        end
+        env["Arquivo .env<br/>credenciais do banco e SECRET_KEY"]
+        fotos["Pasta assets/produtos<br/>fotos enviadas pelo painel"]
+    end
+
+    navegador -->|"HTTP: páginas, CSS, JavaScript e JSON"| flask
+    flask -->|"TCP 3306 com MySQL Connector/Python"| mysql
+    mysql --- volume
+    flask -.->|"lê a configuração"| env
+    flask -->|"grava e lê as fotos"| fotos

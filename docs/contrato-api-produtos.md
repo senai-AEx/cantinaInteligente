@@ -1,6 +1,6 @@
 # API de produtos
 
-API JSON em `http://127.0.0.1:5000` (Python + Flask + MySQL). Ainda não há login: as rotas administrativas são para uso local até a implementação de autenticação e perfis (RNF08).
+API JSON em `http://127.0.0.1:5000` (Python + Flask + MySQL). Consultar produtos é público; **cadastrar, alterar, inativar, reativar, ver auditoria e enviar foto exigem login com perfil de administrador** (`401` sem login, `403` sem permissão). Visitantes e clientes recebem apenas produtos **ativos** e **sem o preço de compra**; o administrador vê tudo. As demais rotas do sistema estão em [contrato-api.md](contrato-api.md).
 
 ## Corpo de cadastro e edição
 
@@ -59,8 +59,8 @@ JSON malformado ou sem `Content-Type: application/json`: `400`. Produto inexiste
 
 ## Auditoria e autor
 
-Toda inclusão, alteração, inativação e reativação grava a auditoria na mesma transação. O cabeçalho opcional `X-Actor` identifica o operador (padrão `administrador-local`); é apenas informativo enquanto não houver login.
+Toda inclusão, alteração, inativação e reativação grava a auditoria na mesma transação. O autor registrado é o administrador logado (nome e id), obtido da sessão.
 
 ## Uso pelo frontend
 
-CORS aceita `localhost`/`127.0.0.1` nas portas 5500, 5501 (Live Server) e 5173 (Vite). Para fotos, a tela envia o arquivo para `/api/uploads/produtos` antes do `POST`/`PUT` e inclui o `foto_caminho` retornado.
+As telas são servidas pelo próprio Flask, na mesma porta da API; use caminhos relativos (`/api/produtos`). Para fotos, a tela envia o arquivo para `/api/uploads/produtos` antes do `POST`/`PUT` e inclui o `foto_caminho` retornado.

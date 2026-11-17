@@ -6,7 +6,31 @@
 
 ## Onde estamos
 
-A stack confirmada é **Python + Flask + MySQL**, com HTML/CSS/JavaScript no frontend. A branch develop contém aplicação, migrações, API de produtos em camadas, telas cliente/admin, busca e filtros, validações e auditoria.
+A stack confirmada é **Python + Flask + MySQL**, com HTML/CSS/JavaScript no frontend. Um único servidor Flask entrega as telas e a API em `http://127.0.0.1:5000`.
+
+**17/11/2026 (noite) — sistema completo implementado na develop.** Todos os itens da demanda, exceto o QR Code, estão no código:
+
+| Item da demanda | Situação |
+| --- | --- |
+| Cadastro de usuários; login por matrícula, e-mail ou CPF | Feito (issue #11) |
+| Cadastro de produtos; consulta de preços | Feito (issue #10) |
+| Créditos na carteira; consulta de saldo e extrato | Feito (issue #12) |
+| Registro de compras com desconto do saldo e baixa do estoque | Feito (issue #13) |
+| Histórico de compras | Feito (issue #14) |
+| Painel administrativo: usuários, produtos e movimentações | Feito (issues #11 e #14) |
+| Relatórios de vendas, saldos, estoque e depósitos declarados | Feito (issue #14) |
+| QR Code para facilitar o registro | **Não feito** (a demanda trata como possibilidade) |
+
+Como foi verificado em 17/11: 120 testes automatizados passando; 131 conferências da API contra o MySQL real (incluindo dois usuários disputando o último item e clique duplo simultâneo); e os fluxos do cliente e do administrador percorridos no navegador, em 1280 px e em 360 px.
+
+**O que ainda falta para a AV05 (21/11):**
+
+- Liberar o acesso ao repositório para a professora.
+- Passar o [Documento do Sistema](documento-do-sistema.md) para o template, resolver os itens `[CONFIRMAR]`, exportar os diagramas de [diagramas/](diagramas/README.md) e gerar o PDF.
+- Executar o [roteiro de testes manuais](testes-manuais.md) e registrar o resultado.
+- Gravar o vídeo conforme o [roteiro](roteiro-video-demonstracao.md).
+- Aplicar o checklist da ABNT NBR 17225 e registrar em `docs/checklist-acessibilidade-nbr17225.md` (10% da banca). As cores e o foco já foram ajustados para contraste mínimo de 4,5:1, mas o checklist completo não foi percorrido.
+- Commits próprios de todos os integrantes (hoje falta a Ana Cecília).
 
 **17/11/2026 — devolutiva do produto aplicada na develop** (issue #10): código automático, preço de compra e de venda, só quantidade em estoque, sem validade, sem caixas de zero lactose (selos automáticos para frutas), gravação apenas pelo botão Salvar e exclusão lógica (sem exclusão definitiva). O backend do Luan (controller/service/repository) foi unificado com o da AV04, eliminando o conflito entre `src/app.py` e `src/backend/app.py`. Banco atualizado pela migração `005`. Testes automatizados (17) passando e fluxo testado na tela com MySQL. Falta preencher o [checklist manual](testes-manuais.md) com evidências.
 

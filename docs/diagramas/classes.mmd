@@ -1,0 +1,172 @@
+classDiagram
+    direction TB
+
+    class Usuario {
+        <<entity>>
+        +int id_usuario
+        +string nome
+        +string matricula
+        +string cpf
+        +string email
+        -string senha_hash
+        +Perfil perfil
+        +Status status
+    }
+
+    class Carteira {
+        <<entity>>
+        +int id_carteira
+        +int saldo_centavos
+        +datetime atualizado_em
+    }
+
+    class Movimentacao {
+        <<entity>>
+        +int id_movimentacao
+        +TipoMovimentacao tipo
+        +int valor_centavos
+        +int saldo_apos_centavos
+        +string descricao
+        +string chave_idempotencia
+        +datetime data_hora
+    }
+
+    class Compra {
+        <<entity>>
+        +int id_compra
+        +int valor_total_centavos
+        +string chave_idempotencia
+        +datetime data_hora
+    }
+
+    class ItemCompra {
+        <<entity>>
+        +int id_item_compra
+        +int quantidade
+        +int preco_unitario_centavos
+        +int custo_unitario_centavos
+        +int subtotal_centavos
+    }
+
+    class Produto {
+        <<entity>>
+        +int id_produto
+        +string nome
+        +string descricao
+        +string categoria
+        +int preco_compra_centavos
+        +int preco_venda_centavos
+        +int quantidade_estoque
+        +string foto_caminho
+        +bool zero_lactose
+        +bool zero_acucar
+        +Status status
+    }
+
+    class AuditoriaProduto {
+        <<entity>>
+        +int id_auditoria
+        +string acao
+        +string autor
+        +string origem
+        +json antes_json
+        +json depois_json
+        +datetime registrado_em
+    }
+
+    class Perfil {
+        <<enumeration>>
+        ADMINISTRADOR
+        CLIENTE
+    }
+
+    class Status {
+        <<enumeration>>
+        ATIVO
+        INATIVO
+    }
+
+    class TipoMovimentacao {
+        <<enumeration>>
+        CREDITO
+        DEBITO
+        AJUSTE
+    }
+
+    class UsuarioService {
+        <<service>>
+        +cadastrar(dados) Usuario
+        +autenticar(dados) Usuario
+        +garantir_administrador(dados) Usuario
+    }
+
+    class CarteiraService {
+        <<service>>
+        +consultar_carteira(usuario) Carteira
+        +listar_movimentacoes(usuario, limite) List~Movimentacao~
+        +adicionar_credito(usuario, dados) Movimentacao
+        +ajustar_saldo(id_usuario, valor_centavos, motivo, id_autor, chave) Movimentacao
+    }
+
+    class CompraService {
+        <<service>>
+        +registrar_compra(usuario, dados) Compra
+        +listar_compras(usuario, limite) List~Compra~
+        +consultar_compra(usuario, id_compra) Compra
+    }
+
+    class ProdutoService {
+        <<service>>
+        +listar_produtos(termo, status) List~Produto~
+        +consultar_produto(id_produto) Produto
+        +incluir_produto(dados, autor, origem) Produto
+        +alterar_produto(id_produto, dados, autor, origem) Produto
+        +inativar_produto(id_produto, autor, origem) Produto
+        +reativar_produto(id_produto, autor, origem) Produto
+        +listar_auditoria(id_produto) List~AuditoriaProduto~
+    }
+
+    class AdminService {
+        <<service>>
+        +listar_usuarios(busca, status, perfil) List~Usuario~
+        +alterar_usuario(id_usuario, dados, administrador) Usuario
+        +inativar_usuario(id_usuario, administrador) Usuario
+        +reativar_usuario(id_usuario) Usuario
+        +ajustar_saldo(id_usuario, dados, administrador) Movimentacao
+        +listar_movimentacoes(de, ate, tipo, id_usuario, limite)
+        +relatorio_vendas(de, ate)
+        +relatorio_saldos()
+        +relatorio_estoque()
+    }
+
+    class Seguranca {
+        <<module>>
+        +usuario_atual() Usuario
+        +login_obrigatorio()
+        +somente_administrador()
+        +iniciar_sessao(usuario)
+        +encerrar_sessao()
+    }
+
+    Usuario "1" -- "1" Carteira : possui
+    Usuario "1" -- "0..*" Compra : realiza
+    Usuario "0..*" --> "1" Perfil : tem
+    Carteira "1" *-- "0..*" Movimentacao : registra
+    Movimentacao "0..*" --> "1" TipoMovimentacao : classificada por
+    Compra "1" *-- "1..*" ItemCompra : contém
+    Compra "1" --> "1" Movimentacao : gera o débito
+    ItemCompra "0..*" --> "1" Produto : refere-se a
+    Produto "1" -- "0..*" AuditoriaProduto : tem histórico
+
+    UsuarioService ..> Usuario : cria e autentica
+    UsuarioService ..> Carteira : cria com saldo zero
+    CarteiraService ..> Carteira : altera o saldo
+    CarteiraService ..> Movimentacao : lança
+    CompraService ..> Compra : registra
+    CompraService ..> Produto : confere e baixa o estoque
+    CompraService ..> CarteiraService : debita o saldo
+    ProdutoService ..> Produto : mantém
+    ProdutoService ..> AuditoriaProduto : registra
+    AdminService ..> Usuario : gerencia
+    AdminService ..> CarteiraService : lança o ajuste
+    Seguranca ..> Usuario : identifica o usuário logado

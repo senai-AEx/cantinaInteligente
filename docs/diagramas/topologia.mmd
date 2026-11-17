@@ -1,0 +1,16 @@
+flowchart LR
+    celular["Celular do cliente<br/>navegador"]
+    computador["Computador do administrador<br/>navegador"]
+    rede(("Rede local<br/>ou Wi-Fi"))
+
+    subgraph servidor["Servidor da aplicação"]
+        flask["Flask na porta 5000<br/>telas e API REST"]
+        fotos["assets/produtos<br/>fotos dos produtos"]
+        bd[("MySQL 8 na porta 3306<br/>banco cantina_inteligente")]
+    end
+
+    celular --> rede
+    computador --> rede
+    rede -->|"HTTP: páginas e JSON<br/>cookie de sessão HttpOnly"| flask
+    flask -->|"SQL em transações"| bd
+    flask --> fotos

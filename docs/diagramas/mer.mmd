@@ -1,0 +1,93 @@
+erDiagram
+    TIPO_USUARIO ||--o{ USUARIO : "define o perfil de"
+    USUARIO ||--|| CARTEIRA : "possui"
+    USUARIO ||--o{ COMPRA : "realiza"
+    USUARIO ||--o{ MOVIMENTACAO : "lança como autor"
+    CARTEIRA ||--o{ MOVIMENTACAO : "registra"
+    COMPRA ||--|{ ITEM_COMPRA : "contém"
+    COMPRA |o--|| MOVIMENTACAO : "gera o débito"
+    PRODUTO ||--o{ ITEM_COMPRA : "é vendido em"
+    PRODUTO ||..o{ AUDITORIA_PRODUTOS : "tem histórico em"
+
+    TIPO_USUARIO {
+        tinyint id_tipo_usuario PK
+        varchar nome UK "ADMINISTRADOR ou CLIENTE"
+    }
+
+    USUARIO {
+        int id_usuario PK
+        varchar nome
+        varchar matricula UK
+        char cpf UK
+        varchar email UK
+        varchar senha_hash "somente o hash da senha"
+        tinyint id_tipo_usuario FK
+        enum status "ATIVO ou INATIVO"
+        datetime criado_em
+        datetime atualizado_em
+    }
+
+    CARTEIRA {
+        int id_carteira PK
+        int id_usuario FK "único: uma carteira por usuário"
+        int saldo_centavos "CRÉDITO disponível do usuário, nunca negativo"
+        datetime atualizado_em
+    }
+
+    MOVIMENTACAO {
+        int id_movimentacao PK
+        int id_carteira FK
+        enum tipo "CREDITO, DEBITO ou AJUSTE"
+        int valor_centavos "com sinal: crédito positivo, débito negativo"
+        int saldo_apos_centavos "saldo logo após o lançamento"
+        varchar descricao
+        int id_compra FK "preenchido apenas no débito de uma compra"
+        int id_autor FK "usuário que fez o lançamento"
+        char chave_idempotencia UK "impede lançamento duplicado"
+        datetime data_hora
+    }
+
+    COMPRA {
+        int id_compra PK
+        int id_usuario FK
+        int valor_total_centavos
+        char chave_idempotencia UK "impede compra duplicada"
+        datetime data_hora
+    }
+
+    ITEM_COMPRA {
+        int id_item_compra PK
+        int id_compra FK
+        int id_produto FK
+        int quantidade
+        int preco_unitario_centavos "preço de venda no momento da compra"
+        int custo_unitario_centavos "preço de compra no momento da compra"
+        int subtotal_centavos "quantidade x preço unitário"
+    }
+
+    PRODUTO {
+        int id_produto PK "código gerado automaticamente"
+        varchar nome
+        varchar descricao
+        varchar categoria
+        int preco_compra_centavos
+        int preco_venda_centavos
+        int quantidade_estoque
+        varchar foto_caminho
+        boolean zero_lactose
+        boolean zero_acucar
+        enum status "ATIVO ou INATIVO, exclusão lógica"
+        datetime criado_em
+        datetime atualizado_em
+    }
+
+    AUDITORIA_PRODUTOS {
+        int id_auditoria PK
+        int id_produto "produto alterado, referência sem FK"
+        enum acao "INCLUIR, ALTERAR, INATIVAR ou REATIVAR"
+        varchar autor
+        varchar origem
+        json antes_json
+        json depois_json
+        datetime registrado_em
+    }

@@ -1,0 +1,48 @@
+flowchart LR
+    cliente["«ator»<br/>Cliente"]
+    admin["«ator»<br/>Administrador"]
+
+    subgraph sistema["Sistema Cantina Inteligente"]
+        uc01(["UC01 - Cadastrar-se"])
+        uc02(["UC02 - Fazer login e sair"])
+        uc03(["UC03 - Consultar catálogo e preços"])
+        uc04(["UC04 - Montar a sacola"])
+        uc05(["UC05 - Adicionar crédito"])
+        uc06(["UC06 - Consultar saldo e extrato"])
+        uc07(["UC07 - Finalizar compra"])
+        uc08(["UC08 - Consultar histórico de compras"])
+        inc1(["Debitar o saldo da carteira"])
+        inc2(["Baixar o estoque"])
+        uc09(["UC09 - Manter produtos"])
+        uc10(["UC10 - Gerenciar usuários"])
+        uc11(["UC11 - Lançar ajuste de saldo"])
+        uc12(["UC12 - Consultar movimentações"])
+        uc13(["UC13 - Emitir relatórios"])
+        uc14(["UC14 - Ler QR Code (previsto)"])
+    end
+
+    cliente --- uc01
+    cliente --- uc02
+    cliente --- uc03
+    cliente --- uc04
+    cliente --- uc05
+    cliente --- uc06
+    cliente --- uc07
+    cliente --- uc08
+    cliente --- uc14
+
+    admin --- uc02
+    admin --- uc09
+    admin --- uc10
+    admin --- uc11
+    admin --- uc12
+    admin --- uc13
+
+    uc07 -.->|"«include»"| inc1
+    uc07 -.->|"«include»"| inc2
+    uc14 -.->|"«extend»"| uc04
+
+    classDef ator stroke-width:3px
+    classDef previsto stroke-dasharray: 5 5
+    class cliente,admin ator
+    class uc14 previsto

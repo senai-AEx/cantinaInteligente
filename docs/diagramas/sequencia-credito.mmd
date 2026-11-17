@@ -1,0 +1,43 @@
+sequenceDiagram
+    autonumber
+    actor C as Cliente
+    participant T as Tela Minha conta (navegador)
+    participant A as API Flask (routes e controller)
+    participant S as Serviço da carteira (service)
+    participant R as Repositório da carteira (repository)
+    participant B as MySQL
+
+    C->>T: Deposita o dinheiro na caixa e informa o valor depositado
+    T->>T: Aplica a máscara de moeda
+    C->>T: Marca a declaração de depósito e clica em Adicionar crédito
+    T->>T: Valida o valor e gera a chave de idempotência (UUID)
+    T->>A: POST /api/carteira/creditos (valor_centavos, chave, cookie de sessão)
+    A->>A: Confere a sessão (login obrigatório)
+    alt Usuário sem login
+        A-->>T: 401 - faça login para continuar
+    else Usuário logado
+        A->>S: adicionar_credito(usuario, dados)
+        S->>S: Valida o valor (R$ 1,00 a R$ 500,00) e a chave
+        alt Valor ou chave inválidos
+            S-->>A: Erro de validação
+            A-->>T: 422 - mensagem no campo
+        else Dados válidos
+            S->>B: Inicia a transação
+            S->>R: bloquear_carteira
+            R->>B: SELECT em carteiras FOR UPDATE
+            S->>R: carregar_movimentacao_por_chave
+            R->>B: SELECT em movimentacoes pela chave
+            alt Chave já utilizada (envio repetido)
+                S-->>A: Lançamento já registrado
+                A-->>T: 200 - mesmo lançamento, sem duplicar
+            else Chave nova
+                S->>R: lancar_movimentacao (CREDITO)
+                R->>B: UPDATE em carteiras (saldo mais o valor)
+                R->>B: INSERT em movimentacoes (tipo, valor, saldo após, autor)
+                S->>B: COMMIT
+                S-->>A: Movimentação e carteira
+                A-->>T: 201 - movimentação e carteira
+                T-->>C: Mostra o novo saldo e o lançamento no extrato
+            end
+        end
+    end
