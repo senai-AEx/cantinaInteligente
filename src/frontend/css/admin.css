@@ -1,0 +1,1121 @@
+/* ============================================================
+   PAINEL ADMINISTRATIVO — estilos compartilhados
+   Usado por usuarios_adm.html, movimentacoes_adm.html e
+   relatorios_adm.html. Carregue DEPOIS do base.css: as cores
+   vêm das variáveis de lá (contraste mínimo de 4,5:1).
+   O menu lateral é o mesmo do painel de produtos; o bloco
+   "MENU DO PAINEL" de catalogo_produtos_adm.css repete estas
+   regras para as quatro telas ficarem iguais.
+   ============================================================ */
+
+:root {
+    --admin-fundo: #f7f8f6;
+    --admin-suave: #fbfcfa;
+    --admin-borda: #e2e8e1;
+    --admin-contorno: #7d8a80;      /* contorno de campos e botões: 3,6:1 sobre branco */
+    --admin-verde: #2d5637;         /* 8,4:1 sobre branco */
+    --admin-verde-medio: #3d6545;   /* 6,6:1 sobre branco */
+    --admin-verde-claro: #edf4e9;
+    --admin-titulo: #24352b;
+}
+
+
+/* ---------- estrutura da página ---------- */
+
+.pagina-admin {
+    min-height: calc(100vh - 175px);
+    padding: 38px 0 52px;
+    background: var(--admin-fundo);
+}
+
+.layout-admin {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+    width: 100%;
+}
+
+.layout-admin.menu-recolhido {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.conteudo-admin {
+    min-width: 0;
+    padding: 28px;
+    border: 1px solid var(--admin-borda);
+    border-radius: 18px;
+    background: var(--cor-superficie);
+    box-shadow: 0 10px 30px #19321a0a;
+}
+
+/* O <main> recebe foco pelo link "Pular para o conteúdo"; não precisa de contorno. */
+.conteudo-admin:focus {
+    outline: none;
+}
+
+.sobretitulo {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--cor-texto-suave);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.introducao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.introducao h1 {
+    margin-bottom: 5px;
+    color: var(--admin-titulo);
+    font-size: clamp(26px, 3vw, 34px);
+    letter-spacing: -.03em;
+    line-height: 1.2;
+}
+
+.introducao p {
+    color: var(--cor-texto-suave);
+}
+
+.introducao .botao {
+    flex: 0 0 auto;
+}
+
+.titulo-secao {
+    margin: 26px 0 8px;
+    color: var(--admin-titulo);
+    font-size: 19px;
+    line-height: 1.3;
+}
+
+.texto-apoio,
+.contador-lista,
+.periodo-relatorio {
+    color: var(--cor-texto-suave);
+    font-size: 14px;
+}
+
+.contador-lista {
+    min-height: 21px;
+    margin: 4px 0 12px;
+}
+
+.periodo-relatorio {
+    margin-bottom: 4px;
+}
+
+/* Só aparece no papel (ver @media print no fim do arquivo). */
+.somente-impressao {
+    display: none;
+}
+
+
+/* ---------- menu lateral ---------- */
+
+.menu-admin {
+    position: sticky;
+    top: 20px;
+    width: 100%;
+    padding: 18px;
+    border: 1px solid #e5e9e4;
+    border-radius: 16px;
+    background: var(--cor-superficie);
+    box-shadow: 0 10px 30px #19321a0a;
+}
+
+.menu-admin-topo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.menu-admin-titulo {
+    margin: 0;
+    color: var(--admin-titulo);
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.botao-menu {
+    min-height: 44px;
+    padding: 6px 12px;
+    border: 1px solid var(--admin-contorno);
+    border-radius: 9px;
+    background: var(--cor-superficie);
+    color: var(--cor-texto);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.botao-menu:hover,
+.botao-menu:focus-visible {
+    border-color: var(--cor-primaria);
+    color: var(--cor-primaria-escura);
+}
+
+.navegacao-admin {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.menu-admin.recolhido {
+    position: static;
+    padding: 12px 18px;
+}
+
+.menu-admin.recolhido .menu-admin-topo {
+    margin: 0;
+}
+
+.menu-admin.recolhido .navegacao-admin {
+    display: none;
+}
+
+.menu-admin-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    list-style: none;
+}
+
+.menu-admin-lista a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 9px 10px;
+    border: 0;
+    border-left: 4px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: #3a4a3f;
+    font-weight: 600;
+    line-height: 1.3;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.menu-admin-lista a:hover {
+    background: #f2f5ef;
+    color: var(--admin-verde);
+}
+
+/* Página atual: fundo, barra lateral e negrito (não depende só da cor). */
+.menu-admin-lista a[aria-current="page"] {
+    border-left-color: var(--admin-verde-medio);
+    background: var(--admin-verde-claro);
+    color: var(--admin-verde);
+    font-weight: 700;
+}
+
+.menu-admin-separado {
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--cor-borda);
+}
+
+
+/* ---------- botões ---------- */
+
+/* Mesmo desenho dos botões do site, com o laranja acessível das variáveis. */
+.botao-principal {
+    background-color: var(--cor-primaria);
+    color: #ffffff;
+}
+
+.botao-principal:hover {
+    background-color: var(--cor-primaria-escura);
+}
+
+.botao-secundario {
+    border: 1px solid var(--cor-primaria);
+    background-color: var(--cor-superficie);
+    color: var(--cor-primaria);
+}
+
+.botao-secundario:hover {
+    background-color: var(--cor-primaria-clara);
+    color: var(--cor-primaria-escura);
+}
+
+.botao {
+    border-radius: 10px;
+}
+
+/* Botões e links de ação dentro das tabelas */
+.botao-tabela {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 1px solid var(--admin-contorno);
+    border-radius: 9px;
+    background: var(--cor-superficie);
+    color: var(--cor-texto);
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.botao-tabela:hover {
+    border-color: var(--admin-verde-medio);
+    background: #f2f5ef;
+    color: var(--admin-verde);
+}
+
+.botao-tabela.botao-perigo {
+    border-color: var(--cor-erro);
+    color: var(--cor-erro);
+}
+
+.botao-tabela.botao-perigo:hover {
+    background: var(--cor-erro-clara);
+    color: var(--cor-erro);
+}
+
+.botao-tabela:disabled {
+    cursor: not-allowed;
+    opacity: .6;
+}
+
+
+/* ---------- cartões de resumo ---------- */
+
+.resumo-cartoes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 18px 0 22px;
+}
+
+.resumo-cartoes.colunas-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.resumo-cartoes.colunas-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.resumo-card {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+    padding: 16px 18px;
+    border: 1px solid #e9eee8;
+    border-radius: 12px;
+    background: var(--admin-suave);
+}
+
+.resumo-card dt {
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+    line-height: 1.3;
+}
+
+.resumo-card dd {
+    color: #2d4333;
+    font-size: clamp(18px, 2.2vw, 24px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+/* As classes de valor (base.css) continuam valendo dentro dos cartões. */
+.resumo-card dd.valor-positivo {
+    color: var(--cor-sucesso);
+}
+
+.resumo-card dd.valor-negativo {
+    color: var(--cor-erro);
+}
+
+
+/* ---------- campos e filtros ---------- */
+
+.campo-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.campo-formulario label,
+.grupo-opcoes legend {
+    color: #39483d;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.campo-formulario input:not([type="radio"]):not([type="checkbox"]),
+.campo-formulario select,
+.campo-formulario textarea {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--admin-contorno);
+    border-radius: 9px;
+    background: var(--cor-superficie);
+    color: var(--cor-texto);
+    font: inherit;
+}
+
+.campo-formulario input::placeholder {
+    color: #6b756d;
+    opacity: 1;
+}
+
+/* Campo com erro: borda vermelha (base.css), fundo claro e a mensagem logo abaixo. */
+.campo-formulario input:not([type="radio"]):not([type="checkbox"])[aria-invalid="true"],
+.campo-formulario select[aria-invalid="true"],
+.campo-formulario textarea[aria-invalid="true"] {
+    background-color: var(--cor-erro-clara);
+}
+
+.campo-formulario select:disabled,
+.campo-formulario input:disabled {
+    background: #eef1ec;
+    color: #4a554d;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+.campo-moeda {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.filtros-admin {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px 14px;
+    align-items: start;
+    margin: 0 0 14px;
+    padding: 16px;
+    border: 1px solid var(--admin-borda);
+    border-radius: 12px;
+    background: var(--admin-suave);
+}
+
+.filtros-admin .campo-largo {
+    grid-column: span 2;
+}
+
+.filtros-admin .feedback-form,
+.filtros-admin .texto-apoio,
+.acoes-filtros {
+    grid-column: 1 / -1;
+}
+
+.acoes-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Atalhos de período ("Hoje", "7 dias", "30 dias") */
+.grupo-atalhos {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.grupo-atalhos-titulo {
+    color: #39483d;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.grupo-atalhos-botoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.botao-atalho {
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid var(--admin-contorno);
+    border-radius: 9px;
+    background: var(--cor-superficie);
+    color: var(--cor-texto);
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.botao-atalho:hover {
+    border-color: var(--admin-verde-medio);
+    color: var(--admin-verde);
+}
+
+/* Selecionado: marca de conferido, borda dupla e fundo (não depende só da cor). */
+.botao-atalho[aria-pressed="true"] {
+    border-color: var(--admin-verde-medio);
+    background: var(--admin-verde-claro);
+    box-shadow: inset 0 0 0 1px var(--admin-verde-medio);
+    color: var(--admin-verde);
+}
+
+.botao-atalho[aria-pressed="true"]::before {
+    content: "✓ ";
+}
+
+/* Opções de rádio em forma de botão grande (tipo do ajuste de saldo) */
+.grupo-opcoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+    border: 0;
+}
+
+.grupo-opcoes legend {
+    margin-bottom: 6px;
+}
+
+.opcao-radio {
+    display: flex;
+    flex: 1 1 140px;
+    align-items: center;
+    gap: 9px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid var(--admin-contorno);
+    border-radius: 9px;
+    background: var(--cor-superficie);
+    color: var(--cor-texto);
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.opcao-radio input {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--admin-verde-medio);
+}
+
+.opcao-radio:has(input:checked) {
+    border-color: var(--admin-verde-medio);
+    background: var(--admin-verde-claro);
+    box-shadow: inset 0 0 0 1px var(--admin-verde-medio);
+}
+
+.opcao-radio:has(input:focus-visible) {
+    outline: 3px solid var(--cor-primaria);
+    outline-offset: 2px;
+}
+
+
+/* ---------- tabelas e estados das listas ---------- */
+
+.tabela-rolagem {
+    max-width: 100%;
+    margin-bottom: 8px;
+}
+
+.tabela-rolagem:focus-visible,
+.painel-relatorio:focus-visible {
+    outline: 3px solid var(--cor-primaria);
+    outline-offset: 2px;
+}
+
+.tabela-dados th,
+.tabela-dados td {
+    padding: 10px;
+}
+
+.tabela-dados caption {
+    padding: 12px 10px;
+}
+
+/* Cabeçalho de linha (<th scope="row">): mesmo fundo das outras células. */
+.tabela-dados tbody th {
+    background: transparent;
+    white-space: normal;
+}
+
+.tabela-dados tbody tr:last-child th {
+    border-bottom: none;
+}
+
+.tabela-dados .numero {
+    text-align: right;
+}
+
+.tabela-usuarios {
+    min-width: 860px;
+}
+
+.tabela-movimentacoes {
+    min-width: 760px;
+}
+
+.tabela-larga {
+    min-width: 720px;
+}
+
+.tabela-media {
+    min-width: 520px;
+}
+
+.celula-data,
+.celula-fixa {
+    white-space: nowrap;
+}
+
+.texto-quebravel {
+    overflow-wrap: anywhere;
+}
+
+.texto-secundario {
+    display: block;
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.nome-usuario {
+    display: block;
+    font-weight: 700;
+}
+
+.celula-vazia {
+    padding: 22px 10px;
+    color: var(--cor-texto-suave);
+    text-align: center;
+}
+
+.tabela-acoes {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    gap: 6px;
+}
+
+.etiqueta {
+    white-space: nowrap;
+}
+
+.etiqueta-aviso {
+    background: var(--cor-aviso-clara);
+    color: var(--cor-primaria-escura);
+}
+
+.etiqueta-destaque {
+    background: var(--admin-verde-claro);
+    color: var(--admin-verde);
+}
+
+/* Produto sem estoque: fundo de aviso + etiqueta com o texto "Sem estoque". */
+.tabela-dados .linha-alerta th,
+.tabela-dados .linha-alerta td {
+    background: var(--cor-aviso-clara);
+}
+
+.linha-alerta .etiqueta-aviso {
+    border: 1px solid var(--cor-primaria-escura);
+    background: var(--cor-superficie);
+}
+
+.estado-lista {
+    margin: 0 0 8px;
+    padding: 28px 20px;
+    border: 1px dashed #c9d3c8;
+    border-radius: 12px;
+    background: var(--admin-suave);
+}
+
+.estado-lista.estado-erro {
+    border-color: var(--cor-erro);
+    background: var(--cor-erro-clara);
+    color: var(--cor-erro);
+    font-weight: 700;
+}
+
+.estado-lista .botao {
+    margin-top: 12px;
+}
+
+.mensagem-api {
+    margin: 0 0 14px;
+    font-weight: 700;
+}
+
+.aviso-conferencia {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border-left: 4px solid var(--cor-primaria);
+    border-radius: var(--raio);
+    background: var(--cor-aviso-clara);
+    color: var(--cor-texto);
+    font-weight: 700;
+}
+
+
+/* ---------- barra horizontal dos relatórios (decorativa) ---------- */
+
+.barra-linha {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 190px;
+}
+
+.barra-trilho {
+    flex: 1 1 auto;
+    height: 12px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e3e9e2;
+}
+
+.barra-preenchimento {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--admin-verde-medio);
+}
+
+.barra-valor {
+    flex: 0 0 auto;
+    min-width: 92px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+}
+
+
+/* ---------- abas dos relatórios ---------- */
+
+.abas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 6px 0 20px;
+    padding: 4px;
+    border: 1px solid var(--admin-borda);
+    border-radius: 12px;
+    background: var(--admin-fundo);
+}
+
+.aba {
+    flex: 1 1 auto;
+    min-height: 44px;
+    padding: 8px 14px;
+    border: 2px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: #445248;
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.aba:hover {
+    color: var(--admin-verde);
+}
+
+/* Aba aberta: borda e fundo branco, além da cor do texto. */
+.aba[aria-selected="true"] {
+    border-color: var(--admin-verde-medio);
+    background: var(--cor-superficie);
+    color: var(--admin-verde);
+}
+
+.cabecalho-relatorio {
+    margin-bottom: 14px;
+}
+
+.cabecalho-relatorio h2 {
+    margin-bottom: 4px;
+    color: var(--admin-titulo);
+    font-size: 22px;
+    line-height: 1.3;
+}
+
+.painel-relatorio h3 {
+    margin: 22px 0 8px;
+    color: var(--admin-titulo);
+    font-size: 17px;
+}
+
+
+/* ---------- modais ---------- */
+
+body.modal-aberto {
+    overflow: hidden;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 16px;
+    background: #1d2b2299;
+    backdrop-filter: blur(4px);
+}
+
+.modal-overlay.aberto {
+    display: flex;
+}
+
+.modal-conteudo {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 30px;
+    border: 1px solid #edf0eb;
+    border-radius: 18px;
+    background: var(--cor-superficie);
+    box-shadow: 0 8px 30px #00000030;
+}
+
+.modal-confirmacao {
+    max-width: 480px;
+}
+
+.modal-conteudo h2 {
+    margin: 0 44px 6px 0;
+    color: #293b2e;
+    font-size: 24px;
+    line-height: 1.25;
+}
+
+.modal-conteudo .sobretitulo {
+    margin-right: 44px;
+}
+
+.modal-fechar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 0;
+    border-radius: 10px;
+    background: #f1f4ef;
+    color: #33423a;
+    cursor: pointer;
+    font-size: 26px;
+    line-height: 1;
+}
+
+.modal-fechar:hover {
+    background: #e3e9e2;
+}
+
+.texto-modal,
+.texto-confirmacao {
+    margin-bottom: 18px;
+    color: var(--cor-texto-suave);
+    font-size: 15px;
+}
+
+.texto-confirmacao {
+    color: var(--cor-texto);
+}
+
+.formulario-modal {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.acoes-modal {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.acoes-modal .botao {
+    width: 100%;
+}
+
+/* Dados que o formulário só mostra (CPF, saldo atual) */
+.dados-fixos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--admin-borda);
+    border-radius: 10px;
+    background: var(--admin-suave);
+}
+
+.dados-fixos dt {
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+}
+
+.dados-fixos dd {
+    color: var(--cor-texto);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.saldo-resultante {
+    padding: 12px 14px;
+    border: 1px solid var(--admin-borda);
+    border-radius: 10px;
+    background: var(--admin-suave);
+    color: var(--cor-texto);
+}
+
+.saldo-resultante strong {
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* ---------- telas menores ---------- */
+
+@media (max-width: 900px) {
+    .layout-admin,
+    .layout-admin.menu-recolhido {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .menu-admin {
+        position: static;
+    }
+
+    .conteudo-admin {
+        padding: 22px;
+    }
+
+    .menu-admin-lista {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 4px 6px;
+    }
+
+    .menu-admin-separado {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .pagina-admin {
+        padding: 20px 0 32px;
+    }
+
+    .menu-admin {
+        padding: 14px 17px;
+        border-radius: 13px;
+    }
+
+    .conteudo-admin {
+        padding: 19px 15px;
+        border-radius: 14px;
+    }
+
+    .introducao {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .resumo-cartoes,
+    .resumo-cartoes.colunas-2,
+    .resumo-cartoes.colunas-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .resumo-card {
+        padding: 12px 10px;
+    }
+
+    .filtros-admin {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 14px 12px;
+    }
+
+    .filtros-admin .campo-largo {
+        grid-column: auto;
+    }
+
+    .acoes-filtros .botao {
+        flex: 1 1 130px;
+    }
+
+    .abas {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .aba {
+        padding: 8px 6px;
+    }
+
+    .modal-overlay {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .modal-conteudo {
+        max-height: 94dvh;
+        padding: 26px 19px 20px;
+        border-radius: 18px 18px 0 0;
+    }
+}
+
+
+/* ---------- impressão ----------
+   Sai só o conteúdo visível: sem cabeçalho do site, menu, filtros
+   nem abas (classe .nao-imprimir do base.css). Nos relatórios, as
+   abas fechadas já estão com o atributo hidden. */
+
+@media print {
+    .pagina-admin {
+        min-height: 0;
+        padding: 0;
+        background: #ffffff;
+    }
+
+    .pagina-admin .container {
+        width: 100%;
+        max-width: none;
+    }
+
+    .layout-admin,
+    .layout-admin.menu-recolhido {
+        display: block;
+    }
+
+    .conteudo-admin {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .somente-impressao {
+        display: block;
+        margin-bottom: 6px;
+        color: #000000;
+        font-size: 11pt;
+    }
+
+    .introducao {
+        margin-bottom: 10px;
+    }
+
+    .introducao h1 {
+        font-size: 20pt;
+    }
+
+    .resumo-cartoes,
+    .resumo-cartoes.colunas-2,
+    .resumo-cartoes.colunas-4 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        margin: 10px 0 14px;
+    }
+
+    .resumo-card {
+        padding: 8px 10px;
+        border-color: #999999;
+        background: #ffffff;
+        break-inside: avoid;
+    }
+
+    .resumo-card dd {
+        font-size: 14pt;
+    }
+
+    .tabela-rolagem {
+        overflow: visible;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .tabela-dados {
+        min-width: 0;
+        font-size: 10pt;
+    }
+
+    .tabela-dados th,
+    .tabela-dados td {
+        padding: 5px 6px;
+        border: 1px solid #999999;
+    }
+
+    .tabela-dados tr:last-child td,
+    .tabela-dados tbody tr:last-child th {
+        border-bottom: 1px solid #999999;
+    }
+
+    .tabela-dados thead {
+        display: table-header-group;
+    }
+
+    .tabela-dados tr {
+        break-inside: avoid;
+    }
+
+    .tabela-dados caption {
+        padding: 6px 0;
+        color: #000000;
+        font-weight: 700;
+    }
+
+    .painel-relatorio h3,
+    .titulo-secao {
+        break-after: avoid;
+    }
+
+    .barra-linha {
+        min-width: 0;
+    }
+
+    .barra-trilho,
+    .barra-preenchimento,
+    .tabela-dados .linha-alerta th,
+    .tabela-dados .linha-alerta td,
+    .etiqueta {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .aviso-conferencia {
+        border: 1px solid #999999;
+        background: #ffffff;
+    }
+}

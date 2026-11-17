@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#fffaf4">
+    <title>Minha conta | Cantina da Honestidade</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/minha_conta.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main id="conteudo-principal" class="pagina-conta">
+        <div class="container">
+
+            <div class="cabecalho-conta">
+                <span class="sobretitulo">Área do cliente</span>
+                <h1>Minha conta</h1>
+                <p id="saudacao-conta">Acompanhe seu saldo, declare seus depósitos e veja suas compras.</p>
+            </div>
+
+            <nav class="atalhos-conta" aria-label="Seções da minha conta">
+                <a href="#resumo">Resumo</a>
+                <a href="#creditos">Adicionar crédito</a>
+                <a href="#extrato">Extrato</a>
+                <a href="#compras">Minhas compras</a>
+            </nav>
+
+            <div class="grade-conta">
+
+                <!-- RESUMO -->
+                <section id="resumo" class="cartao-conta" aria-labelledby="titulo-resumo">
+                    <h2 id="titulo-resumo">Resumo</h2>
+
+                    <div class="saldo-destaque">
+                        <span class="rotulo-saldo">Saldo disponível</span>
+                        <strong class="valor-saldo" id="saldo-conta">—</strong>
+                        <p class="dica-saldo" id="dica-saldo" hidden></p>
+                    </div>
+
+                    <dl class="dados-conta">
+                        <div>
+                            <dt>Nome</dt>
+                            <dd id="conta-nome">—</dd>
+                        </div>
+                        <div>
+                            <dt>Matrícula</dt>
+                            <dd id="conta-matricula">—</dd>
+                        </div>
+                        <div>
+                            <dt>E-mail</dt>
+                            <dd id="conta-email">—</dd>
+                        </div>
+                        <div>
+                            <dt>CPF</dt>
+                            <dd id="conta-cpf">—</dd>
+                        </div>
+                    </dl>
+
+                    <a class="botao botao-secundario" href="/html/catalogo_produtos.html#produtos">Ver produtos da cantina</a>
+                </section>
+
+                <!-- ADICIONAR CRÉDITO -->
+                <section id="creditos" class="cartao-conta" aria-labelledby="titulo-creditos">
+                    <h2 id="titulo-creditos">Adicionar crédito</h2>
+                    <p class="texto-cartao">
+                        Colocou dinheiro na caixa da cantina? Informe o valor aqui para ele entrar no seu saldo.
+                        A cantina confia na sua palavra.
+                    </p>
+
+                    <form id="form-credito" novalidate>
+                        <p class="legenda-obrigatorio">
+                            <span class="obrigatorio" aria-hidden="true">*</span> Campo obrigatório
+                        </p>
+
+                        <div class="campo-formulario">
+                            <label for="valor-credito">
+                                Valor depositado
+                                <span class="obrigatorio" aria-hidden="true">*</span>
+                            </label>
+                            <div class="campo-moeda">
+                                <span class="prefixo-moeda" aria-hidden="true">R$</span>
+                                <input
+                                    type="text"
+                                    id="valor-credito"
+                                    name="valor_centavos"
+                                    inputmode="numeric"
+                                    autocomplete="off"
+                                    placeholder="0,00"
+                                    maxlength="6"
+                                    required
+                                    aria-required="true"
+                                    aria-describedby="dica-valor-credito"
+                                >
+                            </div>
+                            <small class="dica-campo" id="dica-valor-credito">
+                                Em reais, de R$ 1,00 a R$ 500,00. Digite só os números: a vírgula entra sozinha.
+                            </small>
+                            <small class="erro-campo" id="erro-valor-credito" data-error-for="valor_centavos"></small>
+                        </div>
+
+                        <div class="atalhos-valor" id="atalhos-valor" role="group" aria-label="Preencher com um valor comum">
+                            <button type="button" class="atalho-valor" data-valor="500">R$ 5</button>
+                            <button type="button" class="atalho-valor" data-valor="1000">R$ 10</button>
+                            <button type="button" class="atalho-valor" data-valor="2000">R$ 20</button>
+                            <button type="button" class="atalho-valor" data-valor="5000">R$ 50</button>
+                        </div>
+
+                        <div class="campo-declaracao">
+                            <label class="opcao-declaracao" for="declaracao-credito">
+                                <input
+                                    type="checkbox"
+                                    id="declaracao-credito"
+                                    name="declaracao"
+                                    required
+                                    aria-required="true"
+                                >
+                                <span>
+                                    Declaro que depositei este valor na caixa da cantina
+                                    <span class="obrigatorio" aria-hidden="true">*</span>
+                                </span>
+                            </label>
+                            <small class="erro-campo" id="erro-declaracao-credito" data-error-for="declaracao"></small>
+                        </div>
+
+                        <p class="feedback-form" role="alert"></p>
+
+                        <!-- O crédito só é gravado pelo clique neste botão (Enter nos campos não envia). -->
+                        <button type="submit" class="botao botao-principal" id="botao-credito">Adicionar crédito</button>
+                    </form>
+
+                    <p id="mensagem-credito" class="mensagem-api" role="status"></p>
+                </section>
+
+            </div>
+
+            <!-- EXTRATO -->
+            <section id="extrato" class="cartao-conta" aria-labelledby="titulo-extrato">
+                <h2 id="titulo-extrato" tabindex="-1">Extrato</h2>
+                <p class="texto-cartao">Créditos, compras e ajustes da sua carteira, do mais recente para o mais antigo.</p>
+
+                <div id="estado-extrato" class="estado-lista" role="status">
+                    <p>Carregando extrato...</p>
+                </div>
+
+                <!-- A tabela rola para os lados em telas estreitas; tabindex permite rolar pelo teclado. -->
+                <div class="tabela-rolagem" id="rolagem-extrato" role="region" aria-label="Tabela do extrato, com rolagem lateral em telas pequenas" tabindex="0" hidden>
+                    <table class="tabela-dados">
+                        <caption>Últimas movimentações da carteira (até 50)</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Data e hora</th>
+                                <th scope="col">Tipo</th>
+                                <th scope="col">Descrição</th>
+                                <th scope="col" class="numero">Valor</th>
+                                <th scope="col" class="numero">Saldo após</th>
+                            </tr>
+                        </thead>
+                        <tbody id="linhas-extrato"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- MINHAS COMPRAS -->
+            <section id="compras" class="cartao-conta" aria-labelledby="titulo-compras">
+                <h2 id="titulo-compras" tabindex="-1">Minhas compras</h2>
+                <p class="texto-cartao">O que você registrou na cantina, da compra mais recente para a mais antiga.</p>
+
+                <div id="estado-compras" class="estado-lista" role="status">
+                    <p>Carregando compras...</p>
+                </div>
+
+                <ol id="lista-compras" class="lista-compras" hidden></ol>
+            </section>
+
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+    <script src="/javascript/base.js"></script>
+    <script src="/javascript/minha_conta.js"></script>
+</body>
+</html>

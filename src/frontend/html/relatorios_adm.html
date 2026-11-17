@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Relatórios - Administração</title>
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div id="header-container"></div>
+
+    <div class="pagina-admin">
+
+        <div class="container">
+
+            <div class="layout-admin">
+
+                <!-- MENU LATERAL (igual nas quatro telas do painel) -->
+                <aside class="menu-admin nao-imprimir" id="menu-admin">
+                    <div class="menu-admin-topo">
+                        <div>
+                            <span class="sobretitulo">Painel da cantina</span>
+                            <p class="menu-admin-titulo">Administração</p>
+                        </div>
+                        <button type="button" class="botao-menu" id="alternar-menu" aria-expanded="true" aria-controls="navegacao-admin">
+                            Recolher menu
+                        </button>
+                    </div>
+
+                    <div id="navegacao-admin" class="navegacao-admin">
+                        <nav aria-label="Painel administrativo">
+                            <ul class="menu-admin-lista">
+                                <li><a href="/html/catalogo_produtos_adm.html">Produtos</a></li>
+                                <li><a href="/html/usuarios_adm.html">Usuários</a></li>
+                                <li><a href="/html/movimentacoes_adm.html">Movimentações</a></li>
+                                <li><a href="/html/relatorios_adm.html" aria-current="page">Relatórios</a></li>
+                                <li class="menu-admin-separado"><a href="/html/catalogo_produtos.html">Ver catálogo da cantina</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- CONTEÚDO -->
+                <main id="conteudo-principal" class="conteudo-admin" tabindex="-1">
+
+                    <p class="somente-impressao">Cantina da Honestidade — painel administrativo</p>
+
+                    <div class="introducao">
+                        <div>
+                            <span class="sobretitulo">Acompanhamento</span>
+                            <h1>Relatórios</h1>
+                            <p class="nao-imprimir">Vendas, saldos das carteiras, estoque e depósitos declarados.</p>
+                        </div>
+                        <button type="button" class="botao botao-secundario nao-imprimir" id="botao-imprimir">Imprimir</button>
+                    </div>
+
+                    <!-- PERÍODO -->
+                    <section class="nao-imprimir" aria-labelledby="titulo-periodo">
+                        <h2 id="titulo-periodo" class="somente-leitor">Período dos relatórios</h2>
+                        <!-- novalidate: as datas são validadas pelo JavaScript, com a mensagem junto ao campo. -->
+                        <form id="form-periodo" class="filtros-admin" novalidate>
+                            <div class="campo-formulario">
+                                <label for="periodo-de">Data inicial <span class="obrigatorio" aria-hidden="true">*</span></label>
+                                <input type="date" id="periodo-de" name="de" required>
+                                <small class="erro-campo" data-error-for="de"></small>
+                            </div>
+                            <div class="campo-formulario">
+                                <label for="periodo-ate">Data final <span class="obrigatorio" aria-hidden="true">*</span></label>
+                                <input type="date" id="periodo-ate" name="ate" required>
+                                <small class="erro-campo" data-error-for="ate"></small>
+                            </div>
+                            <div class="grupo-atalhos" role="group" aria-labelledby="titulo-atalhos-periodo">
+                                <span class="grupo-atalhos-titulo" id="titulo-atalhos-periodo">Atalhos de período</span>
+                                <div class="grupo-atalhos-botoes">
+                                    <button type="button" class="botao-atalho" data-atalho-dias="1" aria-pressed="false">Hoje</button>
+                                    <button type="button" class="botao-atalho" data-atalho-dias="7" aria-pressed="false">7 dias</button>
+                                    <button type="button" class="botao-atalho" data-atalho-dias="30" aria-pressed="false">30 dias</button>
+                                </div>
+                            </div>
+                            <p class="texto-apoio">O período vale para Vendas e Depósitos declarados. Saldos e Estoque mostram a situação atual.</p>
+                            <p class="feedback-form" role="alert"></p>
+                            <div class="acoes-filtros">
+                                <button type="submit" class="botao botao-principal">Atualizar relatório</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- ABAS: setas esquerda/direita, Home e End trocam de relatório -->
+                    <div class="abas nao-imprimir" role="tablist" aria-label="Relatórios disponíveis" id="abas-relatorios">
+                        <button type="button" class="aba" role="tab" id="aba-vendas" data-relatorio="vendas" aria-controls="painel-vendas" aria-selected="true">Vendas</button>
+                        <button type="button" class="aba" role="tab" id="aba-saldos" data-relatorio="saldos" aria-controls="painel-saldos" aria-selected="false" tabindex="-1">Saldos</button>
+                        <button type="button" class="aba" role="tab" id="aba-estoque" data-relatorio="estoque" aria-controls="painel-estoque" aria-selected="false" tabindex="-1">Estoque</button>
+                        <button type="button" class="aba" role="tab" id="aba-depositos" data-relatorio="depositos" aria-controls="painel-depositos" aria-selected="false" tabindex="-1">Depósitos declarados</button>
+                    </div>
+
+                    <!-- 1. VENDAS -->
+                    <section class="painel-relatorio" id="painel-vendas" role="tabpanel" aria-labelledby="aba-vendas" tabindex="0">
+                        <header class="cabecalho-relatorio">
+                            <h2>Relatório de vendas</h2>
+                            <p class="periodo-relatorio" data-periodo></p>
+                            <p class="somente-impressao" data-emissao></p>
+                        </header>
+
+                        <div class="estado-lista" data-estado role="status">Carregando relatório…</div>
+
+                        <div data-conteudo hidden>
+                            <dl class="resumo-cartoes">
+                                <div class="resumo-card"><dt>Compras</dt><dd id="vendas-compras">—</dd></div>
+                                <div class="resumo-card"><dt>Itens vendidos</dt><dd id="vendas-itens">—</dd></div>
+                                <div class="resumo-card"><dt>Total vendido</dt><dd id="vendas-total">—</dd></div>
+                                <div class="resumo-card"><dt>Custo dos produtos</dt><dd id="vendas-custo">—</dd></div>
+                                <div class="resumo-card"><dt>Lucro</dt><dd id="vendas-lucro">—</dd></div>
+                                <div class="resumo-card"><dt>Ticket médio</dt><dd id="vendas-ticket">—</dd></div>
+                            </dl>
+
+                            <h3 id="titulo-vendas-produto">Vendas por produto</h3>
+                            <div class="tabela-rolagem" tabindex="0" role="region" aria-labelledby="titulo-vendas-produto">
+                                <table class="tabela-dados tabela-media">
+                                    <caption>Produtos vendidos no período, do maior para o menor total.</caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Produto</th>
+                                            <th scope="col">Categoria</th>
+                                            <th scope="col" class="numero">Quantidade</th>
+                                            <th scope="col" class="numero">Total vendido</th>
+                                            <th scope="col" class="numero">Lucro</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vendas-por-produto"></tbody>
+                                </table>
+                            </div>
+
+                            <h3 id="titulo-vendas-dia">Vendas por dia</h3>
+                            <div class="tabela-rolagem" tabindex="0" role="region" aria-labelledby="titulo-vendas-dia">
+                                <table class="tabela-dados tabela-media">
+                                    <caption>Compras e total vendido em cada dia do período. A barra ao lado do valor compara os dias.</caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Dia</th>
+                                            <th scope="col" class="numero">Compras</th>
+                                            <th scope="col">Total vendido</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vendas-por-dia"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 2. SALDOS -->
+                    <section class="painel-relatorio" id="painel-saldos" role="tabpanel" aria-labelledby="aba-saldos" tabindex="0" hidden>
+                        <header class="cabecalho-relatorio">
+                            <h2>Relatório de saldos</h2>
+                            <p class="periodo-relatorio" data-periodo></p>
+                            <p class="somente-impressao" data-emissao></p>
+                        </header>
+
+                        <div class="estado-lista" data-estado role="status">Carregando relatório…</div>
+
+                        <div data-conteudo hidden>
+                            <dl class="resumo-cartoes colunas-2">
+                                <div class="resumo-card"><dt>Total em carteiras</dt><dd id="saldos-total">—</dd></div>
+                                <div class="resumo-card"><dt>Usuários com carteira</dt><dd id="saldos-usuarios">—</dd></div>
+                            </dl>
+
+                            <h3 id="titulo-saldos-usuario">Saldo por usuário</h3>
+                            <div class="tabela-rolagem" tabindex="0" role="region" aria-labelledby="titulo-saldos-usuario">
+                                <table class="tabela-dados tabela-media">
+                                    <caption>Saldo atual da carteira de cada cliente, do maior para o menor.</caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Usuário</th>
+                                            <th scope="col">Matrícula</th>
+                                            <th scope="col">Situação</th>
+                                            <th scope="col" class="numero">Saldo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="saldos-lista"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 3. ESTOQUE -->
+                    <section class="painel-relatorio" id="painel-estoque" role="tabpanel" aria-labelledby="aba-estoque" tabindex="0" hidden>
+                        <header class="cabecalho-relatorio">
+                            <h2>Relatório de estoque</h2>
+                            <p class="periodo-relatorio" data-periodo></p>
+                            <p class="somente-impressao" data-emissao></p>
+                        </header>
+
+                        <div class="estado-lista" data-estado role="status">Carregando relatório…</div>
+
+                        <div data-conteudo hidden>
+                            <dl class="resumo-cartoes colunas-4">
+                                <div class="resumo-card"><dt>Produtos</dt><dd id="estoque-produtos">—</dd></div>
+                                <div class="resumo-card"><dt>Sem estoque</dt><dd id="estoque-zerados">—</dd></div>
+                                <div class="resumo-card"><dt>Total de itens</dt><dd id="estoque-itens">—</dd></div>
+                                <div class="resumo-card"><dt>Valor do estoque</dt><dd id="estoque-valor">—</dd></div>
+                            </dl>
+
+                            <h3 id="titulo-estoque-produto">Estoque por produto</h3>
+                            <div class="tabela-rolagem" tabindex="0" role="region" aria-labelledby="titulo-estoque-produto">
+                                <table class="tabela-dados tabela-larga">
+                                    <caption>Produtos em ordem de quantidade: os que estão sem estoque aparecem primeiro. Valor em estoque = quantidade × preço de compra.</caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Produto</th>
+                                            <th scope="col">Categoria</th>
+                                            <th scope="col">Situação</th>
+                                            <th scope="col" class="numero">Quantidade</th>
+                                            <th scope="col" class="numero">Preço de compra</th>
+                                            <th scope="col" class="numero">Preço de venda</th>
+                                            <th scope="col" class="numero">Valor em estoque</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="estoque-lista"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 4. DEPÓSITOS DECLARADOS -->
+                    <section class="painel-relatorio" id="painel-depositos" role="tabpanel" aria-labelledby="aba-depositos" tabindex="0" hidden>
+                        <header class="cabecalho-relatorio">
+                            <h2>Relatório de depósitos declarados</h2>
+                            <p class="periodo-relatorio" data-periodo></p>
+                            <p class="somente-impressao" data-emissao></p>
+                        </header>
+
+                        <div class="estado-lista" data-estado role="status">Carregando relatório…</div>
+
+                        <div data-conteudo hidden>
+                            <dl class="resumo-cartoes colunas-2">
+                                <div class="resumo-card"><dt>Total declarado no período</dt><dd id="depositos-total">—</dd></div>
+                                <div class="resumo-card"><dt>Depósitos na lista</dt><dd id="depositos-quantidade">—</dd></div>
+                            </dl>
+
+                            <p class="aviso-conferencia">Compare este total com o dinheiro contado na caixa.</p>
+
+                            <h3 id="titulo-depositos-lista">Depósitos do período</h3>
+                            <p class="texto-apoio" id="depositos-aviso-limite" hidden></p>
+                            <div class="tabela-rolagem" tabindex="0" role="region" aria-labelledby="titulo-depositos-lista">
+                                <table class="tabela-dados tabela-media">
+                                    <caption>Créditos que os usuários declararam ter depositado na caixa da cantina.</caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Data e hora</th>
+                                            <th scope="col">Usuário</th>
+                                            <th scope="col">Matrícula</th>
+                                            <th scope="col" class="numero">Valor declarado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="depositos-lista"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                </main>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div id="footer-container"></div>
+
+    <script src="/javascript/base.js"></script>
+    <script src="/javascript/relatorios_adm.js"></script>
+
+</body>
+
+</html>

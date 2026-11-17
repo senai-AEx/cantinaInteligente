@@ -4,20 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#fffaf5">
-    <meta name="description" content="Acesse a Cantina da Honestidade como cliente ou administrador.">
+    <meta name="description" content="Cantina da Honestidade: veja os produtos, adicione créditos à sua carteira e registre suas compras.">
     <title>Início | Cantina da Honestidade</title>
-    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="/css/home.css">
 </head>
 <body>
+    <a class="pular-conteudo" href="#conteudo-principal">Pular para o conteúdo</a>
+
     <header class="topo">
         <a class="marca" href="/" aria-label="Cantina da Honestidade — início">
             <span class="marca-icone" aria-hidden="true">C</span>
             <span>Cantina <strong>da Honestidade</strong></span>
         </a>
-        <a class="atalho-topo" href="html/catalogo_produtos.html">Ver produtos <span aria-hidden="true">↗</span></a>
+        <a class="atalho-topo" href="/html/catalogo_produtos.html">Ver produtos <span aria-hidden="true">↗</span></a>
     </header>
 
-    <main>
+    <main id="conteudo-principal">
         <section class="apresentacao" aria-labelledby="titulo-principal">
             <p class="etiqueta">Cantina Inteligente · Grupo 4</p>
             <h1 id="titulo-principal">Bem-vindo à<br><span>Cantina da Honestidade</span></h1>
@@ -29,12 +31,14 @@
                 <div class="cartao-icone cliente-icone" aria-hidden="true">♡</div>
                 <p class="cartao-etiqueta">Para quem vai comprar</p>
                 <h2>Área do cliente</h2>
-                <p>Consulte os produtos disponíveis e conheça as opções da cantina.</p>
-                <a class="botao botao-principal" href="html/catalogo_produtos.html">Explorar produtos <span aria-hidden="true">→</span></a>
+                <p>Veja os produtos, adicione créditos à sua carteira e registre suas compras com o seu saldo.</p>
+                <a class="botao botao-principal" href="/html/catalogo_produtos.html">Explorar produtos <span aria-hidden="true">→</span></a>
                 <div class="links-secundarios">
-                    <a href="html/login.html">Entrar</a>
+                    <a href="/html/login.html">Entrar</a>
                     <span aria-hidden="true">·</span>
-                    <a href="html/cadastro.html">Criar cadastro</a>
+                    <a href="/html/cadastro.html">Criar cadastro</a>
+                    <span aria-hidden="true">·</span>
+                    <a href="/html/minha_conta.html">Minha conta</a>
                 </div>
             </article>
 
@@ -42,9 +46,9 @@
                 <div class="cartao-icone admin-icone" aria-hidden="true">▤</div>
                 <p class="cartao-etiqueta">Para a equipe da cantina</p>
                 <h2>Administração</h2>
-                <p>Cadastre produtos e mantenha o catálogo e o estoque organizados.</p>
-                <a class="botao botao-secundario" href="html/catalogo_produtos_adm.html">Abrir painel admin <span aria-hidden="true">→</span></a>
-                <p class="nota-admin">Área de demonstração do projeto AV04.</p>
+                <p>Gerencie produtos, usuários, movimentações e relatórios da cantina.</p>
+                <a class="botao botao-secundario" href="/html/catalogo_produtos_adm.html">Abrir painel admin <span aria-hidden="true">→</span></a>
+                <p class="nota-admin">Acesso só para contas de administrador.</p>
             </article>
         </section>
 

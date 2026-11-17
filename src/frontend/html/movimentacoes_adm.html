@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Movimentações - Administração</title>
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div id="header-container"></div>
+
+    <div class="pagina-admin">
+
+        <div class="container">
+
+            <div class="layout-admin">
+
+                <!-- MENU LATERAL (igual nas quatro telas do painel) -->
+                <aside class="menu-admin nao-imprimir" id="menu-admin">
+                    <div class="menu-admin-topo">
+                        <div>
+                            <span class="sobretitulo">Painel da cantina</span>
+                            <p class="menu-admin-titulo">Administração</p>
+                        </div>
+                        <button type="button" class="botao-menu" id="alternar-menu" aria-expanded="true" aria-controls="navegacao-admin">
+                            Recolher menu
+                        </button>
+                    </div>
+
+                    <div id="navegacao-admin" class="navegacao-admin">
+                        <nav aria-label="Painel administrativo">
+                            <ul class="menu-admin-lista">
+                                <li><a href="/html/catalogo_produtos_adm.html">Produtos</a></li>
+                                <li><a href="/html/usuarios_adm.html">Usuários</a></li>
+                                <li><a href="/html/movimentacoes_adm.html" aria-current="page">Movimentações</a></li>
+                                <li><a href="/html/relatorios_adm.html">Relatórios</a></li>
+                                <li class="menu-admin-separado"><a href="/html/catalogo_produtos.html">Ver catálogo da cantina</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- CONTEÚDO -->
+                <main id="conteudo-principal" class="conteudo-admin" tabindex="-1">
+
+                    <p class="somente-impressao">Cantina da Honestidade — painel administrativo</p>
+
+                    <div class="introducao">
+                        <div>
+                            <span class="sobretitulo">Controle financeiro</span>
+                            <h1>Movimentações</h1>
+                            <p>Créditos declarados, débitos de compras e ajustes lançados nas carteiras dos usuários.</p>
+                        </div>
+                        <button type="button" class="botao botao-secundario nao-imprimir" id="botao-imprimir">Imprimir</button>
+                    </div>
+
+                    <section class="nao-imprimir" aria-labelledby="titulo-filtros">
+                        <h2 id="titulo-filtros" class="somente-leitor">Filtros</h2>
+                        <!-- novalidate: as datas são validadas pelo JavaScript, com a mensagem junto ao campo. -->
+                        <form id="form-filtros" class="filtros-admin" novalidate>
+                            <div class="campo-formulario">
+                                <label for="filtro-de">Data inicial <span class="obrigatorio" aria-hidden="true">*</span></label>
+                                <input type="date" id="filtro-de" name="de" required>
+                                <small class="erro-campo" data-error-for="de"></small>
+                            </div>
+                            <div class="campo-formulario">
+                                <label for="filtro-ate">Data final <span class="obrigatorio" aria-hidden="true">*</span></label>
+                                <input type="date" id="filtro-ate" name="ate" required>
+                                <small class="erro-campo" data-error-for="ate"></small>
+                            </div>
+                            <div class="campo-formulario">
+                                <label for="filtro-tipo">Tipo</label>
+                                <select id="filtro-tipo" name="tipo">
+                                    <option value="TODOS">Todos</option>
+                                    <option value="CREDITO">Créditos</option>
+                                    <option value="DEBITO">Compras/Débitos</option>
+                                    <option value="AJUSTE">Ajustes</option>
+                                </select>
+                                <small class="erro-campo" data-error-for="tipo"></small>
+                            </div>
+                            <div class="campo-formulario">
+                                <label for="filtro-usuario">Usuário</label>
+                                <select id="filtro-usuario" name="id_usuario">
+                                    <option value="">Todos os usuários</option>
+                                </select>
+                                <small class="erro-campo" data-error-for="id_usuario"></small>
+                            </div>
+                            <p class="feedback-form" role="alert"></p>
+                            <div class="acoes-filtros">
+                                <button type="submit" class="botao botao-principal">Aplicar filtros</button>
+                                <button type="button" class="botao botao-secundario" id="limpar-filtros">Limpar filtros</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section aria-labelledby="titulo-totais">
+                        <h2 id="titulo-totais" class="titulo-secao">Totais do período</h2>
+                        <p class="periodo-relatorio" id="texto-filtros-aplicados"></p>
+                        <p class="somente-impressao" id="texto-emissao"></p>
+                        <dl class="resumo-cartoes">
+                            <div class="resumo-card"><dt>Créditos declarados</dt><dd id="total-creditos">—</dd></div>
+                            <div class="resumo-card"><dt>Débitos de compras</dt><dd id="total-debitos">—</dd></div>
+                            <div class="resumo-card"><dt>Ajustes da administração</dt><dd id="total-ajustes">—</dd></div>
+                        </dl>
+                    </section>
+
+                    <section aria-labelledby="titulo-lista">
+                        <h2 id="titulo-lista" class="titulo-secao">Lançamentos</h2>
+                        <p class="contador-lista" id="contador-movimentacoes" aria-live="polite"></p>
+
+                        <div class="estado-lista" id="estado-movimentacoes" role="status">Carregando movimentações…</div>
+
+                        <div class="tabela-rolagem" id="area-tabela-movimentacoes" tabindex="0" role="region" aria-labelledby="legenda-movimentacoes" hidden>
+                            <table class="tabela-dados tabela-movimentacoes">
+                                <caption id="legenda-movimentacoes">Movimentações das carteiras conforme os filtros aplicados. Em telas pequenas, role para o lado para ver todas as colunas.</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Data e hora</th>
+                                        <th scope="col">Usuário</th>
+                                        <th scope="col">Tipo</th>
+                                        <th scope="col">Descrição</th>
+                                        <th scope="col" class="numero">Valor</th>
+                                        <th scope="col" class="numero">Saldo após</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="corpo-tabela-movimentacoes"></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                </main>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div id="footer-container"></div>
+
+    <script src="/javascript/base.js"></script>
+    <script src="/javascript/movimentacoes_adm.js"></script>
+
+</body>
+
+</html>

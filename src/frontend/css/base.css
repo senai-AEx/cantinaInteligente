@@ -46,7 +46,7 @@ input {
 }
 
 .logo {
-    color: #e87522;
+    color: #b8520b;
     font-size: 22px;
     font-weight: bold;
 }
@@ -58,7 +58,7 @@ input {
 }
 
 .navegacao a:hover {
-    color: #e87522;
+    color: #b8520b;
 }
 
 /* BOTÕES PADRÃO */
@@ -75,17 +75,17 @@ input {
 
 .botao-principal {
     color: #ffffff;
-    background-color: #e87522;
+    background-color: #b8520b;
 }
 
 .botao-principal:hover {
-    background-color: #c95d12;
+    background-color: #96420a;
 }
 
 .botao-secundario {
-    color: #e87522;
+    color: #b8520b;
     background-color: #ffffff;
-    border: 1px solid #e87522;
+    border: 1px solid #b8520b;
 }
 
 .botao-secundario:hover {
@@ -157,5 +157,312 @@ input {
     .navegacao {
         width: 100%;
         max-width: 100%;
+    }
+}
+
+
+/* ============================================================
+   BASE COMPARTILHADA (AV05)
+   Use estas variáveis e classes nas telas novas, em vez de cores
+   soltas. As cores abaixo têm contraste mínimo de 4,5:1 sobre
+   fundo branco, exigido pela ABNT NBR 17225.
+   ============================================================ */
+
+:root {
+    --cor-primaria: #b8520b;          /* laranja acessível (4,9:1 sobre branco) */
+    --cor-primaria-escura: #96420a;
+    --cor-primaria-clara: #fff0e4;
+    --cor-texto: #2b2b2b;
+    --cor-texto-suave: #5f6b62;       /* 5,6:1 sobre branco */
+    --cor-fundo: #fffaf5;
+    --cor-superficie: #ffffff;
+    --cor-borda: #d9ded8;
+    --cor-sucesso: #2e7d32;
+    --cor-sucesso-clara: #edf7ee;
+    --cor-erro: #b3261e;
+    --cor-erro-clara: #fdecea;
+    --cor-aviso-clara: #fff4e0;
+    --raio: 10px;
+    --sombra: 0 5px 18px #18331b0f;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* Texto só para leitores de tela */
+.somente-leitor {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* Link "Pular para o conteúdo": aparece ao receber foco pelo teclado */
+.pular-conteudo {
+    position: absolute;
+    top: -60px;
+    left: 12px;
+    z-index: 1000;
+    padding: 10px 16px;
+    border-radius: 0 0 8px 8px;
+    background: var(--cor-texto);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.pular-conteudo:focus {
+    top: 0;
+}
+
+/* Foco sempre visível na navegação por teclado */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid var(--cor-primaria);
+    outline-offset: 2px;
+}
+
+select,
+textarea {
+    font: inherit;
+}
+
+/* Cabeçalho conforme a sessão */
+.navegacao a,
+.navegacao .botao-sair {
+    padding: 8px 10px;
+    border-radius: 9px;
+}
+
+.navegacao .link-destaque {
+    background: var(--cor-primaria);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.navegacao .link-destaque:hover {
+    background: var(--cor-primaria-escura);
+    color: #ffffff;
+}
+
+.navegacao .link-conta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+}
+
+.saldo-cabecalho {
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--cor-sucesso-clara);
+    color: var(--cor-sucesso);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.saldo-cabecalho:empty {
+    display: none;
+}
+
+.saudacao-usuario {
+    color: var(--cor-texto-suave);
+    font-size: 14px;
+}
+
+.botao-sair {
+    border: 1px solid var(--cor-borda);
+    background: var(--cor-superficie);
+    color: var(--cor-texto);
+    cursor: pointer;
+}
+
+.botao-sair:hover {
+    border-color: var(--cor-primaria);
+    color: var(--cor-primaria);
+}
+
+/* Botões */
+.botao {
+    min-height: 44px;
+    font-weight: 700;
+}
+
+.botao:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.botao-perigo {
+    border: 1px solid var(--cor-erro);
+    background: var(--cor-superficie);
+    color: var(--cor-erro);
+}
+
+.botao-perigo:hover {
+    background: var(--cor-erro-clara);
+}
+
+/* Formulários: mensagens de erro e ajuda */
+.erro-campo {
+    display: block;
+    min-height: 0;
+    color: var(--cor-erro);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.erro-campo:empty {
+    display: none;
+}
+
+.dica-campo {
+    display: block;
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+}
+
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+    border-color: var(--cor-erro) !important;
+    background-color: var(--cor-erro-clara);
+}
+
+label .obrigatorio,
+.obrigatorio {
+    color: var(--cor-erro);
+}
+
+.feedback-form {
+    color: var(--cor-erro);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.feedback-form:empty {
+    display: none;
+}
+
+/* Avisos de página (resultado de uma operação) */
+.mensagem-api {
+    padding: 10px 14px;
+    border-radius: var(--raio);
+    background: var(--cor-aviso-clara);
+    color: var(--cor-texto);
+    font-size: 14px;
+}
+
+.mensagem-api:empty {
+    display: none;
+}
+
+.mensagem-api.mensagem-erro {
+    background: var(--cor-erro-clara);
+    color: var(--cor-erro);
+}
+
+.mensagem-api.mensagem-sucesso {
+    background: var(--cor-sucesso-clara);
+    color: var(--cor-sucesso);
+}
+
+/* Tabelas de dados (painel administrativo, extrato, histórico) */
+.tabela-rolagem {
+    overflow-x: auto;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio);
+    background: var(--cor-superficie);
+}
+
+.tabela-dados {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.tabela-dados caption {
+    padding: 12px 14px;
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+    text-align: left;
+}
+
+.tabela-dados th,
+.tabela-dados td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--cor-borda);
+    text-align: left;
+    vertical-align: top;
+}
+
+.tabela-dados th {
+    background: #f6f8f3;
+    color: var(--cor-texto);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.tabela-dados tr:last-child td {
+    border-bottom: none;
+}
+
+.tabela-dados .numero {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.valor-positivo {
+    color: var(--cor-sucesso);
+    font-weight: 700;
+}
+
+.valor-negativo {
+    color: var(--cor-erro);
+    font-weight: 700;
+}
+
+.etiqueta {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: #eef1ec;
+    color: var(--cor-texto);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.etiqueta-sucesso {
+    background: var(--cor-sucesso-clara);
+    color: var(--cor-sucesso);
+}
+
+.etiqueta-erro {
+    background: var(--cor-erro-clara);
+    color: var(--cor-erro);
+}
+
+.estado-lista {
+    padding: 24px;
+    color: var(--cor-texto-suave);
+    text-align: center;
+}
+
+@media print {
+    .header,
+    .footer,
+    .pular-conteudo,
+    .nao-imprimir {
+        display: none !important;
+    }
+
+    body {
+        background: #ffffff;
     }
 }

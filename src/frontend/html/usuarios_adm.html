@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Usuários - Administração</title>
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div id="header-container"></div>
+
+    <div class="pagina-admin">
+
+        <div class="container">
+
+            <div class="layout-admin">
+
+                <!-- MENU LATERAL (igual nas quatro telas do painel) -->
+                <aside class="menu-admin nao-imprimir" id="menu-admin">
+                    <div class="menu-admin-topo">
+                        <div>
+                            <span class="sobretitulo">Painel da cantina</span>
+                            <p class="menu-admin-titulo">Administração</p>
+                        </div>
+                        <button type="button" class="botao-menu" id="alternar-menu" aria-expanded="true" aria-controls="navegacao-admin">
+                            Recolher menu
+                        </button>
+                    </div>
+
+                    <div id="navegacao-admin" class="navegacao-admin">
+                        <nav aria-label="Painel administrativo">
+                            <ul class="menu-admin-lista">
+                                <li><a href="/html/catalogo_produtos_adm.html">Produtos</a></li>
+                                <li><a href="/html/usuarios_adm.html" aria-current="page">Usuários</a></li>
+                                <li><a href="/html/movimentacoes_adm.html">Movimentações</a></li>
+                                <li><a href="/html/relatorios_adm.html">Relatórios</a></li>
+                                <li class="menu-admin-separado"><a href="/html/catalogo_produtos.html">Ver catálogo da cantina</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- CONTEÚDO -->
+                <main id="conteudo-principal" class="conteudo-admin" tabindex="-1">
+
+                    <div class="introducao">
+                        <div>
+                            <span class="sobretitulo">Gestão de pessoas</span>
+                            <h1>Usuários</h1>
+                            <p>Consulte os cadastros, corrija dados, controle o acesso e ajuste saldos.</p>
+                        </div>
+                    </div>
+
+                    <section aria-labelledby="titulo-resumo">
+                        <h2 id="titulo-resumo" class="somente-leitor">Resumo dos usuários</h2>
+                        <dl class="resumo-cartoes">
+                            <div class="resumo-card"><dt>Usuários ativos</dt><dd id="total-ativos">—</dd></div>
+                            <div class="resumo-card"><dt>Usuários inativos</dt><dd id="total-inativos">—</dd></div>
+                            <div class="resumo-card"><dt>Administradores</dt><dd id="total-administradores">—</dd></div>
+                        </dl>
+                    </section>
+
+                    <section aria-labelledby="titulo-filtros">
+                        <h2 id="titulo-filtros" class="somente-leitor">Buscar e filtrar usuários</h2>
+                        <!-- Filtros só consultam: a lista se atualiza ao digitar (com um pequeno atraso) ou ao trocar uma opção. -->
+                        <form id="form-filtros" class="filtros-admin" role="search" novalidate>
+                            <div class="campo-formulario campo-largo">
+                                <label for="busca-usuarios">Buscar por nome, matrícula ou e-mail</label>
+                                <input type="search" id="busca-usuarios" name="q" maxlength="100" autocomplete="off" aria-describedby="busca-usuarios-ajuda">
+                                <small class="dica-campo" id="busca-usuarios-ajuda">A lista é atualizada enquanto você digita.</small>
+                            </div>
+                            <div class="campo-formulario">
+                                <label for="filtro-status">Situação</label>
+                                <select id="filtro-status" name="status">
+                                    <option value="TODOS">Todas</option>
+                                    <option value="ATIVO">Ativos</option>
+                                    <option value="INATIVO">Inativos</option>
+                                </select>
+                            </div>
+                            <div class="campo-formulario">
+                                <label for="filtro-perfil">Perfil</label>
+                                <select id="filtro-perfil" name="perfil">
+                                    <option value="TODOS">Todos</option>
+                                    <option value="ADMINISTRADOR">Administradores</option>
+                                    <option value="CLIENTE">Clientes</option>
+                                </select>
+                            </div>
+                            <div class="acoes-filtros">
+                                <button type="button" class="botao botao-secundario" id="limpar-filtros">Limpar filtros</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <p id="mensagem-api" class="mensagem-api" role="status" aria-live="polite"></p>
+
+                    <section aria-labelledby="titulo-lista">
+                        <h2 id="titulo-lista" class="titulo-secao">Usuários cadastrados</h2>
+                        <p class="contador-lista" id="contador-usuarios" aria-live="polite"></p>
+
+                        <div class="estado-lista" id="estado-usuarios" role="status">Carregando usuários…</div>
+
+                        <div class="tabela-rolagem" id="area-tabela-usuarios" tabindex="0" role="region" aria-labelledby="legenda-usuarios" hidden>
+                            <table class="tabela-dados tabela-usuarios">
+                                <caption id="legenda-usuarios">Usuários da cantina, em ordem de nome. Em telas pequenas, role para o lado para ver todas as colunas.</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Nome</th>
+                                        <th scope="col">Matrícula</th>
+                                        <th scope="col">E-mail</th>
+                                        <th scope="col">CPF</th>
+                                        <th scope="col">Perfil</th>
+                                        <th scope="col">Situação</th>
+                                        <th scope="col" class="numero">Saldo</th>
+                                        <th scope="col">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="corpo-tabela-usuarios"></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                </main>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL DE EDIÇÃO DE USUÁRIO -->
+    <div class="modal-overlay" id="modal-editar-usuario" aria-hidden="true">
+        <div class="modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="titulo-editar-usuario" aria-describedby="texto-editar-usuario">
+
+            <button type="button" class="modal-fechar" data-fechar-modal aria-label="Fechar">&times;</button>
+
+            <span class="sobretitulo">Cadastro do usuário</span>
+            <h2 id="titulo-editar-usuario">Editar usuário</h2>
+            <p class="texto-modal" id="texto-editar-usuario">Campos com <span class="obrigatorio">*</span> são obrigatórios. As alterações só são gravadas ao clicar em Salvar alterações.</p>
+
+            <!-- novalidate: a validação é feita pelo JavaScript; o formulário só é
+                 gravado quando o botão de salvar é clicado (Enter não grava). -->
+            <form id="form-editar-usuario" class="formulario-modal" novalidate>
+
+                <div class="campo-formulario">
+                    <label for="editar-nome">Nome completo <span class="obrigatorio" aria-hidden="true">*</span></label>
+                    <input type="text" id="editar-nome" name="nome" required minlength="3" maxlength="100" autocomplete="off">
+                    <small class="erro-campo" data-error-for="nome"></small>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="editar-matricula">Matrícula <span class="obrigatorio" aria-hidden="true">*</span></label>
+                    <input type="text" id="editar-matricula" name="matricula" inputmode="numeric" required minlength="4" maxlength="20" autocomplete="off" aria-describedby="editar-matricula-ajuda">
+                    <small class="dica-campo" id="editar-matricula-ajuda">Somente números, de 4 a 20 dígitos.</small>
+                    <small class="erro-campo" data-error-for="matricula"></small>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="editar-email">E-mail <span class="obrigatorio" aria-hidden="true">*</span></label>
+                    <input type="email" id="editar-email" name="email" inputmode="email" required maxlength="150" autocomplete="off" spellcheck="false">
+                    <small class="erro-campo" data-error-for="email"></small>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="editar-perfil">Perfil <span class="obrigatorio" aria-hidden="true">*</span></label>
+                    <select id="editar-perfil" name="perfil" required aria-describedby="editar-perfil-ajuda">
+                        <option value="CLIENTE">Cliente</option>
+                        <option value="ADMINISTRADOR">Administrador</option>
+                    </select>
+                    <small class="dica-campo" id="editar-perfil-ajuda"></small>
+                    <small class="erro-campo" data-error-for="perfil"></small>
+                </div>
+
+                <dl class="dados-fixos">
+                    <div>
+                        <dt>CPF (não pode ser alterado)</dt>
+                        <dd id="editar-cpf"></dd>
+                    </div>
+                </dl>
+
+                <p class="feedback-form" role="alert"></p>
+
+                <div class="acoes-modal">
+                    <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+                    <button type="submit" class="botao botao-principal">Salvar alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO: INATIVAR OU REATIVAR -->
+    <div class="modal-overlay" id="modal-situacao-usuario" aria-hidden="true">
+        <div class="modal-conteudo modal-confirmacao" role="dialog" aria-modal="true" aria-labelledby="titulo-situacao-usuario" aria-describedby="texto-situacao-usuario">
+
+            <button type="button" class="modal-fechar" data-fechar-modal aria-label="Fechar">&times;</button>
+
+            <h2 id="titulo-situacao-usuario">Inativar usuário</h2>
+            <p id="texto-situacao-usuario" class="texto-confirmacao">O usuário não será apagado; apenas perde o acesso e pode ser reativado.</p>
+
+            <p class="feedback-form" id="erro-situacao-usuario" role="alert"></p>
+
+            <div class="acoes-modal">
+                <button type="button" class="botao botao-secundario" id="cancelar-situacao" data-fechar-modal>Cancelar</button>
+                <button type="button" class="botao botao-perigo" id="confirmar-situacao">Inativar usuário</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE AJUSTE DE SALDO -->
+    <div class="modal-overlay" id="modal-ajuste-saldo" aria-hidden="true">
+        <div class="modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="titulo-ajuste-saldo" aria-describedby="texto-ajuste-saldo">
+
+            <button type="button" class="modal-fechar" data-fechar-modal aria-label="Fechar">&times;</button>
+
+            <span class="sobretitulo">Carteira do usuário</span>
+            <h2 id="titulo-ajuste-saldo">Ajustar saldo</h2>
+            <p class="texto-modal" id="texto-ajuste-saldo">Campos com <span class="obrigatorio">*</span> são obrigatórios. O ajuste só é lançado ao clicar em Lançar ajuste e fica registrado nas movimentações.</p>
+
+            <form id="form-ajuste-saldo" class="formulario-modal" novalidate>
+
+                <dl class="dados-fixos">
+                    <div>
+                        <dt>Usuário</dt>
+                        <dd id="ajuste-usuario"></dd>
+                    </div>
+                    <div>
+                        <dt>Saldo atual</dt>
+                        <dd id="ajuste-saldo-atual"></dd>
+                    </div>
+                </dl>
+
+                <fieldset class="grupo-opcoes">
+                    <legend>Tipo de ajuste <span class="obrigatorio" aria-hidden="true">*</span></legend>
+                    <label class="opcao-radio">
+                        <input type="radio" name="tipo" value="ACRESCENTAR" checked required>
+                        Acrescentar
+                    </label>
+                    <label class="opcao-radio">
+                        <input type="radio" name="tipo" value="DESCONTAR" required>
+                        Descontar
+                    </label>
+                </fieldset>
+
+                <div class="campo-formulario">
+                    <label for="ajuste-valor">Valor do ajuste (R$) <span class="obrigatorio" aria-hidden="true">*</span></label>
+                    <input type="text" id="ajuste-valor" name="valor_centavos" class="campo-moeda" inputmode="numeric" placeholder="0,00" required maxlength="12" autocomplete="off" aria-describedby="ajuste-valor-ajuda">
+                    <small class="dica-campo" id="ajuste-valor-ajuda">De R$ 0,01 a R$ 1.000,00. Digite só os números.</small>
+                    <small class="erro-campo" data-error-for="valor_centavos"></small>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="ajuste-motivo">Motivo <span class="obrigatorio" aria-hidden="true">*</span></label>
+                    <input type="text" id="ajuste-motivo" name="motivo" required minlength="5" maxlength="150" autocomplete="off" aria-describedby="ajuste-motivo-ajuda">
+                    <small class="dica-campo" id="ajuste-motivo-ajuda">De 5 a 150 caracteres. Aparece no extrato do usuário.</small>
+                    <small class="erro-campo" data-error-for="motivo"></small>
+                </div>
+
+                <p class="saldo-resultante" aria-live="polite" aria-atomic="true">Saldo após o ajuste: <strong id="ajuste-saldo-resultante"></strong></p>
+
+                <p class="feedback-form" role="alert"></p>
+
+                <div class="acoes-modal">
+                    <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+                    <button type="submit" class="botao botao-principal">Lançar ajuste</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div id="footer-container"></div>
+
+    <script src="/javascript/base.js"></script>
+    <script src="/javascript/usuarios_adm.js"></script>
+
+</body>
+
+</html>

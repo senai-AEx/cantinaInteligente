@@ -1,7 +1,8 @@
 // Integração da tela administrativa com a API de produtos.
+// Telas e API saem do mesmo servidor: as URLs são relativas e o login vai no cookie de sessão.
 document.addEventListener("DOMContentLoaded", () => {
-    const API_URL = "http://127.0.0.1:5000/api/produtos";
-    const UPLOAD_URL = "http://127.0.0.1:5000/api/uploads/produtos";
+    const API_URL = "/api/produtos";
+    const UPLOAD_URL = "/api/uploads/produtos";
     const lista = document.getElementById("lista-produtos");
     const mensagemApi = document.getElementById("mensagem-api");
     const modalCadastro = document.getElementById("modal-cadastro-produto");
@@ -68,29 +69,25 @@ document.addEventListener("DOMContentLoaded", () => {
         return produto.status === "ATIVO" && produto.quantidade_estoque === 0;
     }
 
+    // A API devolve "assets/produtos/arquivo.png"; o servidor entrega em "/assets/produtos/...".
+    function caminhoFoto(caminho) {
+        return "/" + String(caminho).replace(/^\/+/, "");
+    }
+
+    // Chamada à API pelo Cantina.requisitar (base.js). O servidor identifica o
+    // administrador pela sessão; aqui só tratamos sessão encerrada e falta de permissão.
     async function requisitar(url, opcoes = {}) {
-        const resposta = await fetch(url, {
-            ...opcoes,
-            headers: {
-                Accept: "application/json",
-                "X-Actor": "administrador-local",
-                ...(opcoes.headers || {}),
-            },
-        });
-
-        let resultado = {};
         try {
-            resultado = await resposta.json();
-        } catch {
-            resultado = {};
-        }
-
-        if (!resposta.ok) {
-            const erro = new Error(resultado.erro || "Não foi possível concluir a operação.");
-            erro.campos = resultado.campos || {};
+            return await Cantina.requisitar(url, opcoes);
+        } catch (erro) {
+            if (erro.status === 401) {
+                erro.message = "Sua sessão terminou. Abrindo a tela de login…";
+                Cantina.irParaLogin();
+            } else if (erro.status === 403) {
+                erro.message = "Sua conta não tem permissão de administrador para esta operação.";
+            }
             throw erro;
         }
-        return resultado;
     }
 
     // ---------- modais ----------
@@ -132,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const imagem = criarElemento("img", "imagem-produto");
         imagem.alt = produto.nome;
         if (produto.foto_caminho) {
-            imagem.src = new URL("../../../" + produto.foto_caminho, document.baseURI).href;
+            imagem.src = caminhoFoto(produto.foto_caminho);
             imagem.addEventListener("error", () => imagem.remove(), { once: true });
         } else {
             imagem.hidden = true;
@@ -223,7 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderizarProdutos();
         } catch (erro) {
             lista.replaceChildren(criarElemento("p", "estado-lista", "Não foi possível carregar os produtos."));
-            mostrarMensagem(mensagemApi, erro.message + " Confira se o MySQL e o backend estão ligados.", "erro");
+            mostrarMensagem(mensagemApi, erro.message, "erro");
         }
     }
 
@@ -325,7 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
             preview.dataset.urlTemporaria = url;
             preview.hidden = false;
         } else if (caminho) {
-            preview.src = new URL("../../../" + caminho, document.baseURI).href;
+            preview.src = caminhoFoto(caminho);
             preview.hidden = false;
         } else {
             preview.removeAttribute("src");
@@ -383,8 +380,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             await requisitar(idProduto ? API_URL + "/" + idProduto : API_URL, {
                 method: metodo,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(montarPayload(formulario, fotoCaminho)),
+                json: montarPayload(formulario, fotoCaminho),
             });
             fecharModal(idProduto ? modalEdicao : modalCadastro);
             formulario.reset();
@@ -412,11 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     [formularioCadastro, formularioEdicao].forEach((formulario) => {
         // Enter dentro de um campo NÃO grava: o produto só é salvo pelo clique no botão.
-        formulario.addEventListener("keydown", (evento) => {
-            if (evento.key === "Enter" && evento.target.tagName !== "TEXTAREA" && evento.target.type !== "submit") {
-                evento.preventDefault();
-            }
-        });
+        Cantina.bloquearEnvioPorEnter(formulario);
 
         formulario.querySelectorAll(".campo-moeda").forEach((campo) => {
             campo.addEventListener("input", () => aplicarMascaraMoeda(campo));
@@ -503,7 +495,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const recolhido = document.getElementById("menu-admin").classList.toggle("recolhido");
         document.querySelector(".layout-admin").classList.toggle("menu-recolhido", recolhido);
         evento.currentTarget.setAttribute("aria-expanded", String(!recolhido));
-        evento.currentTarget.textContent = recolhido ? "Expandir" : "Recolher";
+        evento.currentTarget.textContent = recolhido ? "Expandir menu" : "Recolher menu";
     });
 
     document.getElementById("fechar-cadastro-produto").addEventListener("click", () => fecharModal(modalCadastro));
@@ -598,5 +590,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    carregarProdutos();
+    // Só administradores usam esta tela: quem não está logado vai para o login e
+    // quem não é administrador volta ao catálogo (Cantina.exigirAdministrador).
+    Cantina.exigirAdministrador().then(carregarProdutos);
 });

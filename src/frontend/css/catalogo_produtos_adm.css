@@ -1130,3 +1130,251 @@ textarea:focus-visible {
 .card-produto.sem-estoque {
     border-color: #f0d6bd;
 }
+
+
+/* ============================================================
+   MENU DO PAINEL (AV05)
+   Mesmas regras do menu de css/admin.css, para o menu lateral
+   ficar igual nas quatro telas do painel (Produtos, Usuários,
+   Movimentações e Relatórios). Ao mudar aqui, mude lá também.
+   ============================================================ */
+
+.layout-admin {
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 24px;
+}
+
+.menu-admin {
+    padding: 18px;
+}
+
+.menu-admin-topo {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.menu-admin-titulo {
+    margin: 0;
+    color: #24352b;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* O texto fica em minúsculas no HTML (leitores de tela) e maiúsculo só na tela. */
+.sobretitulo {
+    text-transform: uppercase;
+}
+
+.botao-menu {
+    min-height: 44px;
+    padding: 6px 12px;
+    border: 1px solid #7d8a80;
+    border-radius: 9px;
+    background: var(--cor-superficie);
+    color: var(--cor-texto);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.botao-menu:hover,
+.botao-menu:focus-visible {
+    border-color: var(--cor-primaria);
+    color: var(--cor-primaria-escura);
+}
+
+.navegacao-admin {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.menu-admin.recolhido {
+    padding: 12px 18px;
+}
+
+.menu-admin-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    list-style: none;
+}
+
+.menu-admin-lista a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 9px 10px;
+    border: 0;
+    border-left: 4px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: #3a4a3f;
+    font-weight: 600;
+    line-height: 1.3;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.menu-admin-lista a:hover {
+    background: #f2f5ef;
+    color: #2d5637;
+}
+
+/* Página atual: fundo, barra lateral e negrito (não depende só da cor). */
+.menu-admin-lista a[aria-current="page"] {
+    border-left-color: #3d6545;
+    background: #edf4e9;
+    color: #2d5637;
+    font-weight: 700;
+}
+
+.menu-admin-separado {
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--cor-borda);
+}
+
+/* Atalhos que só existem na tela de produtos */
+.menu-admin-atalhos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--cor-borda);
+}
+
+.menu-admin-subtitulo {
+    color: var(--cor-texto-suave);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.atalho-menu {
+    min-height: 44px;
+    border: 1px solid transparent;
+    color: #3a4a3f;
+    font-weight: 600;
+}
+
+/* Filtro ligado: marca de conferido, borda e negrito (não depende só da cor). */
+.atalho-menu[aria-pressed="true"] {
+    border-color: #3d6545;
+    background: #edf4e9;
+    color: #2d5637;
+    font-weight: 700;
+}
+
+.atalho-menu[aria-pressed="true"]::before {
+    content: "✓ ";
+}
+
+@media (max-width: 900px) {
+    .layout-admin,
+    .layout-admin.menu-recolhido {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .menu-admin {
+        position: static;
+    }
+
+    .menu-admin-lista {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 4px 6px;
+    }
+
+    .menu-admin-separado {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .menu-admin {
+        padding: 14px 17px;
+    }
+}
+
+
+/* ============================================================
+   CONTRASTE E ÁREA DE TOQUE (ABNT NBR 17225)
+   Troca o laranja antigo (#e87522, contraste 3,0:1 com branco)
+   pelas variáveis acessíveis do base.css e garante alvos de
+   pelo menos 44 px. Não altera o comportamento da tela.
+   ============================================================ */
+
+.botao-principal {
+    background-color: var(--cor-primaria);
+}
+
+.botao-principal:hover {
+    background-color: var(--cor-primaria-escura);
+}
+
+.botao-secundario {
+    border-color: var(--cor-primaria);
+    color: var(--cor-primaria);
+}
+
+.botao-secundario:hover {
+    color: var(--cor-primaria-escura);
+}
+
+#botao-confirmar-exclusao {
+    border-color: var(--cor-primaria);
+    background-color: var(--cor-primaria);
+}
+
+#botao-confirmar-exclusao:hover {
+    border-color: var(--cor-primaria-escura);
+    background-color: var(--cor-primaria-escura);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid var(--cor-primaria);
+    outline-offset: 2px;
+}
+
+.sobretitulo,
+.contador-produtos,
+.form-secao-titulo p,
+.filtro-status,
+.estado-lista {
+    color: var(--cor-texto-suave);
+}
+
+.filtro-status.selecionado {
+    color: #2d5637;
+}
+
+.campo-formulario input::placeholder {
+    color: #6b756d;
+    opacity: 1;
+}
+
+.campo-formulario:has(input:required) label::after,
+.campo-formulario:has(textarea:required) label::after {
+    color: var(--cor-erro);
+}
+
+.filtro-status {
+    min-height: 44px;
+}
+
+.modal-fechar {
+    width: 44px;
+    height: 44px;
+}

@@ -7,8 +7,8 @@
 
     <title>Catálogo de Produtos - Administração</title>
 
-    <link rel="stylesheet" href="../css/base.css">
-    <link rel="stylesheet" href="../css/catalogo_produtos_adm.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/catalogo_produtos_adm.css">
 </head>
 
 <body>
@@ -16,37 +16,49 @@
     <!-- HEADER -->
     <div id="header-container"></div>
 
-    <main class="pagina-catalogo-admin">
+    <div class="pagina-catalogo-admin">
 
         <div class="container">
 
             <div class="layout-admin">
 
-                <!-- MENU LATERAL -->
+                <!-- MENU LATERAL (igual nas quatro telas do painel) -->
                 <aside class="menu-admin" id="menu-admin">
                     <div class="menu-admin-topo">
                         <div>
-                            <span class="sobretitulo">PAINEL DA CANTINA</span>
-                            <h2>Administração</h2>
+                            <span class="sobretitulo">Painel da cantina</span>
+                            <p class="menu-admin-titulo">Administração</p>
                         </div>
                         <button type="button" class="botao-menu" id="alternar-menu" aria-expanded="true" aria-controls="navegacao-admin">
-                            Recolher
+                            Recolher menu
                         </button>
                     </div>
 
-                    <nav id="navegacao-admin" class="navegacao-admin" aria-label="Atalhos administrativos">
-                        <button type="button" class="botao botao-principal" id="abrir-cadastro-produto">
-                            <span aria-hidden="true">＋</span> Novo produto
-                        </button>
-                        <a href="catalogo_produtos.html">Ver catálogo da cantina</a>
-                        <button type="button" class="atalho-menu" id="filtrar-sem-estoque" aria-pressed="false">
-                            Produtos sem estoque
-                        </button>
-                    </nav>
+                    <div id="navegacao-admin" class="navegacao-admin">
+                        <nav aria-label="Painel administrativo">
+                            <ul class="menu-admin-lista">
+                                <li><a href="/html/catalogo_produtos_adm.html" aria-current="page">Produtos</a></li>
+                                <li><a href="/html/usuarios_adm.html">Usuários</a></li>
+                                <li><a href="/html/movimentacoes_adm.html">Movimentações</a></li>
+                                <li><a href="/html/relatorios_adm.html">Relatórios</a></li>
+                                <li class="menu-admin-separado"><a href="/html/catalogo_produtos.html">Ver catálogo da cantina</a></li>
+                            </ul>
+                        </nav>
+
+                        <div class="menu-admin-atalhos" role="group" aria-labelledby="titulo-atalhos-produtos">
+                            <p class="menu-admin-subtitulo" id="titulo-atalhos-produtos">Atalhos de produtos</p>
+                            <button type="button" class="botao botao-principal" id="abrir-cadastro-produto">
+                                <span aria-hidden="true">＋</span> Novo produto
+                            </button>
+                            <button type="button" class="atalho-menu" id="filtrar-sem-estoque" aria-pressed="false">
+                                Produtos sem estoque
+                            </button>
+                        </div>
+                    </div>
                 </aside>
 
                 <!-- CATÁLOGO -->
-                <section class="secao-produtos-admin">
+                <main id="conteudo-principal" class="secao-produtos-admin" tabindex="-1">
 
                     <div class="introducao">
                         <div>
@@ -83,13 +95,13 @@
                         <p class="estado-lista">Carregando produtos...</p>
                     </div>
 
-                </section>
+                </main>
 
             </div>
 
         </div>
 
-    </main>
+    </div>
 
     <!-- MODAL CADASTRO DE PRODUTO -->
     <div class="modal-overlay" id="modal-cadastro-produto" aria-hidden="true">
@@ -309,8 +321,8 @@
     <!-- FOOTER -->
     <div id="footer-container"></div>
 
-    <script src="../javascript/base.js"></script>
-    <script src="../javascript/catalogo_produtos_adm.js"></script>
+    <script src="/javascript/base.js"></script>
+    <script src="/javascript/catalogo_produtos_adm.js"></script>
 
 </body>
 

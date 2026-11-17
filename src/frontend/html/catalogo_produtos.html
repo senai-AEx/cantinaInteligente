@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#fffaf4">
-    <title>Catálogo | Cantina da Honestidade</title>
-    <link rel="stylesheet" href="../css/base.css">
-    <link rel="stylesheet" href="../css/catalogo_produtos.css">
+    <title>Produtos | Cantina da Honestidade</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/catalogo_produtos.css">
 </head>
 <body>
     <div id="header-container"></div>
 
-    <main>
-        <section class="hero-catalogo">
+    <main id="conteudo-principal">
+        <section class="hero-catalogo" aria-labelledby="titulo-catalogo">
             <div class="container hero-conteudo">
                 <div class="hero-texto">
                     <span class="eyebrow">CANTINA DA HONESTIDADE</span>
-                    <h1>Escolha com carinho.<br><span>Contribua com confiança.</span></h1>
-                    <p>Confira o que está disponível hoje e monte sua sacola com tranquilidade.</p>
+                    <h1 id="titulo-catalogo">Escolha com carinho.<br><span>Contribua com confiança.</span></h1>
+                    <p>Confira o que está disponível hoje, monte sua sacola e registre sua compra com o saldo da sua conta.</p>
                     <a class="botao botao-principal" href="#produtos">Ver produtos <span aria-hidden="true">↓</span></a>
                 </div>
                 <div class="hero-selo" aria-hidden="true">
@@ -28,30 +28,33 @@
         </section>
 
         <div class="container pagina-catalogo">
+            <!-- Aviso vindo de outra tela (?aviso=bem-vindo ou ?aviso=sem-permissao) -->
+            <div id="aviso-pagina" class="mensagem-api aviso-pagina" role="status" hidden></div>
+
             <div class="layout-catalogo">
                 <section class="secao-produtos" id="produtos" aria-labelledby="titulo-produtos">
                     <div class="cabecalho-secao">
                         <div>
                             <span class="eyebrow">FEITO PARA VOCÊ</span>
-                            <h2 id="titulo-produtos">Produtos da cantina</h2>
+                            <h2 id="titulo-produtos" tabindex="-1">Produtos da cantina</h2>
                             <p>Encontre seu lanche e confira os ingredientes importantes.</p>
                         </div>
                         <p class="contador-produtos" id="contador-produtos" aria-live="polite"></p>
                     </div>
 
-                    <section class="ferramentas-catalogo" aria-label="Busca e filtros do catálogo">
+                    <div class="ferramentas-catalogo" role="search" aria-label="Buscar e filtrar produtos">
                         <label class="busca-produtos" for="busca-produtos">
                             <span aria-hidden="true">⌕</span>
+                            <span class="somente-leitor">Buscar produto ou categoria</span>
                             <input type="search" id="busca-produtos" placeholder="Buscar produto ou categoria" autocomplete="off">
-                            <kbd>⌕</kbd>
                         </label>
                         <div class="categorias-produtos" id="categorias-produtos" role="group" aria-label="Filtrar por categoria">
                             <button type="button" class="filtro-categoria selecionado" data-categoria="TODAS" aria-pressed="true">Todas</button>
                         </div>
-                    </section>
+                    </div>
 
                     <p id="mensagem-api" class="mensagem-api" role="status" aria-live="polite"></p>
-                    <div class="lista-produtos" id="lista-produtos" aria-live="polite" aria-busy="true">
+                    <div class="lista-produtos" id="lista-produtos" aria-busy="true">
                         <p class="estado-lista">Carregando produtos...</p>
                     </div>
                 </section>
@@ -60,12 +63,17 @@
                     <div class="cabecalho-carrinho">
                         <div>
                             <span class="eyebrow">SUA ESCOLHA</span>
-                            <h2 id="titulo-carrinho">Minha sacola</h2>
+                            <h2 id="titulo-carrinho" tabindex="-1">Minha sacola</h2>
                         </div>
-                        <span class="contador-sacola" id="contador-sacola" aria-label="0 itens">0</span>
+                        <p class="contador-sacola">
+                            <span id="contador-sacola">0</span>
+                            <span class="somente-leitor" id="rotulo-contador-sacola">itens na sacola</span>
+                        </p>
                     </div>
-                    <p class="texto-carrinho">Os produtos escolhidos ficam salvos neste dispositivo.</p>
-                    <div id="itens-carrinho" class="itens-carrinho" aria-live="polite">
+                    <p class="texto-carrinho">Os produtos escolhidos ficam salvos neste dispositivo até você finalizar a compra.</p>
+                    <!-- Resumo falado da sacola a cada mudança (leitores de tela) -->
+                    <p class="somente-leitor" id="status-sacola" role="status" aria-live="polite"></p>
+                    <div id="itens-carrinho" class="itens-carrinho">
                         <div class="sacola-vazia">
                             <span aria-hidden="true">🛍️</span>
                             <strong>Sua sacola está vazia</strong>
@@ -75,34 +83,112 @@
                     </div>
                     <div class="resumo-carrinho" id="resumo-carrinho" hidden>
                         <div class="linha-total"><span>Total dos produtos</span><strong id="total-carrinho">R$ 0,00</strong></div>
-                        <p class="aviso-finalizacao">Esta tela ainda não envia pedidos nem processa pagamentos. Confira sua sacola antes de falar com a equipe da cantina.</p>
-                        <button type="button" class="botao botao-principal botao-revisar" id="revisar-sacola">Revisar sacola</button>
+                        <div class="linha-saldo" id="linha-saldo-sacola" hidden><span>Seu saldo</span><strong id="saldo-sacola"></strong></div>
+                        <p class="aviso-finalizacao">Ao finalizar, a compra é registrada e o total sai do seu saldo.</p>
+                        <button type="button" class="botao botao-principal botao-revisar" id="finalizar-compra">Finalizar compra</button>
                         <button type="button" class="botao-limpar" id="limpar-sacola">Limpar sacola</button>
                     </div>
                 </aside>
             </div>
 
-            <section class="mensagem-honestidade" aria-label="Sobre a cantina">
+            <section class="mensagem-honestidade" aria-labelledby="titulo-honestidade">
                 <span aria-hidden="true">♡</span>
-                <div><h2>Uma cantina feita de confiança</h2><p>Escolha o que deseja levar e contribua com um valor justo para você e para a comunidade.</p></div>
+                <div>
+                    <h2 id="titulo-honestidade">Uma cantina feita de confiança</h2>
+                    <p>Você mesmo registra o que levou e declara o que depositou na caixa. A cantina funciona porque cada um faz a sua parte.</p>
+                </div>
             </section>
         </div>
     </main>
 
-    <div class="modal-overlay" id="modal-revisao" aria-hidden="true">
-        <section class="modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="titulo-revisao">
-            <button type="button" class="modal-fechar" id="fechar-revisao" aria-label="Fechar">&times;</button>
-            <span class="eyebrow">SUA ESCOLHA</span>
-            <h2 id="titulo-revisao">Confira sua sacola</h2>
-            <div id="resumo-revisao" class="resumo-revisao"></div>
-            <div class="linha-total"><span>Total dos produtos</span><strong id="total-revisao">R$ 0,00</strong></div>
-            <p class="aviso-finalizacao">O sistema ainda não envia pedidos nem gera cobrança. Use esta conferência ao combinar sua compra com a equipe da cantina.</p>
-            <button type="button" class="botao botao-principal botao-revisar" id="voltar-catalogo">Voltar ao catálogo</button>
+    <!-- MODAL: finalizar compra -->
+    <div class="modal-overlay" id="modal-compra" aria-hidden="true">
+        <section class="modal-conteudo" id="dialogo-compra" role="dialog" aria-modal="true" aria-labelledby="titulo-compra" tabindex="-1">
+            <button type="button" class="modal-fechar" id="fechar-compra" aria-label="Fechar">&times;</button>
+
+            <!-- Etapa 1: conferir a sacola e o saldo -->
+            <div id="etapa-revisao">
+                <span class="eyebrow">SUA ESCOLHA</span>
+                <h2 id="titulo-compra">Finalizar compra</h2>
+
+                <ul id="itens-compra" class="resumo-revisao" aria-label="Itens da compra"></ul>
+
+                <dl class="valores-compra">
+                    <div class="linha-total">
+                        <dt>Total da compra</dt>
+                        <dd id="total-compra">R$ 0,00</dd>
+                    </div>
+                    <div class="linha-valor" id="linha-saldo-disponivel" hidden>
+                        <dt>Saldo disponível</dt>
+                        <dd id="saldo-disponivel"></dd>
+                    </div>
+                    <div class="linha-valor" id="linha-saldo-apos" hidden>
+                        <dt id="rotulo-saldo-apos">Saldo após a compra</dt>
+                        <dd id="saldo-apos"></dd>
+                    </div>
+                </dl>
+
+                <!-- Sem login -->
+                <p class="aviso-compra" id="aviso-login-compra" hidden>
+                    Entre na sua conta para registrar a compra. Sua sacola continua salva neste dispositivo.
+                </p>
+
+                <!-- Saldo insuficiente -->
+                <div class="aviso-compra aviso-atencao" id="aviso-saldo-compra" hidden>
+                    <p>
+                        <span aria-hidden="true">⚠</span>
+                        <strong>Saldo insuficiente.</strong>
+                        <span id="texto-aviso-saldo"></span>
+                    </p>
+                    <a class="link-acao" href="/html/minha_conta.html#creditos">Adicionar crédito</a>
+                </div>
+
+                <!-- Mais produtos diferentes do que uma compra aceita -->
+                <p class="aviso-compra aviso-atencao" id="aviso-limite-compra" hidden>
+                    <span aria-hidden="true">⚠</span>
+                    Cada compra aceita até 50 produtos diferentes. Retire alguns itens da sacola para continuar.
+                </p>
+
+                <p id="erro-compra" class="mensagem-api mensagem-erro" role="alert" tabindex="-1"></p>
+
+                <div class="acoes-modal">
+                    <button type="button" class="botao botao-principal" id="confirmar-compra" hidden>Confirmar compra</button>
+                    <button type="button" class="botao botao-principal" id="entrar-para-finalizar" hidden>Entrar para finalizar</button>
+                    <button type="button" class="botao botao-secundario" id="voltar-catalogo">Voltar ao catálogo</button>
+                </div>
+            </div>
+
+            <!-- Etapa 2: compra registrada -->
+            <div id="etapa-sucesso" class="etapa-sucesso" hidden>
+                <span class="icone-sucesso" aria-hidden="true">✓</span>
+                <h2 id="titulo-sucesso" tabindex="-1">Compra registrada!</h2>
+                <p class="texto-agradecimento">Obrigado por manter a Cantina da Honestidade funcionando.</p>
+
+                <dl class="valores-compra">
+                    <div class="linha-valor">
+                        <dt>Número da compra</dt>
+                        <dd id="numero-compra"></dd>
+                    </div>
+                    <div class="linha-valor">
+                        <dt>Total debitado</dt>
+                        <dd id="total-pago"></dd>
+                    </div>
+                    <div class="linha-total">
+                        <dt>Novo saldo</dt>
+                        <dd id="novo-saldo"></dd>
+                    </div>
+                </dl>
+
+                <div class="acoes-modal">
+                    <button type="button" class="botao botao-principal" id="continuar-catalogo">Continuar no catálogo</button>
+                    <a class="botao botao-secundario" href="/html/minha_conta.html#compras">Ver minhas compras</a>
+                </div>
+            </div>
         </section>
     </div>
 
     <div id="footer-container"></div>
-    <script src="../javascript/base.js"></script>
-    <script src="../javascript/catalogo_produtos.js"></script>
+    <script src="/javascript/base.js"></script>
+    <script src="/javascript/catalogo_produtos.js"></script>
 </body>
 </html>

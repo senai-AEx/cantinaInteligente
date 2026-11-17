@@ -1,30 +1,40 @@
-<!-- ESTRUTURA PADRÃO DE HEADER E FOOTER -->
+<!-- ESTRUTURA PADRÃO DE CABEÇALHO E RODAPÉ
+     O base.js copia o <a class="pular-conteudo">, o <header> e o <footer> deste
+     arquivo para as telas que têm <div id="header-container"> e
+     <div id="footer-container">. Os itens do menu aparecem conforme a sessão:
+     data-visivel = "sempre" | "anonimo" | "logado" | "admin". -->
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <title>Base</title>
-    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="/css/base.css">
 </head>
 <body>
+
+    <a class="pular-conteudo" href="#conteudo-principal">Pular para o conteúdo</a>
 
     <!-- CABEÇALHO PADRÃO -->
     <header class="header">
         <div class="container header-conteudo">
 
-            <a href="../index.html" class="logo" aria-label="Voltar ao início">
+            <a href="/" class="logo" aria-label="Cantina da Honestidade — voltar ao início">
                 Cantina da Honestidade
             </a>
 
-            <nav class="navegacao">
-                <a href="../index.html">Início</a>
-                <a href="catalogo_produtos.html#produtos">Produtos</a>
-                <a href="catalogo_produtos.html#carrinho">Meu carrinho</a>
-                <a href="catalogo_produtos.html#rodape">Sobre a cantina</a>
-                <a href="login.html">Entrar</a>
-                <a href="cadastro.html">Criar conta</a>
-                <a class="link-administracao" href="catalogo_produtos_adm.html">Administração</a>
+            <nav class="navegacao" aria-label="Menu principal">
+                <a href="/html/catalogo_produtos.html#produtos" data-visivel="sempre">Produtos</a>
+                <a href="/html/catalogo_produtos.html#carrinho" data-visivel="sempre">Minha sacola</a>
+                <a href="/html/minha_conta.html" class="link-conta" data-visivel="logado" hidden>
+                    Minha conta
+                    <span class="saldo-cabecalho" data-usuario-saldo aria-label="Saldo disponível"></span>
+                </a>
+                <a href="/html/catalogo_produtos_adm.html" class="link-administracao" data-visivel="admin" hidden>Administração</a>
+                <a href="/html/login.html" data-visivel="anonimo" hidden>Entrar</a>
+                <a href="/html/cadastro.html" class="link-destaque" data-visivel="anonimo" hidden>Criar conta</a>
+                <span class="saudacao-usuario" data-visivel="logado" hidden>Olá, <strong data-usuario-nome></strong></span>
+                <button type="button" class="botao-sair" data-acao="sair" data-visivel="logado" hidden>Sair</button>
             </nav>
 
         </div>
@@ -43,9 +53,9 @@
             </p>
 
             <p class="texto-copyright">
-                © 2026 Cantina da Honestidade
+                © 2026 Cantina da Honestidade — SENAI Fraiburgo
             </p>
-            <p><a href="../index.html">Voltar ao início</a></p>
+            <p><a href="/">Voltar ao início</a></p>
 
         </div>
 

@@ -1,0 +1,629 @@
+/* MINHA CONTA: resumo, adicionar crédito, extrato e compras.
+   As cores vêm das variáveis do base.css (contraste mínimo de 4,5:1). */
+
+:root {
+    --conta-tinta: #293a30;
+    --conta-verde: #446e4c;
+    --conta-verde-escuro: #31573a;
+    /* Borda dos campos e botões claros com contraste de 3:1 sobre o branco */
+    --borda-campo: #7f8a82;
+}
+
+body {
+    background: #fffdf9;
+    color: var(--cor-texto);
+}
+
+.container {
+    width: min(92%, 1100px);
+}
+
+/* CABEÇALHO DA ÁREA DO CLIENTE (mesma aparência do catálogo) */
+
+.header {
+    padding: 14px 0;
+    border-bottom-color: #efece5;
+    background: #fffefa;
+}
+
+.header-conteudo {
+    min-height: 48px;
+}
+
+.logo {
+    color: var(--conta-tinta);
+    font-size: 20px;
+    letter-spacing: -.03em;
+}
+
+.logo::before {
+    content: "♡";
+    display: inline-grid;
+    width: 30px;
+    height: 30px;
+    margin-right: 8px;
+    place-items: center;
+    border-radius: 10px;
+    background: #fff0df;
+    color: var(--cor-primaria);
+    font-size: 19px;
+    vertical-align: -2px;
+}
+
+.navegacao {
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.navegacao a,
+.navegacao .botao-sair {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    font-size: 14px;
+}
+
+.navegacao a {
+    padding: 9px 12px;
+    color: #526057;
+    font-weight: 600;
+}
+
+.navegacao a:hover,
+.navegacao a:focus-visible {
+    background: #f5f6f1;
+    color: var(--conta-verde-escuro);
+}
+
+.navegacao .link-administracao {
+    border: 1px solid #dbe5d9;
+    background: #f5f8f2;
+    color: var(--conta-verde-escuro);
+}
+
+.navegacao .link-destaque:hover {
+    background: var(--cor-primaria-escura);
+    color: #ffffff;
+}
+
+/* BOTÕES E LINKS (laranja acessível) */
+
+.botao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 10px;
+}
+
+.botao-principal {
+    background-color: var(--cor-primaria);
+    color: #ffffff;
+}
+
+.botao-principal:hover {
+    background-color: var(--cor-primaria-escura);
+}
+
+.botao-secundario {
+    border: 1px solid var(--cor-primaria);
+    background-color: #ffffff;
+    color: var(--cor-primaria);
+}
+
+.botao-secundario:hover {
+    background-color: var(--cor-primaria-clara);
+    color: var(--cor-primaria-escura);
+}
+
+.link-acao {
+    display: inline-block;
+    padding: 10px 2px;
+    color: var(--cor-primaria-escura);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.link-acao:hover {
+    color: var(--cor-texto);
+}
+
+/* Foco visível também na área de rolagem da tabela e nos títulos que recebem foco */
+[tabindex]:focus-visible {
+    outline: 3px solid var(--cor-primaria);
+    outline-offset: 2px;
+}
+
+/* PÁGINA */
+
+.pagina-conta {
+    padding: 34px 0 10px;
+}
+
+.sobretitulo {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--conta-verde);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+}
+
+.cabecalho-conta h1 {
+    margin-bottom: 6px;
+    color: var(--conta-tinta);
+    font-size: clamp(28px, 4vw, 38px);
+    letter-spacing: -.03em;
+    line-height: 1.15;
+}
+
+.cabecalho-conta p {
+    max-width: 640px;
+    color: var(--cor-texto-suave);
+    font-size: 16px;
+}
+
+/* Atalhos para as seções da página */
+
+.atalhos-conta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 20px 0 22px;
+}
+
+.atalhos-conta a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    padding: 8px 16px;
+    border: 1px solid var(--borda-campo);
+    border-radius: 999px;
+    background: #ffffff;
+    color: var(--conta-verde-escuro);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.atalhos-conta a:hover {
+    border-color: var(--conta-verde);
+    background: #f0f5ed;
+}
+
+/* Cartões das seções */
+
+.grade-conta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    align-items: start;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.cartao-conta {
+    min-width: 0;
+    margin-bottom: 20px;
+    padding: 24px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 16px;
+    background: var(--cor-superficie);
+    box-shadow: var(--sombra);
+    /* Ao chegar por uma âncora (#extrato...), o título não cola no topo da tela */
+    scroll-margin-top: 16px;
+}
+
+.grade-conta .cartao-conta {
+    margin-bottom: 0;
+}
+
+.cartao-conta h2 {
+    margin-bottom: 6px;
+    color: var(--conta-tinta);
+    font-size: 22px;
+    letter-spacing: -.02em;
+}
+
+.texto-cartao {
+    margin-bottom: 16px;
+    color: var(--cor-texto-suave);
+    font-size: 14px;
+}
+
+/* RESUMO */
+
+.saldo-destaque {
+    margin: 12px 0 18px;
+    padding: 18px;
+    border: 1px solid #dcebdd;
+    border-radius: 14px;
+    background: linear-gradient(120deg, #f0f7ee, #fff6ea);
+}
+
+.rotulo-saldo {
+    display: block;
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.valor-saldo {
+    display: block;
+    color: var(--cor-sucesso);
+    font-size: clamp(32px, 8vw, 42px);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.03em;
+    line-height: 1.2;
+}
+
+.dica-saldo {
+    margin-top: 6px;
+    color: var(--cor-texto);
+    font-size: 14px;
+}
+
+.dados-conta {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.dados-conta > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--cor-borda);
+}
+
+.dados-conta dt {
+    flex: 0 0 auto;
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+}
+
+.dados-conta dd {
+    min-width: 0;
+    color: var(--cor-texto);
+    font-size: 15px;
+    font-weight: 700;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+#resumo .botao {
+    width: 100%;
+}
+
+/* ADICIONAR CRÉDITO */
+
+#form-credito {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.legenda-obrigatorio {
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+}
+
+.campo-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.campo-formulario > label {
+    color: var(--cor-texto);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Campo de valor com o "R$" na frente */
+.campo-moeda {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--borda-campo);
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.prefixo-moeda {
+    padding: 0 2px 0 14px;
+    color: var(--cor-texto-suave);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.campo-moeda input {
+    width: 100%;
+    min-width: 0;
+    min-height: 52px;
+    flex: 1;
+    padding: 10px 14px 10px 6px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--cor-texto);
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.campo-moeda input::placeholder {
+    color: var(--cor-texto-suave);
+    font-weight: 400;
+    opacity: 1;
+}
+
+/* O foco aparece no contorno do campo inteiro (com o "R$") */
+.campo-moeda input:focus-visible {
+    outline: 0;
+}
+
+.campo-moeda:focus-within {
+    border-color: var(--cor-primaria);
+    outline: 3px solid var(--cor-primaria);
+    outline-offset: 2px;
+}
+
+.campo-moeda:has(input[aria-invalid="true"]) {
+    border-color: var(--cor-erro);
+    background: var(--cor-erro-clara);
+}
+
+/* Atalhos de valor */
+.atalhos-valor {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.atalho-valor {
+    min-height: 44px;
+    padding: 8px 4px;
+    border: 1px solid var(--borda-campo);
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--conta-verde-escuro);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.atalho-valor:hover {
+    border-color: var(--conta-verde);
+    background: #f0f5ed;
+}
+
+/* Declaração obrigatória */
+.campo-declaracao {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.opcao-declaracao {
+    display: flex;
+    min-height: 44px;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--borda-campo);
+    border-radius: 10px;
+    background: #fbfcf9;
+    color: var(--cor-texto);
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.opcao-declaracao input {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+    margin-top: 1px;
+    accent-color: var(--cor-primaria);
+    cursor: pointer;
+}
+
+.opcao-declaracao:has(input[aria-invalid="true"]) {
+    border-color: var(--cor-erro);
+    background: var(--cor-erro-clara);
+}
+
+#form-credito .botao {
+    width: 100%;
+    min-height: 48px;
+}
+
+#creditos .mensagem-api {
+    margin-top: 14px;
+    font-weight: 700;
+}
+
+/* EXTRATO */
+
+.tabela-dados {
+    /* Em telas estreitas a tabela mantém a largura e rola dentro da caixa, sem empurrar a página */
+    min-width: 580px;
+}
+
+.coluna-data {
+    white-space: nowrap;
+}
+
+.coluna-descricao {
+    min-width: 170px;
+}
+
+.etiqueta-ajuste {
+    background: var(--cor-aviso-clara);
+    color: #7a4a00;
+}
+
+.estado-lista {
+    border: 1px dashed var(--cor-borda);
+    border-radius: var(--raio);
+    background: #fbfcf9;
+    font-size: 15px;
+}
+
+.estado-lista .botao {
+    margin-top: 12px;
+}
+
+.estado-lista .link-acao {
+    margin-top: 2px;
+}
+
+/* MINHAS COMPRAS */
+
+.lista-compras {
+    display: grid;
+    gap: 12px;
+    list-style: none;
+}
+
+.compra {
+    padding: 16px 18px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 12px;
+    background: #ffffff;
+    scroll-margin-top: 16px;
+}
+
+.topo-compra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 6px 16px;
+}
+
+.compra h3 {
+    color: var(--conta-tinta);
+    font-size: 16px;
+}
+
+.data-compra {
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+}
+
+.total-da-compra {
+    color: var(--cor-texto-suave);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.total-da-compra strong {
+    color: var(--conta-tinta);
+    font-size: 19px;
+}
+
+.itens-da-compra {
+    margin-top: 12px;
+    border-top: 1px solid var(--cor-borda);
+    list-style: none;
+}
+
+.item-compra {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: baseline;
+    gap: 4px 18px;
+    padding: 9px 0;
+    border-bottom: 1px dashed var(--cor-borda);
+    font-size: 14px;
+}
+
+.item-compra:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.item-nome {
+    color: var(--cor-texto);
+    overflow-wrap: anywhere;
+}
+
+.item-unitario {
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.item-subtotal {
+    min-width: 76px;
+    color: var(--cor-texto);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* TELAS MENORES */
+
+@media (max-width: 860px) {
+    .grade-conta {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .container {
+        width: min(92%, 560px);
+    }
+
+    .header {
+        padding: 12px 0;
+    }
+
+    .navegacao a,
+    .navegacao .botao-sair {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    .pagina-conta {
+        padding-top: 24px;
+    }
+
+    .cartao-conta {
+        padding: 18px 16px;
+    }
+
+    .cartao-conta h2 {
+        font-size: 20px;
+    }
+
+    .atalhos-conta a {
+        padding: 8px 13px;
+        font-size: 13px;
+    }
+
+    /* Item da compra: nome em cima; preço unitário e subtotal embaixo */
+    .item-compra {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .item-nome {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 380px) {
+    .container {
+        width: min(94%, 360px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: .01ms !important;
+    }
+}

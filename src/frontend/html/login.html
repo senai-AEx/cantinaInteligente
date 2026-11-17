@@ -4,64 +4,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#fffaf4">
 
-    <title>Login - Cantina da Honestidade</title>
+    <title>Entrar | Cantina da Honestidade</title>
 
-    <link rel="stylesheet" href="../css/base.css">
-    <link rel="stylesheet" href="../css/login_cadastro.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/login_cadastro.css">
 </head>
 
 <body>
 
-    <main class="pagina-autenticacao">
+    <div id="header-container"></div>
 
-        <section class="card-autenticacao">
+    <main id="conteudo-principal" class="pagina-autenticacao">
 
-            <a class="link-inicio" href="../index.html">← Voltar ao início</a>
-            <h1>Cantina da Honestidade</h1>
+        <section class="card-autenticacao" aria-labelledby="titulo-login">
+
+            <a class="link-inicio" href="/"><span aria-hidden="true">←</span> Voltar ao início</a>
+            <h1 id="titulo-login">Entrar na cantina</h1>
             <p class="subtitulo-autenticacao">
-                Entre com seus dados para acessar o sistema.
+                Use sua matrícula, seu e-mail ou seu CPF e a senha do cadastro.
             </p>
 
-            <form id="form-login">
+            <!-- Aviso de contexto (ex.: veio de uma tela que exige login) -->
+            <p id="aviso-login" class="mensagem-api" role="status"></p>
+
+            <form id="form-login" novalidate>
+
+                <p class="legenda-obrigatorio">
+                    <span class="obrigatorio" aria-hidden="true">*</span> Campo obrigatório
+                </p>
 
                 <div class="campo-formulario">
-                    <label for="matricula-login">Matrícula</label>
+                    <label for="identificador-login">
+                        Matrícula, e-mail ou CPF
+                        <span class="obrigatorio" aria-hidden="true">*</span>
+                    </label>
                     <input
                         type="text"
-                        id="matricula-login"
-                        name="matricula"
+                        id="identificador-login"
+                        name="identificador"
                         autocomplete="username"
+                        autocapitalize="none"
+                        autocorrect="off"
+                        spellcheck="false"
+                        maxlength="150"
                         required
+                        aria-required="true"
                     >
+                    <small class="erro-campo" id="erro-identificador-login" data-error-for="identificador"></small>
                 </div>
 
                 <div class="campo-formulario">
-                    <label for="senha-login">Senha</label>
+                    <label for="senha-login">
+                        Senha
+                        <span class="obrigatorio" aria-hidden="true">*</span>
+                    </label>
                     <input
                         type="password"
                         id="senha-login"
                         name="senha"
                         autocomplete="current-password"
+                        maxlength="72"
                         required
+                        aria-required="true"
                     >
+                    <small class="erro-campo" id="erro-senha-login" data-error-for="senha"></small>
+                    <label class="opcao-mostrar-senha" for="mostrar-senha-login">
+                        <input type="checkbox" id="mostrar-senha-login">
+                        <span>Mostrar senha</span>
+                    </label>
                 </div>
 
-                <button type="submit" class="botao botao-principal">
-                    Entrar
-                </button>
+                <p class="feedback-form" role="alert"></p>
+
+                <button type="submit" class="botao botao-principal">Entrar</button>
 
             </form>
 
             <p class="texto-alternativo">
                 Ainda não tem cadastro?
-                <a href="cadastro.html">Cadastre-se</a>
+                <a href="/html/cadastro.html">Criar conta</a>
             </p>
 
         </section>
 
     </main>
 
+    <div id="footer-container"></div>
+
+    <script src="/javascript/base.js"></script>
+    <script src="/javascript/login.js"></script>
 </body>
 
 </html>
