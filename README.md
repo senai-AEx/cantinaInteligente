@@ -1,92 +1,95 @@
-> **Escopo atualizado (16/10/2026):** este repositório registra o CRUD legado da AV04. As correções pedidas para AV05 (ID automático, sem validade/limites de estoque, dois preços e sem exclusão física no fluxo comum) ainda não estão implementadas. Consulte [estado atual e próximas entregas](docs/estado-atual-e-proximas-entregas.md).
+# Cantina Inteligente — Grupo 4
 
-# Cantina Inteligente — AV04 (Grupo 4)
+Sistema web para a **Cantina da Honestidade do SENAI Fraiburgo (SC)**: cadastro de produtos, catálogo para os clientes e, nas próximas entregas, usuários, carteira de créditos, compras e relatórios. Projeto Aplicado II — Centro Universitário SENAI Santa Catarina.
 
-Base de trabalho para apresentar **Manter Produto** com banco de dados. A stack definida pelo grupo é **Python + Flask + MySQL**. O backend fornece o CRUD de produtos, validações, persistência e auditoria.
+Stack: **Python + Flask + MySQL**, com HTML/CSS/JavaScript no frontend.
 
-## Entrega
+## Situação
 
-Projeto Aplicado II do Centro Universitário SENAI Santa Catarina para a Cantina da Honestidade, unidade Fraiburgo (SC), Grupo 4. Apresentação da AV04: **15/10/2026 às 20h40**.
-
-Acompanhe as tarefas no [Kanban AV04](https://github.com/orgs/senai-AEx/projects/1) e no [marco AV04 — CRUD de Produto](https://github.com/senai-AEx/cantinaInteligente/milestone/1).
+- AV04 (CRUD de produto) apresentada em 15/10/2026 — nota 85/100.
+- Devolutiva do produto aplicada na `develop` em 17/11/2026: código automático, preço de compra e de venda, só quantidade em estoque, sem validade, selos automáticos para frutas, gravação só pelo botão Salvar e exclusão lógica (o produto fica inativo e permanece no banco).
+- Próximas entregas e prazos: [estado atual e próximas entregas](docs/estado-atual-e-proximas-entregas.md).
 
 ## Executar localmente
 
-É necessário ter **Python**, **Docker Desktop** e **GNU Make** instalados. No Windows, abra o Docker Desktop e espere o serviço ficar pronto. No terminal, entre na pasta principal do repositório — a que contém este README e `requirements.txt`.
+Pré-requisitos: **Python 3**, **Docker Desktop** e **GNU Make**. Abra o Docker Desktop e, no terminal, entre na pasta do repositório.
 
-Na primeira execução daquele computador:
+Primeira vez no computador:
 
 ```sh
 make setup
 ```
 
-Esse comando cria `.env` a partir de `.env.example` se ainda não existir e prepara o ambiente Python em `.venv`. O arquivo `.env` é local e não deve ser enviado ao GitHub. Os valores de exemplo usam a senha `masterkey` para desenvolvimento local; se o container MySQL existente tiver outra senha root, informe a senha atual em `MYSQL_ROOT_PASSWORD` no `.env`. O comando não apaga nem recria containers existentes.
+Cria o `.env` a partir do `.env.example` (se não existir) e instala as dependências em `.venv`. O `.env` é local e não vai para o GitHub.
 
-Para iniciar o banco, aplicar as migrações pendentes e subir os servidores:
+Para trabalhar:
 
 ```sh
 make up
 ```
 
-O Make cria ou inicia o container `cantina-mysql` com o volume persistente `cantina-mysql-data`, aguarda o MySQL, aplica as migrações MySQL necessárias e inicia o Flask. Quando as telas estiverem presentes na branch, inicia também um servidor local para o frontend.
+Inicia o MySQL (container `cantina-mysql`, dados no volume `cantina-mysql-data`), aplica as migrações pendentes e sobe a API e as telas. `Ctrl+C` para os servidores; o MySQL continua ligado até `make down`.
 
-- API: http://127.0.0.1:5000/api/health
-- Conexão com banco: http://127.0.0.1:5000/api/health/db
-- Início: http://127.0.0.1:5500/
-- Catálogo cliente: http://127.0.0.1:5500/html/catalogo_produtos.html
-- Login: http://127.0.0.1:5500/html/login.html
-- Cadastro: http://127.0.0.1:5500/html/cadastro.html
-- Painel admin: http://127.0.0.1:5500/html/catalogo_produtos_adm.html
+Para ter produtos de exemplo num banco vazio:
 
-Mantenha o terminal aberto enquanto apresenta ou testa. `Ctrl+C` encerra os servidores Flask e frontend; o MySQL continua ligado. Para parar o container e preservar os dados, use `make down`. O volume não é removido por esses comandos.
+```sh
+make seed
+```
 
-### Comandos disponíveis
+| Endereço | Tela |
+| --- | --- |
+| http://127.0.0.1:5500/ | Início |
+| http://127.0.0.1:5500/html/catalogo_produtos.html | Catálogo do cliente |
+| http://127.0.0.1:5500/html/catalogo_produtos_adm.html | Painel administrativo |
+| http://127.0.0.1:5000/api/health/db | Teste de conexão da API com o banco |
+
+### Comandos
 
 | Comando | Ação |
 | --- | --- |
-| `make help` | Lista os comandos |
 | `make setup` | Prepara `.env` e o ambiente Python |
-| `make up` | Inicia banco, migrações, API e frontend disponível |
-| `make api` | Inicia banco, migrações e API |
-| `make web` | Serve as telas em `http://127.0.0.1:5500` |
-| `make db-up` | Inicia somente o MySQL |
-| `make db-down` ou `make down` | Para somente o MySQL, preservando os dados |
-| `make migrate` | Inicia o MySQL se necessário e confere/aplica migrações |
-| `make status` | Mostra o estado do MySQL, Flask e frontend |
-| `make test` | Executa os testes automatizados |
+| `make up` | Banco + migrações + API + telas |
+| `make api` / `make web` | Somente a API / somente as telas |
+| `make migrate` | Aplica migrações pendentes (atualiza bancos da AV04) |
+| `make seed` | Insere produtos de exemplo se a tabela estiver vazia |
+| `make test` | Testes automatizados |
+| `make status` | Mostra o que está rodando |
+| `make down` | Para o MySQL preservando os dados |
 
-Se a porta `3306`, `5000` ou `5500` já estiver ocupada, encerre o serviço que a utiliza antes de iniciar. O frontend chama a API Flask; por isso, abra as telas pelo servidor local (porta `5500`), não diretamente como arquivo `file://`.
+### Sem Docker (MySQL instalado no computador)
 
-Cada integrante possui seu próprio banco local. Os dados cadastrados em um computador não aparecem automaticamente nos demais.
+1. No MySQL Workbench, execute [`database/schema.sql`](database/schema.sql) (e, se quiser, [`database/seeds/produtos_exemplo.sql`](database/seeds/produtos_exemplo.sql)).
+2. Crie um usuário com acesso ao banco `cantina_inteligente` e informe-o no `.env` (`MYSQL_USER`, `MYSQL_PASSWORD`).
+3. Rode a API e as telas:
 
-## Estrutura de produto e banco
+```sh
+.venv/Scripts/python -m flask --app src.backend.app run --debug
+```
 
-O modelo comum está em [docs/modelo-produto.md](docs/modelo-produto.md), e as regras da entrega em [docs/requisitos-av04.md](docs/requisitos-av04.md). A tabela MySQL mantém código único, preço positivo em centavos, quantidades válidas, validade, foto, selos, situação e datas.
+```sh
+.venv/Scripts/python scripts/serve_frontend.py 5500
+```
 
-A tela administrativa atual permite inativar/reativar e ainda contém exclusão física. A regra aprovada é preservar histórico por inativação; a remoção definitiva deve sair do fluxo comum conforme a issue #10. As migrações MySQL ficam em `database/migrations`; `001_produtos.sql` é específica para SQLite e não deve ser usada no MySQL. O Make confere e aplica as migrações `002`, `003` e `004` sem repetir alterações já aplicadas.
+(No macOS/Linux, troque `.venv/Scripts/python` por `.venv/bin/python`.) Se o seu banco ainda está no formato da AV04, aplique [`database/migrations/005_produto_av05_mysql.sql`](database/migrations/005_produto_av05_mysql.sql) uma vez.
 
-## Rotas da API
+Abra as telas pelo servidor da porta 5500, não como arquivo `file://`. Cada integrante tem seu próprio banco local.
 
-- `GET /` — confirma que a API iniciou.
-- `GET /api/health` — estado do Flask.
-- `GET /api/health/db` — verifica a conexão MySQL com `SELECT 1`.
-- `GET /api/produtos?q=&status=` — lista, busca e filtra produtos.
-- `GET /api/produtos/<id>` — consulta detalhes.
-- `POST /api/uploads/produtos` — envia uma foto JPG, PNG ou WebP de até 5 MB.
-- `POST /api/produtos` — cadastra produto.
-- `PUT /api/produtos/<id>` — edita produto.
-- `PATCH /api/produtos/<id>/inativar` — inativa produto, mantendo-o para reativação.
-- `PATCH /api/produtos/<id>/reativar` — reativa produto.
-- `DELETE /api/produtos/<id>` — endpoint legado da AV04; não usar no fluxo aprovado e remover conforme a issue #10.
-- `GET /api/produtos/<id>/auditoria` — consulta o histórico de alterações.
+## Organização
 
-Para campos, exemplos de JSON e respostas de erro, consulte o [contrato do CRUD](docs/contrato-crud.md).
+```
+assets/produtos/   fotos enviadas pela tela
+database/          migrations/, seeds/ e schema.sql
+docs/              documentação (índice em docs/README.md)
+scripts/           atalhos usados pelo Makefile
+src/backend/       API Flask (produtos em camadas: routes → controller → service → repository)
+src/frontend/      telas HTML, CSS e JavaScript
+tests/             testes automatizados
+```
 
-## Materiais da entrega
+Detalhes em [docs/arquitetura.md](docs/arquitetura.md). A API está descrita em [docs/contrato-api-produtos.md](docs/contrato-api-produtos.md) e o modelo de produto em [docs/modelo-produto.md](docs/modelo-produto.md).
 
-- [Decisões da stack e do produto](docs/decisoes.md)
-- [Checklist manual](docs/testes-manuais-av04.md)
-- [Roteiro da apresentação](docs/roteiro-apresentacao-av04.md)
-- [Contribuição, branches e commits](CONTRIBUTING.md)
+Ainda não há login: não publique a API fora do ambiente local antes de implementar autenticação e perfis.
 
-Faça operações administrativas em ambiente local; não publique a API sem autenticação e autorização.
+## Equipe
+
+Equipe 4 (integrantes listados no Documento do Sistema). Fluxo de trabalho em [CONTRIBUTING.md](CONTRIBUTING.md).

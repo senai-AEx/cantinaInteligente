@@ -1,4 +1,6 @@
-> **Registro da AV04:** apresentada em 15/10/2026, nota 85/100. As devolutivas posteriores corrigem escopo para próximas entregas; veja [estado atual e próximas entregas](estado-atual-e-proximas-entregas.md).
+> **Registro histórico da AV04 (15/10/2026).** Descreve o modelo antigo de produto. O modelo atual está em [modelo-produto.md](../../modelo-produto.md).
+
+> **Registro da AV04:** apresentada em 15/10/2026, nota 85/100. As devolutivas posteriores corrigem escopo para próximas entregas; veja [estado atual e próximas entregas](../../estado-atual-e-proximas-entregas.md).
 
 # Requisitos fechados para a AV04
 

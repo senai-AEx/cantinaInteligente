@@ -1,33 +1,32 @@
-> **Estado em 16/10/2026:** a stack Flask/MySQL e as telas estão implementadas no develop; a correção do modelo de produto e a validação ponta a ponta continuam pendentes. Há uma rota de exclusão física legada que deve sair do fluxo comum. Consulte [estado atual e próximas entregas](estado-atual-e-proximas-entregas.md).
+# Decisões do projeto
 
-# Decisões de projeto para a AV04
+## Stack
 
-## Stack definida pelo grupo
-
-A equipe definiu **Python + Flask + MySQL** para implementar e apresentar o CRUD de Produto.
-
-| Camada | Escolha | Uso nesta entrega |
+| Camada | Escolha | Motivo |
 | --- | --- | --- |
-| Backend | Python com Flask | API HTTP para a aplicação e a interface. |
-| Banco de dados | MySQL 8.0.16 ou superior | Persistência relacional; as restrições CHECK precisam ser aplicadas. |
-| Conector Python | MySQL Connector/Python | Abrir a conexão definida no arquivo local `.env`. |
-| Valores monetários | Inteiro em centavos | Evitar erros de arredondamento. |
-| Datas do backend | Sessão MySQL configurada em UTC | Datas de criação, alteração e auditoria. |
+| Backend | Python 3 + Flask | Simples, gratuito e conhecido pela equipe (RNF12). |
+| Banco | MySQL 8.0.16+ | Relacional, com restrições CHECK aplicadas; roda em Docker ou instalação local. |
+| Conector | MySQL Connector/Python | Driver oficial; credenciais em `.env` (fora do Git). |
+| Frontend | HTML, CSS e JavaScript puros | Sem etapa de build; roda em qualquer navegador atual (RNF01). |
+| Dinheiro | Inteiros em centavos | Evita erros de arredondamento. |
+| Datas | Sessão MySQL em UTC | Auditoria consistente. |
 
-As variáveis ficam em `.env`, ignorado pelo Git. Use `.env.example` como referência e não versione credenciais. Consulte o [README](../README.md) para preparar o ambiente e executar as migrações.
+## Organização do código
 
-## Produto e comportamento do CRUD
+Backend em camadas `routes → controller → service → repository`, um pacote por módulo de negócio. Detalhes em [arquitetura.md](arquitetura.md). Essa divisão foi iniciada na branch do Luan e unificada na develop, substituindo o arquivo único `produtos.py` da AV04.
 
-- **Código:** `codigo_produto` único; EAN/GTIN da embalagem ou código interno.
-- **Campos:** nome, descrição, categoria, preço em centavos, saldo e limites de estoque, validade, caminho da foto, selos e situação. Regras completas em [modelo-produto.md](modelo-produto.md).
-- **Exclusão:** inativação reversível (`status = INATIVO`), sem apagar o produto ou suas referências.
-- **Auditoria:** cada inclusão, alteração, inativação e reativação deve registrar autor, origem, data/hora e valores antes/depois na mesma transação da mudança.
-- **PWA:** interface responsiva está no escopo; instalação offline fica para depois do CRUD.
+## Produto
 
-A migração `001_produtos.sql` é legada, exclusiva para SQLite. Para preparar um banco MySQL novo, aplique `002_produtos_mysql.sql`, `003_auditoria_produtos_mysql.sql` e `004_auditoria_exclusao_mysql.sql` uma única vez e nessa ordem. Em bancos que já têm as duas tabelas, aplique somente a migração `004` uma vez.
+Decisões tomadas a partir da devolutiva da AV04 (detalhes em [modelo-produto.md](modelo-produto.md)):
 
-## Estado do backend
+- **Código:** o identificador é o `id_produto` gerado pelo banco; não há código digitado.
+- **Preços:** preço de compra e preço de venda; a venda não pode ser menor que a compra.
+- **Estoque:** somente quantidade. Sem mínimo, máximo ou validade.
+- **Selos:** automáticos para a categoria Frutas; não aparecem no formulário.
+- **Exclusão:** sempre lógica (`status = INATIVO`). O produto e o histórico ficam no banco (RNF10). A rota de exclusão física da AV04 foi removida.
+- **Gravação:** o formulário só grava pelo clique no botão Salvar; Enter não envia.
+- **Auditoria:** cada gravação registra autor, origem, data/hora e antes/depois na mesma transação (RNF09).
 
-A API Flask conecta ao MySQL e implementa listagem com busca/filtro, consulta por ID, cadastro, edição, inativação/reativação e consulta de auditoria. As operações de escrita validam os dados e registram produto e auditoria na mesma transação. A interface consome o contrato em [contrato-crud.md](contrato-crud.md); sua implementação continua com a equipe de frontend.
+## Segurança
 
-Todas as rotas administrativas de Produto devem ficar locais para a apresentação até que autenticação e autorização estejam implementadas. `X-Actor` identifica apenas o operador informado pela interface e não substitui login.
+Ainda não há login. As rotas administrativas devem ficar em ambiente local até a implementação de autenticação e autorização por perfil (RNF08, issue #11). `X-Actor` apenas identifica o operador informado pela tela.

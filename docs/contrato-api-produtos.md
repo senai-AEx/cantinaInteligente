@@ -1,92 +1,66 @@
-> **Contrato legado da AV04:** API atual ainda tem campos e operação de exclusão que serão removidos conforme a devolutiva. Consulte [issue #10](https://github.com/senai-AEx/cantinaInteligente/issues/10) e [estado atual e próximas entregas](estado-atual-e-proximas-entregas.md).
+# API de produtos
 
-# API de Produtos — contrato para o frontend
+API JSON em `http://127.0.0.1:5000` (Python + Flask + MySQL). Ainda não há login: as rotas administrativas são para uso local até a implementação de autenticação e perfis (RNF08).
 
-Backend da AV04: Python + Flask + MySQL. A API usa JSON e fica em `http://127.0.0.1:5000`. Os endpoints administrativos são para execução local na apresentação; ainda não há login nem autorização por perfil.
+## Corpo de cadastro e edição
 
-## Produto e convenções
-
-Os nomes de campo seguem [o modelo de Produto](modelo-produto.md). `preco_centavos` é inteiro: R$ 4,50 é enviado como `450`, sem ponto flutuante. `validade` usa `AAAA-MM-DD` ou `null`; `foto_caminho` é um caminho relativo em `assets/produtos/` ou `null`. Selos são booleanos JSON. A API responde datas de auditoria em UTC com sufixo `Z`.
-
-Exemplo de corpo para `POST` e `PUT`:
+`POST /api/produtos` e `PUT /api/produtos/{id}` recebem:
 
 ```json
 {
-  "codigo_produto": "CI-AV04-001",
   "nome": "Suco de uva 200 ml",
   "descricao": "Produto de demonstração",
   "categoria": "Bebidas",
-  "preco_centavos": 450,
+  "preco_compra_centavos": 300,
+  "preco_venda_centavos": 450,
   "quantidade_estoque": 10,
-  "estoque_minimo": 3,
-  "estoque_maximo": 20,
-  "validade": "2026-12-15",
-  "foto_caminho": "assets/produtos/suco-uva.jpg",
-  "zero_lactose": true,
-  "zero_acucar": false
+  "foto_caminho": "assets/produtos/3f2a...png"
 }
 ```
 
-`codigo_produto`, `nome`, `categoria` e `preco_centavos` são obrigatórios. A descrição começa vazia, estoque e mínimos/máximos começam em zero, validade e foto começam nulas e selos começam falsos quando omitidos. `PUT` substitui os dados editáveis: a tela deve enviar o produto completo que está editando. A situação (`status`) e os identificadores são controlados pelo servidor.
+- Obrigatórios: `nome`, `categoria`, `preco_compra_centavos`, `preco_venda_centavos`.
+- `descricao` vazia, `quantidade_estoque` 0 e `foto_caminho` nulo quando omitidos.
+- `id_produto`, `status`, `zero_lactose` e `zero_acucar` são definidos pelo servidor. Enviá-los (ou campos antigos como `codigo_produto`, `validade`, `estoque_minimo`, `estoque_maximo`) gera erro `422` "Campo não permitido".
+- `PUT` substitui todos os dados editáveis: envie o produto completo.
+
+Resposta de sucesso: `{"produto": {...}}` com todos os campos do [modelo](modelo-produto.md).
 
 ## Rotas
 
 | Método e rota | Uso | Sucesso |
 | --- | --- | --- |
-| `GET /api/health` | Verificar Flask | `200` `{"status":"ok"}` |
-| `GET /api/health/db` | Verificar MySQL com `SELECT 1` | `200`; indisponível: `503` |
-| `POST /api/uploads/produtos` | Enviar foto como `multipart/form-data`, campo `imagem` | `201` com `{"foto_caminho":"assets/produtos/<nome-gerado>.png"}`; aceita JPG, PNG ou WebP até 5 MB |
-| `GET /api/produtos?q=suco&status=ATIVO` | Listar e filtrar por código, nome ou categoria e situação | `200` com uma lista JSON; sem resultados: `[]` |
-| `GET /api/produtos/{id}` | Abrir detalhes para visualizar/editar | `200` com `{"produto": {...}}`; não existe: `404` |
-| `POST /api/produtos` | Cadastrar | `201` com `{"produto": {...}}` e cabeçalho `Location` |
-| `PUT /api/produtos/{id}` | Salvar edição | `200` com `{"produto": {...}}`; não existe: `404` |
-| `PATCH /api/produtos/{id}/inativar` | Inativar após confirmação da interface | `200` com o produto inativo; não existe: `404` |
-| `PATCH /api/produtos/{id}/reativar` | Reativar produto | `200` com o produto ativo; não existe: `404` |
-| `DELETE /api/produtos/{id}` | Excluir definitivamente após confirmação explícita | `200` com a mensagem de confirmação; não existe: `404`; migração 004 pendente: `409` |
-| `GET /api/produtos/{id}/auditoria` | Consultar até 100 alterações mais recentes, inclusive após exclusão | `200` com `{"auditorias": [...]}`; id desconhecido: `404` |
+| `GET /api/health` | Verificar o Flask | `200` |
+| `GET /api/health/db` | Verificar o MySQL (`SELECT 1`) | `200`; banco fora: `503` |
+| `GET /api/produtos?q=&status=` | Listar; `q` busca por nome, categoria ou código (id); `status` = `TODOS` (padrão), `ATIVO` ou `INATIVO` | `200` com lista |
+| `GET /api/produtos/{id}` | Consultar um produto | `200`; não existe: `404` |
+| `POST /api/produtos` | Cadastrar | `201` + cabeçalho `Location` |
+| `PUT /api/produtos/{id}` | Alterar | `200`; não existe: `404` |
+| `PATCH /api/produtos/{id}/inativar` | **Excluir** (exclusão lógica: fica `INATIVO`) | `200` |
+| `PATCH /api/produtos/{id}/reativar` | Reativar | `200` |
+| `GET /api/produtos/{id}/auditoria` | Últimas 100 ações do produto | `200` com `{"auditorias": [...]}` |
+| `POST /api/uploads/produtos` | Enviar foto (`multipart/form-data`, campo `imagem`; JPG/PNG/WebP até 5 MB) | `201` com `{"foto_caminho": "assets/produtos/..."}` |
 
-O filtro `status` aceita `TODOS`, `ATIVO` ou `INATIVO`; o padrão é `TODOS`, para a tela administrativa poder localizar itens inativos. `q` é opcional. As rotas de catálogo devem exibir apenas produtos ativos, com estoque maior que zero e validade não vencida; a listagem administrativa continua mostrando todos.
+Não existe `DELETE /api/produtos/{id}`: a chamada responde `405`.
 
-Para fotos, o frontend envia o arquivo selecionado para `POST /api/uploads/produtos` antes do `POST` ou `PUT` do produto e inclui o `foto_caminho` retornado no JSON. O backend aceita JPG, PNG e WebP de até 5 MB e salva com nome aleatório em `assets/produtos/`.
+## Erros
 
-Inativar é reversível: o produto sai do catálogo, continua no banco e pode ser reativado. Excluir é definitivo: remove a linha de `produtos`, grava a ação `EXCLUIR` com a cópia final do produto e mantém todo o histórico em `auditoria_produtos`. Depois da exclusão, `GET /api/produtos/{id}/auditoria` continua disponível para consultar esse histórico. A migração `004_auditoria_exclusao_mysql.sql` é obrigatória para remover a chave estrangeira restritiva e permitir essa operação. Inativar um produto já inativo ou reativar um já ativo não duplica registros de auditoria.
-
-## Respostas de erro
-
-Campos inválidos respondem `422` e indicam o problema por campo:
+Campos inválidos respondem `422`:
 
 ```json
 {
   "erro": "Revise os campos informados.",
   "campos": {
-    "preco_centavos": "O valor está fora do limite permitido.",
-    "estoque_maximo": "Deve ser maior ou igual ao estoque mínimo."
+    "preco_venda_centavos": "O preço de venda não pode ser menor que o preço de compra."
   }
 }
 ```
 
-O front deve mostrar `campos[nome_do_campo]` junto ao respectivo controle e preservar os outros valores digitados. Código duplicado, texto fora dos limites, preço não positivo, quantidade negativa, máximo menor que mínimo, data inválida e chaves desconhecidas são recusados. JSON malformado ou tipo de conteúdo incorreto responde `400`; identificador inexistente responde `404`; banco indisponível ou não configurado responde `503`.
+JSON malformado ou sem `Content-Type: application/json`: `400`. Produto inexistente: `404`. Banco indisponível ou `.env` incompleto: `503`.
 
-## Auditoria e transações
+## Auditoria e autor
 
-Inclusão, edição, inativação, reativação e exclusão registram ação, produto, autor, origem, horário UTC e valores antes/depois. Cada alteração e seu registro de auditoria ficam na mesma transação MySQL; se uma falhar, ambas são revertidas. A interface pode enviar `X-Actor` para identificar o operador na demonstração; sem o cabeçalho, fica `administrador-local`. Esse valor é informativo e não comprova identidade enquanto o sistema não tiver autenticação.
+Toda inclusão, alteração, inativação e reativação grava a auditoria na mesma transação. O cabeçalho opcional `X-Actor` identifica o operador (padrão `administrador-local`); é apenas informativo enquanto não houver login.
 
-## Integração local do frontend
+## Uso pelo frontend
 
-Para desenvolvimento separado, CORS aceita as origens de Live Server nas portas `5500` e `5501`, e Vite na porta `5173`, em `localhost` e `127.0.0.1`. A interface pode usar `fetch("http://127.0.0.1:5000/api/produtos")`, enviar/receber JSON e tratar códigos HTTP. Não abra o CRUD administrativo para uma rede pública antes de adicionar autenticação e autorização de Administrador.
-
-Exemplo de chamada do navegador:
-
-```js
-const resposta = await fetch("http://127.0.0.1:5000/api/produtos", {
-  method: "POST",
-  headers: { "Content-Type": "application/json", "X-Actor": "administrador-local" },
-  body: JSON.stringify(produto), // preco_centavos deve ser inteiro, por exemplo 450
-});
-const resultado = await resposta.json();
-
-if (!resposta.ok) {
-  // Exiba resultado.campos perto dos campos inválidos, quando existir.
-  throw new Error(resultado.erro);
-}
-```
+CORS aceita `localhost`/`127.0.0.1` nas portas 5500, 5501 (Live Server) e 5173 (Vite). Para fotos, a tela envia o arquivo para `/api/uploads/produtos` antes do `POST`/`PUT` e inclui o `foto_caminho` retornado.

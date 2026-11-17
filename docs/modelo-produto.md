@@ -1,38 +1,52 @@
-> **Modelo legado da AV04:** esta página lista código manual, validade e limites de estoque. A devolutiva pede removê-los e incluir preço de compra/venda; essas mudanças estão pendentes na [issue #10](https://github.com/senai-AEx/cantinaInteligente/issues/10). Consulte [estado atual e próximas entregas](estado-atual-e-proximas-entregas.md).
+# Modelo de produto
 
-# Modelo de produto definido para a AV04
+Modelo em vigor a partir da AV05, já com as devolutivas da AV04 aplicadas. O esquema completo está em [`database/schema.sql`](../database/schema.sql); bancos criados na AV04 são atualizados pela migração [`005_produto_av05_mysql.sql`](../database/migrations/005_produto_av05_mysql.sql).
 
 ## Entidade `produtos`
 
-| Campo | Tipo lógico | Regra |
+| Campo | Tipo | Regra |
 | --- | --- | --- |
-| `id_produto` | identificador inteiro | Gerado pelo banco; chave primária. |
-| `codigo_produto` | texto, até 32 caracteres | Obrigatório e único. EAN/GTIN da embalagem ou código interno como `CI-0001`. |
-| `nome` | texto, 2–100 caracteres | Obrigatório; não aceitar apenas espaços. |
-| `descricao` | texto, até 500 caracteres | Opcional. |
-| `categoria` | texto, 2–50 caracteres | Obrigatória; texto simples nesta etapa. |
-| `preco_centavos` | inteiro | Obrigatório e maior que zero; a tela mostra R$. |
-| `quantidade_estoque` | inteiro | Não negativo; saldo inicial para a AV04. |
-| `estoque_minimo` | inteiro | Não negativo; limiar de alerta. |
-| `estoque_maximo` | inteiro | Não negativo e ≥ mínimo; alvo de reposição, não limite rígido para quantidade. |
-| `validade` | data ISO `AAAA-MM-DD` | Opcional; representa a **menor validade** do estoque atual. |
-| `foto_caminho` | caminho relativo | Opcional; arquivo local em `assets/produtos/`. |
-| `zero_lactose`, `zero_acucar` | booleanos | Selos opcionais do RF03. |
-| `status` | `ATIVO` ou `INATIVO` | Padrão `ATIVO`; inativar muda para `INATIVO` e permite reativação. Excluir remove definitivamente a linha de produto. |
-| `criado_em`, `atualizado_em` | data e hora UTC | Controle de alterações. |
+| `id_produto` | inteiro | **Código do produto.** Gerado pelo banco (`AUTO_INCREMENT`); não é digitado no cadastro. |
+| `nome` | texto, 2–100 | Obrigatório; não aceita apenas espaços. |
+| `descricao` | texto, até 500 | Opcional. |
+| `categoria` | texto, 2–50 | Obrigatória. |
+| `preco_compra_centavos` | inteiro | Obrigatório, maior que zero. Quanto a cantina paga pelo produto. |
+| `preco_venda_centavos` | inteiro | Obrigatório, maior que zero e **não menor que o preço de compra**. É o preço exibido ao cliente. |
+| `quantidade_estoque` | inteiro | Não negativo; padrão 0. Único controle de estoque do produto. |
+| `foto_caminho` | texto | Opcional; arquivo em `assets/produtos/` enviado pela tela. |
+| `zero_lactose`, `zero_acucar` | booleanos | **Definidos pelo sistema:** verdadeiros quando a categoria é *Frutas*; falsos nas demais. Não aparecem no formulário. |
+| `status` | `ATIVO` / `INATIVO` | Padrão `ATIVO`. **Excluir** um produto muda para `INATIVO`. |
+| `criado_em`, `atualizado_em` | data/hora UTC | Controle automático. |
 
-## Identificador e QR
+Valores monetários são guardados em centavos (inteiros) para evitar erros de arredondamento: R$ 4,50 = `450`.
 
-A AV02 propõe leitura do **EAN/GTIN do produto** e QR para entrar na **cantina**. O DER da AV03 nomeia o campo do produto `codigo_qr`. Para evitar imprimir QR individual em cada item, adotamos `codigo_produto` no banco e na interface. Ele aceita o código de barras existente ou um código interno para itens sem EAN/GTIN. O atributo `codigo_qr` da AV03 fica, portanto, **substituído por `codigo_produto`** nesta implementação; o QR da cantina pertence a outra parte do sistema.
+## O que mudou em relação à AV04
 
-## Validade e estoque
+| Antes (AV04) | Agora | Motivo |
+| --- | --- | --- |
+| `codigo_produto` digitado e único | Removido; o código é o `id_produto` automático | Devolutiva: ID automático, sem código manual. |
+| `preco_centavos` | `preco_compra_centavos` + `preco_venda_centavos` | Devolutiva: preço de compra e de venda. |
+| `estoque_minimo`, `estoque_maximo` | Removidos | Devolutiva: manter somente quantidade em estoque. |
+| `validade` | Removida | Devolutiva: retirar validade do RF03 e do produto. |
+| Selos marcados à mão | Automáticos para Frutas | Devolutiva: remover os rótulos de zero lactose do cadastro; aplicar a regra para frutas. |
+| Botão "Excluir definitivamente" | Removido; Excluir = inativar | Devolutiva: o produto deve continuar no banco como inativo (RNF10). |
 
-Produtos embalados podem chegar em lotes com validades diferentes. Para a demonstração da AV04, `validade` registra a data mais próxima entre as unidades disponíveis. Ao repor o produto, esse valor deve ser revisto. O controle por lote e FEFO previsto como evolução na AV02 substitui essa simplificação depois. Produto inativo, sem estoque ou com validade anterior à data atual não aparece no catálogo disponível; continua consultável pela administração.
+## Exclusão lógica
 
-O estoque inicial fica no produto para atender ao DER da AV03 e ao CRUD da AV04. Movimentos de entrada, venda e ajuste previstos na AV02 serão outra funcionalidade; quando existirem, deverão atualizar `quantidade_estoque` na mesma transação e manter histórico.
+O sistema não apaga produtos. Ao excluir, o produto:
+
+- sai do catálogo do cliente e da lista de ativos;
+- continua na tabela `produtos` com `status = 'INATIVO'`, com todos os dados;
+- pode ser reativado pela tela administrativa;
+- tem a ação registrada em `auditoria_produtos` (`INATIVAR`).
+
+A API não possui rota `DELETE` para produtos.
 
 ## Auditoria
 
-A tabela `auditoria_produtos` guarda produto, ação, autor, origem, data/hora e dados antes/depois para inclusão, alteração, inativação, reativação e exclusão definitiva. A exclusão registra uma cópia final do produto antes de remover sua linha. A migração `004_auditoria_exclusao_mysql.sql` remove a chave estrangeira da auditoria para que o histórico sobreviva à exclusão. O backend grava a mudança e a auditoria na **mesma transação**.
+`auditoria_produtos` guarda ação (`INCLUIR`, `ALTERAR`, `INATIVAR`, `REATIVAR`), autor, origem, data/hora e os dados antes/depois. A gravação do produto e a da auditoria acontecem na mesma transação: ou as duas são salvas, ou nenhuma. O valor `EXCLUIR` continua no ENUM apenas para registros antigos da AV04.
 
-Fontes: RF02/RF03 e DER de `AV03_GRUPO_4.pdf`; RF04/RF18 e arquitetura de `AV02_Cantina_Inteligente_Solucao_e_Requisitos.pdf`.
+## Pendências de negócio
+
+- Confirmar com a cantina se outras categorias além de *Frutas* devem receber os selos.
+- Produtos migrados da AV04 receberam preço de compra igual ao de venda; revise-os na tela.

@@ -1,3 +1,5 @@
+> **Registro histórico da AV04 (15/10/2026).** Descreve o modelo antigo de produto. O modelo atual está em [modelo-produto.md](../../modelo-produto.md).
+
 # Roteiro de apresentação da AV04
 
 **Grupo 4 — 15/10/2026, às 20h40.**
