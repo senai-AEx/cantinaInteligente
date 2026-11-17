@@ -11,3 +11,7 @@ coverage/
 *.db
 *.sqlite
 *.sqlite3
+
+# Fotos enviadas pela tela de produtos (dados locais)
+assets/produtos/*
+!assets/produtos/.gitkeep

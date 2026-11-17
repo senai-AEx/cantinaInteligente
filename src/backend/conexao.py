@@ -1,11 +1,12 @@
-"""Conexão e transações do MySQL para o backend da AV04."""
+"""Conexão e transações do MySQL."""
 from contextlib import contextmanager
 import os
-from pathlib import Path
-import mysql.connector
-from dotenv import load_dotenv, find_dotenv
 
-# Carrega as variáveis de ambiente .ENV
+import mysql.connector
+from dotenv import find_dotenv, load_dotenv
+
+# Procura o .env subindo a partir desta pasta (src/backend → src → raiz do projeto).
+# Variáveis já definidas no ambiente têm prioridade sobre o arquivo.
 load_dotenv(find_dotenv())
 
 def conectar():

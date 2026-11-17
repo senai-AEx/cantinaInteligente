@@ -171,10 +171,6 @@ def apply_migrations(values):
         print(f"Migração conferida: {filename}")
 
     migration_004 = migrations / "004_auditoria_exclusao_mysql.sql"
-    if not migration_004.exists():
-        print("Migração 004 não está nesta branch; exclusão continuará como inativação.")
-        return
-
     estado = docker_mysql(
         """SELECT
           (SELECT COUNT(*) FROM information_schema.REFERENTIAL_CONSTRAINTS
@@ -201,6 +197,39 @@ def apply_migrations(values):
         raise RuntimeError(
             "A auditoria está parcialmente migrada. Confira a tabela auditoria_produtos antes de continuar."
         )
+
+    colunas = docker_mysql(
+        """SELECT
+          (SELECT COUNT(*) FROM information_schema.COLUMNS
+           WHERE TABLE_SCHEMA = 'cantina_inteligente' AND TABLE_NAME = 'produtos'
+             AND COLUMN_NAME = 'codigo_produto'),
+          (SELECT COUNT(*) FROM information_schema.COLUMNS
+           WHERE TABLE_SCHEMA = 'cantina_inteligente' AND TABLE_NAME = 'produtos'
+             AND COLUMN_NAME = 'preco_compra_centavos');""",
+        values,
+    ).split("\t")
+    tem_codigo, tem_preco_compra = (int(valor) > 0 for valor in colunas)
+    if tem_codigo and not tem_preco_compra:
+        sql = (migrations / "005_produto_av05_mysql.sql").read_text(encoding="utf-8-sig")
+        docker_mysql(sql, values)
+        print("Migração conferida: 005_produto_av05_mysql.sql")
+    elif not tem_codigo and tem_preco_compra:
+        print("Migração 005 já aplicada.")
+    else:
+        raise RuntimeError(
+            "A tabela produtos está parcialmente migrada. Confira as colunas antes de continuar."
+        )
+
+
+def seed():
+    values = ensure_database()
+    total = int(docker_mysql("SELECT COUNT(*) FROM cantina_inteligente.produtos;", values) or 0)
+    if total:
+        print(f"O banco já tem {total} produto(s); nenhum dado de exemplo foi inserido.")
+        return
+    sql = (ROOT / "database" / "seeds" / "produtos_exemplo.sql").read_text(encoding="utf-8-sig")
+    docker_mysql(sql, values)
+    print("Produtos de exemplo inseridos.")
 
 
 def ensure_database():
@@ -263,8 +292,8 @@ def run_services(include_web=True):
         print(f"Banco: http://127.0.0.1:{API_PORT}/api/health/db")
         if frontend_exists and include_web:
             print(f"Início: http://127.0.0.1:{WEB_PORT}/")
-            print(f"Admin: http://127.0.0.1:{WEB_PORT}/src/frontend/html/catalogo_produtos_adm.html")
-            print(f"Catálogo: http://127.0.0.1:{WEB_PORT}/src/frontend/html/catalogo_produtos.html")
+            print(f"Admin: http://127.0.0.1:{WEB_PORT}/html/catalogo_produtos_adm.html")
+            print(f"Catálogo: http://127.0.0.1:{WEB_PORT}/html/catalogo_produtos.html")
         elif include_web:
             print("Página inicial do frontend não encontrada; confira src/frontend/index.html.")
         print("Pressione Ctrl+C para parar os servidores. O MySQL continuará ligado.")
@@ -347,6 +376,7 @@ def print_help():
     print("  make db-up    inicia somente o MySQL")
     print("  make db-down  para somente o MySQL")
     print("  make migrate  aplica migrações MySQL pendentes")
+    print("  make seed     insere produtos de exemplo se a tabela estiver vazia")
     print("  make api      inicia MySQL/migrações e roda somente a API")
     print("  make web      serve as telas em http://127.0.0.1:5500")
     print("  make test     executa os testes automatizados")
@@ -361,6 +391,7 @@ def main():
         "db-up": lambda: start_database(ensure_env_file()),
         "db-down": database_down,
         "migrate": ensure_database,
+        "seed": seed,
         "api": lambda: run_services(include_web=False),
         "web": lambda: subprocess.run(serve_web(), cwd=ROOT, check=True),
         "test": test,
