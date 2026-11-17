@@ -39,8 +39,8 @@
                             <span aria-hidden="true">＋</span> Novo produto
                         </button>
                         <a href="catalogo_produtos.html">Ver catálogo da cantina</a>
-                        <button type="button" class="atalho-menu" id="filtrar-estoque-baixo" aria-pressed="false">
-                            Produtos com estoque baixo
+                        <button type="button" class="atalho-menu" id="filtrar-sem-estoque" aria-pressed="false">
+                            Produtos sem estoque
                         </button>
                     </nav>
                 </aside>
@@ -62,13 +62,13 @@
                     <section class="resumo-produtos" aria-label="Resumo do catálogo">
                         <article class="resumo-card"><span>Produtos ativos</span><strong id="total-ativos">—</strong></article>
                         <article class="resumo-card"><span>Produtos inativos</span><strong id="total-inativos">—</strong></article>
-                        <article class="resumo-card"><span>Estoque baixo</span><strong id="total-estoque-baixo">—</strong></article>
+                        <article class="resumo-card"><span>Sem estoque</span><strong id="total-sem-estoque">—</strong></article>
                     </section>
 
                     <section class="controles-catalogo" aria-label="Buscar e filtrar produtos">
                         <label class="busca-produtos" for="busca-produtos">
                             <span aria-hidden="true">⌕</span>
-                            <input type="search" id="busca-produtos" placeholder="Buscar por nome, código ou categoria" autocomplete="off">
+                            <input type="search" id="busca-produtos" placeholder="Buscar por nome, categoria ou código" autocomplete="off">
                         </label>
                         <div class="filtros-status" role="group" aria-label="Filtrar situação dos produtos">
                             <button type="button" class="filtro-status selecionado" data-filtro-status="TODOS" aria-pressed="true">Todos</button>
@@ -92,382 +92,174 @@
     </main>
 
     <!-- MODAL CADASTRO DE PRODUTO -->
-    <div
-        class="modal-overlay"
-        id="modal-cadastro-produto"
-        aria-hidden="true"
-    >
-
+    <div class="modal-overlay" id="modal-cadastro-produto" aria-hidden="true">
         <div class="modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="titulo-cadastro-produto">
 
-            <button
-                type="button"
-                class="modal-fechar"
-                id="fechar-cadastro-produto"
-                aria-label="Fechar"
-            >
-                &times;
-            </button>
+            <button type="button" class="modal-fechar" id="fechar-cadastro-produto" aria-label="Fechar">&times;</button>
 
             <span class="sobretitulo">NOVO ITEM DO CATÁLOGO</span>
             <h2 id="titulo-cadastro-produto">Cadastrar produto</h2>
-            <p class="texto-modal">Campos com * são obrigatórios. O produto será cadastrado como ativo.</p>
+            <p class="texto-modal">Campos com * são obrigatórios. O produto só é gravado ao clicar em Salvar produto.</p>
 
-            <form id="form-cadastro-produto">
+            <!-- novalidate: a validação é feita pelo JavaScript; o formulário só é
+                 gravado quando o botão de salvar é clicado (Enter não grava). -->
+            <form id="form-cadastro-produto" novalidate>
 
                 <section class="form-secao" aria-labelledby="cadastro-secao-01">
                     <div class="form-secao-titulo">
                         <span>01</span>
-                        <div><h3 id="cadastro-secao-01">Identificação</h3><p>Código, nome e categoria do produto.</p></div>
+                        <div><h3 id="cadastro-secao-01">Identificação</h3><p>Nome e categoria do produto. O código é gerado automaticamente pelo sistema.</p></div>
                     </div>
                     <div class="form-grade">
-<div class="campo-formulario">
-                    <label for="cadastro-codigo_produto">Código do produto</label>
-                    <input
-                        type="text"
-                        id="cadastro-codigo_produto"
-                        name="codigo_produto"
-                        required
-                        minlength="3"
-                        maxlength="32"
-                        autocomplete="off"
-                    >
-                    <small class="dica-campo">Use o EAN/GTIN ou um código interno único.</small>
-                    <small class="erro-campo" data-error-for="codigo_produto"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="cadastro-nome">Nome do produto</label>
-                    <input
-                        type="text"
-                        id="cadastro-nome"
-                        name="nome"
-                        required
-                        minlength="2"
-                        maxlength="100"
-                    >
-                    <small class="erro-campo" data-error-for="nome"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="cadastro-categoria">Categoria</label>
-                    <input
-                        type="text"
-                        id="cadastro-categoria"
-                        name="categoria"
-                        list="categorias-cantina"
-                        placeholder="Ex.: Bebidas, Lanches"
-                        required
-                        minlength="2"
-                        maxlength="50"
-                    >
-                    <small class="erro-campo" data-error-for="categoria"></small>
-                </div>
-</div></section>
+                        <div class="campo-formulario">
+                            <label for="cadastro-nome">Nome do produto</label>
+                            <input type="text" id="cadastro-nome" name="nome" required minlength="2" maxlength="100" autocomplete="off">
+                            <small class="erro-campo" data-error-for="nome"></small>
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="cadastro-categoria">Categoria</label>
+                            <input type="text" id="cadastro-categoria" name="categoria" list="categorias-cantina" placeholder="Ex.: Bebidas, Lanches" required minlength="2" maxlength="50" autocomplete="off">
+                            <small class="erro-campo" data-error-for="categoria"></small>
+                        </div>
+                    </div>
+                </section>
 
                 <section class="form-secao" aria-labelledby="cadastro-secao-02">
                     <div class="form-secao-titulo">
                         <span>02</span>
-                        <div><h3 id="cadastro-secao-02">Preço e estoque</h3><p>Defina o valor, a validade e os limites de reposição.</p></div>
+                        <div><h3 id="cadastro-secao-02">Preços e estoque</h3><p>Valores em reais. O preço de venda não pode ser menor que o de compra.</p></div>
                     </div>
-                    <div class="form-grade">
-<div class="campo-formulario">
-                    <label for="cadastro-preco">Preço (R$)</label>
-                    <input
-                        type="number"
-                        id="cadastro-preco"
-                        name="preco"
-                        required
-                        min="0.01"
-                        step="0.01"
-                    >
-                    <small class="erro-campo" data-error-for="preco"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="cadastro-validade">Validade</label>
-                    <input
-                        type="date"
-                        id="cadastro-validade"
-                        name="validade"
-                        aria-describedby="cadastro-validade-ajuda"
-                    >
-                    <small class="dica-campo" id="cadastro-validade-ajuda">Informe a validade mais próxima entre as unidades que estão no estoque.</small>
-                    <small class="erro-campo" data-error-for="validade"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="cadastro-quantidade_estoque">Quantidade em estoque</label>
-                    <input
-                        type="number"
-                        id="cadastro-quantidade_estoque"
-                        name="quantidade_estoque"
-                        min="0"
-                        step="1"
-                        value="0"
-                    >
-                    <small class="erro-campo" data-error-for="quantidade_estoque"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="cadastro-estoque_minimo">Estoque mínimo</label>
-                    <input
-                        type="number"
-                        id="cadastro-estoque_minimo"
-                        name="estoque_minimo"
-                        min="0"
-                        step="1"
-                        value="0"
-                    >
-                    <small class="erro-campo" data-error-for="estoque_minimo"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="cadastro-estoque_maximo">Estoque máximo</label>
-                    <input
-                        type="number"
-                        id="cadastro-estoque_maximo"
-                        name="estoque_maximo"
-                        min="0"
-                        step="1"
-                        value="0"
-                        aria-describedby="cadastro-estoque_maximo-ajuda"
-                    >
-                    <small class="dica-campo" id="cadastro-estoque_maximo-ajuda">Meta para orientar a reposição; não impede que o estoque ultrapasse esse valor.</small>
-                    <small class="erro-campo" data-error-for="estoque_maximo"></small>
-                </div>
-</div></section>
+                    <div class="form-grade form-grade-tres">
+                        <div class="campo-formulario">
+                            <label for="cadastro-preco_compra">Preço de compra (R$)</label>
+                            <input type="text" id="cadastro-preco_compra" name="preco_compra" class="campo-moeda" inputmode="numeric" placeholder="0,00" required autocomplete="off">
+                            <small class="erro-campo" data-error-for="preco_compra"></small>
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="cadastro-preco_venda">Preço de venda (R$)</label>
+                            <input type="text" id="cadastro-preco_venda" name="preco_venda" class="campo-moeda" inputmode="numeric" placeholder="0,00" required autocomplete="off">
+                            <small class="erro-campo" data-error-for="preco_venda"></small>
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="cadastro-quantidade_estoque">Quantidade em estoque</label>
+                            <input type="number" id="cadastro-quantidade_estoque" name="quantidade_estoque" min="0" step="1" value="0" inputmode="numeric">
+                            <small class="erro-campo" data-error-for="quantidade_estoque"></small>
+                        </div>
+                    </div>
+                </section>
 
                 <section class="form-secao" aria-labelledby="cadastro-secao-03">
                     <div class="form-secao-titulo">
                         <span>03</span>
-                        <div><h3 id="cadastro-secao-03">Detalhes e características</h3><p>Essas informações ajudam a apresentar o produto no catálogo.</p></div>
+                        <div><h3 id="cadastro-secao-03">Detalhes</h3><p>Essas informações ajudam a apresentar o produto no catálogo.</p></div>
                     </div>
                     <div class="form-grade">
-<div class="campo-formulario">
-                    <label for="cadastro-descricao">Descrição</label>
-                    <textarea
-                        id="cadastro-descricao"
-                        name="descricao"
-                        rows="3"
-                        maxlength="500"
-                    ></textarea>
-                    <small class="erro-campo" data-error-for="descricao"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="cadastro-imagem">Foto do produto</label>
-                    <input
-                        type="file"
-                        id="cadastro-imagem"
-                        name="imagem"
-                        accept="image/jpeg,image/png,image/webp"
-                        aria-describedby="cadastro-imagem-ajuda"
-                    >
-                    <small class="dica-campo" id="cadastro-imagem-ajuda">Opcional. JPG, PNG ou WebP; até 5 MB.</small>
-                    <img class="preview-imagem" alt="Prévia da foto do produto" hidden>
-                    <input type="hidden" name="foto_caminho">
-                    <small class="erro-campo" data-error-for="foto_caminho"></small>
-                    <small class="erro-campo" data-error-for="imagem"></small>
-                </div>
-<div class="opcoes-produto" aria-label="Características do produto">
-<div class="campo-checkbox">
-                    <input type="checkbox" id="cadastro-zero_lactose" name="zero_lactose">
-                    <label for="cadastro-zero_lactose">Zero lactose</label>
-                </div>
-<div class="campo-checkbox">
-                    <input type="checkbox" id="cadastro-zero_acucar" name="zero_acucar">
-                    <label for="cadastro-zero_acucar">Zero açúcar</label>
-                </div>
-</div>
-</div></section>
-<p class="feedback-form" role="alert" aria-live="polite"></p>
-<button type="submit" class="botao botao-principal">Cadastrar produto</button>
-</form>
+                        <div class="campo-formulario">
+                            <label for="cadastro-descricao">Descrição</label>
+                            <textarea id="cadastro-descricao" name="descricao" rows="3" maxlength="500"></textarea>
+                            <small class="erro-campo" data-error-for="descricao"></small>
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="cadastro-imagem">Foto do produto</label>
+                            <input type="file" id="cadastro-imagem" name="imagem" accept="image/jpeg,image/png,image/webp" aria-describedby="cadastro-imagem-ajuda">
+                            <small class="dica-campo" id="cadastro-imagem-ajuda">Opcional. JPG, PNG ou WebP; até 5 MB.</small>
+                            <img class="preview-imagem" alt="Prévia da foto do produto" hidden>
+                            <input type="hidden" name="foto_caminho">
+                            <small class="erro-campo" data-error-for="foto_caminho"></small>
+                            <small class="erro-campo" data-error-for="imagem"></small>
+                        </div>
+                    </div>
+                </section>
 
+                <p class="feedback-form" role="alert" aria-live="polite"></p>
+                <button type="submit" class="botao botao-principal">Salvar produto</button>
+            </form>
         </div>
-
     </div>
 
     <!-- MODAL EDIÇÃO DE PRODUTO -->
-    <div
-        class="modal-overlay"
-        id="modal-editar-produto"
-        aria-hidden="true"
-    >
+    <div class="modal-overlay" id="modal-editar-produto" aria-hidden="true">
         <div class="modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="titulo-editar-produto">
 
-            <button
-                type="button"
-                class="modal-fechar"
-                id="fechar-editar-produto"
-                aria-label="Fechar"
-            >
-                &times;
-            </button>
+            <button type="button" class="modal-fechar" id="fechar-editar-produto" aria-label="Fechar">&times;</button>
 
             <span class="sobretitulo">ATUALIZAÇÃO DO CATÁLOGO</span>
             <h2 id="titulo-editar-produto">Editar produto</h2>
-            <p class="texto-modal">Campos com * são obrigatórios. Atualize os dados e salve as alterações no estoque.</p>
+            <p class="texto-modal">Campos com * são obrigatórios. As alterações só são gravadas ao clicar em Salvar alterações.</p>
 
-            <form id="form-editar-produto">
+            <!-- novalidate: a validação é feita pelo JavaScript; o formulário só é
+                 gravado quando o botão de salvar é clicado (Enter não grava). -->
+            <form id="form-editar-produto" novalidate>
 
                 <section class="form-secao" aria-labelledby="editar-secao-01">
                     <div class="form-secao-titulo">
                         <span>01</span>
-                        <div><h3 id="editar-secao-01">Identificação</h3><p>Código, nome e categoria do produto.</p></div>
+                        <div><h3 id="editar-secao-01">Identificação</h3><p>Nome e categoria do produto. O código é gerado automaticamente pelo sistema.</p></div>
                     </div>
                     <div class="form-grade">
-<div class="campo-formulario">
-                    <label for="editar-codigo_produto">Código do produto</label>
-                    <input
-                        type="text"
-                        id="editar-codigo_produto"
-                        name="codigo_produto"
-                        required
-                        minlength="3"
-                        maxlength="32"
-                        autocomplete="off"
-                    >
-                    <small class="dica-campo">Use o EAN/GTIN ou um código interno único.</small>
-                    <small class="erro-campo" data-error-for="codigo_produto"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="editar-nome">Nome do produto</label>
-                    <input
-                        type="text"
-                        id="editar-nome"
-                        name="nome"
-                        required
-                        minlength="2"
-                        maxlength="100"
-                    >
-                    <small class="erro-campo" data-error-for="nome"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="editar-categoria">Categoria</label>
-                    <input
-                        type="text"
-                        id="editar-categoria"
-                        name="categoria"
-                        list="categorias-cantina"
-                        placeholder="Ex.: Bebidas, Lanches"
-                        required
-                        minlength="2"
-                        maxlength="50"
-                    >
-                    <small class="erro-campo" data-error-for="categoria"></small>
-                </div>
-</div></section>
+                        <div class="campo-formulario">
+                            <label for="editar-nome">Nome do produto</label>
+                            <input type="text" id="editar-nome" name="nome" required minlength="2" maxlength="100" autocomplete="off">
+                            <small class="erro-campo" data-error-for="nome"></small>
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="editar-categoria">Categoria</label>
+                            <input type="text" id="editar-categoria" name="categoria" list="categorias-cantina" placeholder="Ex.: Bebidas, Lanches" required minlength="2" maxlength="50" autocomplete="off">
+                            <small class="erro-campo" data-error-for="categoria"></small>
+                        </div>
+                    </div>
+                </section>
 
                 <section class="form-secao" aria-labelledby="editar-secao-02">
                     <div class="form-secao-titulo">
                         <span>02</span>
-                        <div><h3 id="editar-secao-02">Preço e estoque</h3><p>Defina o valor, a validade e os limites de reposição.</p></div>
+                        <div><h3 id="editar-secao-02">Preços e estoque</h3><p>Valores em reais. O preço de venda não pode ser menor que o de compra.</p></div>
                     </div>
-                    <div class="form-grade">
-<div class="campo-formulario">
-                    <label for="editar-preco">Preço (R$)</label>
-                    <input
-                        type="number"
-                        id="editar-preco"
-                        name="preco"
-                        required
-                        min="0.01"
-                        step="0.01"
-                    >
-                    <small class="erro-campo" data-error-for="preco"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="editar-validade">Validade</label>
-                    <input
-                        type="date"
-                        id="editar-validade"
-                        name="validade"
-                        aria-describedby="editar-validade-ajuda"
-                    >
-                    <small class="dica-campo" id="editar-validade-ajuda">Informe a validade mais próxima entre as unidades que estão no estoque.</small>
-                    <small class="erro-campo" data-error-for="validade"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="editar-quantidade_estoque">Quantidade em estoque</label>
-                    <input
-                        type="number"
-                        id="editar-quantidade_estoque"
-                        name="quantidade_estoque"
-                        min="0"
-                        step="1"
-                        value="0"
-                    >
-                    <small class="erro-campo" data-error-for="quantidade_estoque"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="editar-estoque_minimo">Estoque mínimo</label>
-                    <input
-                        type="number"
-                        id="editar-estoque_minimo"
-                        name="estoque_minimo"
-                        min="0"
-                        step="1"
-                        value="0"
-                    >
-                    <small class="erro-campo" data-error-for="estoque_minimo"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="editar-estoque_maximo">Estoque máximo</label>
-                    <input
-                        type="number"
-                        id="editar-estoque_maximo"
-                        name="estoque_maximo"
-                        min="0"
-                        step="1"
-                        value="0"
-                        aria-describedby="editar-estoque_maximo-ajuda"
-                    >
-                    <small class="dica-campo" id="editar-estoque_maximo-ajuda">Meta para orientar a reposição; não impede que o estoque ultrapasse esse valor.</small>
-                    <small class="erro-campo" data-error-for="estoque_maximo"></small>
-                </div>
-</div></section>
+                    <div class="form-grade form-grade-tres">
+                        <div class="campo-formulario">
+                            <label for="editar-preco_compra">Preço de compra (R$)</label>
+                            <input type="text" id="editar-preco_compra" name="preco_compra" class="campo-moeda" inputmode="numeric" placeholder="0,00" required autocomplete="off">
+                            <small class="erro-campo" data-error-for="preco_compra"></small>
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="editar-preco_venda">Preço de venda (R$)</label>
+                            <input type="text" id="editar-preco_venda" name="preco_venda" class="campo-moeda" inputmode="numeric" placeholder="0,00" required autocomplete="off">
+                            <small class="erro-campo" data-error-for="preco_venda"></small>
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="editar-quantidade_estoque">Quantidade em estoque</label>
+                            <input type="number" id="editar-quantidade_estoque" name="quantidade_estoque" min="0" step="1" value="0" inputmode="numeric">
+                            <small class="erro-campo" data-error-for="quantidade_estoque"></small>
+                        </div>
+                    </div>
+                </section>
 
                 <section class="form-secao" aria-labelledby="editar-secao-03">
                     <div class="form-secao-titulo">
                         <span>03</span>
-                        <div><h3 id="editar-secao-03">Detalhes e características</h3><p>Essas informações ajudam a apresentar o produto no catálogo.</p></div>
+                        <div><h3 id="editar-secao-03">Detalhes</h3><p>Essas informações ajudam a apresentar o produto no catálogo.</p></div>
                     </div>
                     <div class="form-grade">
-<div class="campo-formulario">
-                    <label for="editar-descricao">Descrição</label>
-                    <textarea
-                        id="editar-descricao"
-                        name="descricao"
-                        rows="3"
-                        maxlength="500"
-                    ></textarea>
-                    <small class="erro-campo" data-error-for="descricao"></small>
-                </div>
-<div class="campo-formulario">
-                    <label for="editar-imagem">Foto do produto</label>
-                    <input
-                        type="file"
-                        id="editar-imagem"
-                        name="imagem"
-                        accept="image/jpeg,image/png,image/webp"
-                        aria-describedby="editar-imagem-ajuda"
-                    >
-                    <small class="dica-campo" id="editar-imagem-ajuda">Opcional. JPG, PNG ou WebP; até 5 MB. Selecione outra imagem para substituir a atual.</small>
-                    <img class="preview-imagem" alt="Prévia da foto do produto" hidden>
-                    <input type="hidden" name="foto_caminho">
-                    <small class="erro-campo" data-error-for="foto_caminho"></small>
-                    <small class="erro-campo" data-error-for="imagem"></small>
-                </div>
-<div class="opcoes-produto" aria-label="Características do produto">
-<div class="campo-checkbox">
-                    <input type="checkbox" id="editar-zero_lactose" name="zero_lactose">
-                    <label for="editar-zero_lactose">Zero lactose</label>
-                </div>
-<div class="campo-checkbox">
-                    <input type="checkbox" id="editar-zero_acucar" name="zero_acucar">
-                    <label for="editar-zero_acucar">Zero açúcar</label>
-                </div>
-</div>
-</div></section>
-<p class="feedback-form" role="alert" aria-live="polite"></p>
-<button type="submit" class="botao botao-principal">Salvar alterações</button>
-</form>
+                        <div class="campo-formulario">
+                            <label for="editar-descricao">Descrição</label>
+                            <textarea id="editar-descricao" name="descricao" rows="3" maxlength="500"></textarea>
+                            <small class="erro-campo" data-error-for="descricao"></small>
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="editar-imagem">Foto do produto</label>
+                            <input type="file" id="editar-imagem" name="imagem" accept="image/jpeg,image/png,image/webp" aria-describedby="editar-imagem-ajuda">
+                            <small class="dica-campo" id="editar-imagem-ajuda">Opcional. JPG, PNG ou WebP; até 5 MB.</small>
+                            <img class="preview-imagem" alt="Prévia da foto do produto" hidden>
+                            <input type="hidden" name="foto_caminho">
+                            <small class="erro-campo" data-error-for="foto_caminho"></small>
+                            <small class="erro-campo" data-error-for="imagem"></small>
+                        </div>
+                    </div>
+                </section>
 
+                <p class="feedback-form" role="alert" aria-live="polite"></p>
+                <button type="submit" class="botao botao-principal">Salvar alterações</button>
+            </form>
         </div>
     </div>
 
@@ -494,13 +286,14 @@
                 &times;
             </button>
 
-            <h2 id="titulo-confirmacao-produto">Inativar produto</h2>
+            <h2 id="titulo-confirmacao-produto">Excluir produto</h2>
 
-            <p id="texto-confirmacao-exclusao" class="texto-confirmacao">Deseja inativar este produto?</p>
+            <p id="texto-confirmacao-exclusao" class="texto-confirmacao">Deseja excluir este produto? Ele ficará inativo e continuará salvo no banco.</p>
 
-            <button type="button" class="botao botao-excluir" id="botao-confirmar-exclusao">
-                Inativar produto
-            </button>
+            <div class="acoes-confirmacao">
+                <button type="button" class="botao botao-secundario" id="botao-cancelar-exclusao">Cancelar</button>
+                <button type="button" class="botao botao-excluir" id="botao-confirmar-exclusao">Excluir produto</button>
+            </div>
 
         </div>
     </div>

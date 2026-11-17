@@ -991,21 +991,6 @@ textarea:focus-visible {
     display: none;
 }
 
-.card-produto.validade-alerta {
-    border-color: #e8c9c3;
-}
-
-.aviso-validade {
-    display: inline-flex;
-    margin: 6px 6px 8px 0;
-    padding: 4px 9px;
-    border-radius: 999px;
-    background: #fff0ed;
-    color: #a13d32;
-    font-size: 11px;
-    font-weight: 800;
-}
-
 #form-cadastro-produto,
 #form-editar-produto {
     display: flex;
@@ -1063,6 +1048,15 @@ textarea:focus-visible {
     grid-template-columns: minmax(0, 1fr);
 }
 
+.form-grade.form-grade-tres {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.campo-moeda {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
 .campo-formulario:has(input:required) label::after,
 .campo-formulario:has(textarea:required) label::after {
     content: " *";
@@ -1107,28 +1101,32 @@ textarea:focus-visible {
     }
 
     .form-grade,
-    .opcoes-produto {
+    .form-grade.form-grade-tres {
         grid-template-columns: minmax(0, 1fr);
     }
 }
 
-.acoes-produto [data-acao="excluir"] {
-    grid-column: 1 / -1;
-    border-color: #e6b8b3;
-    background: #fffafa;
-    color: #a43b35;
+.acoes-confirmacao {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.acoes-confirmacao .botao,
+.acoes-confirmacao #botao-confirmar-exclusao {
+    width: 100%;
+    min-height: 46px;
+    margin-top: 0;
+    border-radius: 10px;
+}
+
+.precos-produto {
+    margin: 4px 0 8px;
+    color: #657168;
     font-size: 12px;
 }
 
-.acoes-produto [data-acao="excluir"]:hover,
-.botao-exclusao-definitiva:hover {
-    border-color: #cf8d85;
-    background: #fff0ee;
-    color: #812c27;
-}
-
-.botao-exclusao-definitiva {
-    border: 1px solid #d9a19a;
-    background: #fff7f6;
-    color: #96352f;
+.card-produto.sem-estoque {
+    border-color: #f0d6bd;
 }

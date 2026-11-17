@@ -1,5 +1,7 @@
 // Catálogo público: consulta o estoque disponível e mantém a sacola neste dispositivo.
 document.addEventListener("DOMContentLoaded", () => {
+    // Com 3 unidades ou menos o catálogo mostra o aviso "Últimas unidades".
+    const ULTIMAS_UNIDADES = 3;
     const API_URL = "http://127.0.0.1:5000/api/produtos?status=ATIVO";
     const STORAGE_KEY = "cantina-sacola-v1";
     const lista = document.getElementById("lista-produtos");
@@ -60,19 +62,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return String(texto || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
     }
 
-    function hojeISO() {
-        const hoje = new Date();
-        return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
-    }
-
-    function formatarData(data) {
-        if (!data) return "";
-        const [ano, mes, dia] = data.split("-");
-        return `${dia}/${mes}/${ano}`;
-    }
-
     function produtosDisponiveis() {
-        return todosProdutos.filter((produto) => produto.status === "ATIVO" && (!produto.validade || produto.validade >= hojeISO()));
+        return todosProdutos.filter((produto) => produto.status === "ATIVO");
     }
 
     function produtoPorId(id) {
@@ -115,14 +106,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const conteudo = elemento("div", "conteudo-produto");
         const topo = elemento("div", "topo-card-produto");
         topo.append(elemento("span", "categoria-produto", produto.categoria));
-        if (produto.quantidade_estoque > 0 && produto.quantidade_estoque <= produto.estoque_minimo) {
+        if (produto.quantidade_estoque > 0 && produto.quantidade_estoque <= ULTIMAS_UNIDADES) {
             topo.append(elemento("span", "estoque-produto poucas-unidades", "Últimas unidades"));
         }
         conteudo.append(topo);
         conteudo.append(elemento("h3", "nome-produto", produto.nome));
-        conteudo.append(elemento("p", "preco-produto", formatarPreco(produto.preco_centavos)));
+        conteudo.append(elemento("p", "preco-produto", formatarPreco(produto.preco_venda_centavos)));
         if (produto.descricao) conteudo.append(elemento("p", "descricao-produto", produto.descricao));
-        if (produto.validade) conteudo.append(elemento("p", "validade-produto", `Validade ${formatarData(produto.validade)}`));
         const selos = elemento("div", "selos-produto");
         if (produto.zero_lactose) selos.append(elemento("span", "selo", "Zero lactose"));
         if (produto.zero_acucar) selos.append(elemento("span", "selo", "Zero açúcar"));
@@ -176,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const termo = normalizar(busca.value.trim());
         const produtos = produtosDisponiveis().filter((produto) => {
             const correspondeCategoria = categoriaAtual === "TODAS" || produto.categoria === categoriaAtual;
-            const correspondeBusca = !termo || normalizar(`${produto.nome} ${produto.categoria} ${produto.codigo_produto}`).includes(termo);
+            const correspondeBusca = !termo || normalizar(`${produto.nome} ${produto.categoria}`).includes(termo);
             return correspondeCategoria && correspondeBusca;
         });
         lista.replaceChildren();
@@ -207,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
         itensCarrinho.replaceChildren();
         const linhas = Object.entries(sacola)
             .map(([id, quantidade]) => ({ produto: produtoPorId(id), quantidade }))
-            .filter((item) => item.produto && item.produto.status === "ATIVO" && item.produto.quantidade_estoque > 0 && (!item.produto.validade || item.produto.validade >= hojeISO()));
+            .filter((item) => item.produto && item.produto.status === "ATIVO" && item.produto.quantidade_estoque > 0);
         const idsValidos = new Set(linhas.map(({ produto }) => String(produto.id_produto)));
         const sacolaLimpa = Object.fromEntries(Object.entries(sacola).filter(([id]) => idsValidos.has(String(id))));
         if (Object.keys(sacolaLimpa).length !== Object.keys(sacola).length) sacola = sacolaLimpa;
@@ -217,8 +207,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const linha = elemento("article", "item-carrinho");
             const info = elemento("div", "informacoes-item");
             info.append(elemento("h3", "", produto.nome));
-            info.append(elemento("p", "", `${formatarPreco(produto.preco_centavos)} cada`));
-            const subtotal = elemento("strong", "subtotal-item", formatarPreco(produto.preco_centavos * qtd));
+            info.append(elemento("p", "", `${formatarPreco(produto.preco_venda_centavos)} cada`));
+            const subtotal = elemento("strong", "subtotal-item", formatarPreco(produto.preco_venda_centavos * qtd));
             const controles = elemento("div", "controles-quantidade");
             const menos = elemento("button", "botao-quantidade", "−");
             menos.type = "button"; menos.dataset.acao = "diminuir"; menos.dataset.id = produto.id_produto;
@@ -234,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
             itensCarrinho.append(linha);
         });
         const quantidadeTotal = Object.values(sacola).reduce((soma, item) => soma + item, 0);
-        const totalCentavos = linhas.reduce((soma, { produto, quantidade }) => soma + produto.preco_centavos * Math.min(quantidade, produto.quantidade_estoque), 0);
+        const totalCentavos = linhas.reduce((soma, { produto, quantidade }) => soma + produto.preco_venda_centavos * Math.min(quantidade, produto.quantidade_estoque), 0);
         contadorSacola.textContent = quantidadeTotal;
         contadorSacola.setAttribute("aria-label", `${quantidadeTotal} ${quantidadeTotal === 1 ? "item" : "itens"}`);
         totalCarrinho.textContent = formatarPreco(totalCentavos);
@@ -259,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!produto) return;
             const linha = elemento("div", "linha-revisao");
             linha.append(elemento("span", "", `${quantidade} × ${produto.nome}`));
-            linha.append(elemento("strong", "", formatarPreco(produto.preco_centavos * quantidade)));
+            linha.append(elemento("strong", "", formatarPreco(produto.preco_venda_centavos * quantidade)));
             resumoRevisao.append(linha);
         });
         totalRevisao.textContent = totalCarrinho.textContent;

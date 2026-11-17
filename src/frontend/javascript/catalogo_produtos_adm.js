@@ -10,18 +10,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const formularioCadastro = document.getElementById("form-cadastro-produto");
     const formularioEdicao = document.getElementById("form-editar-produto");
     const textoConfirmacao = document.getElementById("texto-confirmacao-exclusao");
-    const tituloConfirmacao = document.getElementById("titulo-confirmacao-produto");
     const botaoConfirmarExclusao = document.getElementById("botao-confirmar-exclusao");
     const buscaProdutos = document.getElementById("busca-produtos");
     const contadorProdutos = document.getElementById("contador-produtos");
+    const filtroSemEstoque = document.getElementById("filtrar-sem-estoque");
     const filtrosStatus = [...document.querySelectorAll("[data-filtro-status]")];
+    const modais = [modalCadastro, modalEdicao, modalExclusao];
     const produtosPorId = new Map();
     let todosProdutos = [];
     let filtroAtual = "TODOS";
-    let estoqueBaixoAtivo = false;
+    let semEstoqueAtivo = false;
     let produtoSelecionado = null;
-    let acaoConfirmacao = null;
     const focosAnteriores = new WeakMap();
+
+    // ---------- utilitários ----------
 
     function mostrarMensagem(elemento, mensagem, tipo = "") {
         elemento.textContent = mensagem;
@@ -29,24 +31,41 @@ document.addEventListener("DOMContentLoaded", () => {
         elemento.classList.toggle("mensagem-sucesso", tipo === "sucesso");
     }
 
-    function abrirModal(modal, focoInicial = null) {
-        focosAnteriores.set(modal, document.activeElement);
-        modal.classList.add("aberto");
-        modal.setAttribute("aria-hidden", "false");
-        const conteudo = modal.querySelector(".modal-conteudo");
-        if (conteudo) conteudo.scrollTop = 0;
-        const primeiroCampo = focoInicial || modal.querySelector(
-            "input:not([type='hidden']), select, textarea, button:not([disabled])",
-        );
-        primeiroCampo?.focus({ preventScroll: true });
+    function criarElemento(tag, classe, texto) {
+        const elemento = document.createElement(tag);
+        if (classe) elemento.className = classe;
+        if (texto !== undefined) elemento.textContent = texto;
+        return elemento;
     }
 
-    function fecharModal(modal) {
-        if (!modal.classList.contains("aberto")) return;
-        modal.classList.remove("aberto");
-        modal.setAttribute("aria-hidden", "true");
-        const focoAnterior = focosAnteriores.get(modal);
-        if (focoAnterior?.isConnected) focoAnterior.focus();
+    function formatarPreco(centavos) {
+        return (centavos / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    }
+
+    // Máscara de moeda: o usuário digita só números e o campo mostra "1.234,56".
+    function centavosParaTexto(centavos) {
+        return (centavos / 100).toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+    }
+
+    function textoParaCentavos(texto) {
+        const digitos = String(texto).replace(/\D/g, "");
+        return digitos ? Number(digitos) : 0;
+    }
+
+    function aplicarMascaraMoeda(campo) {
+        const digitos = campo.value.replace(/\D/g, "").replace(/^0+/, "").slice(0, 9);
+        campo.value = digitos ? centavosParaTexto(Number(digitos)) : "";
+    }
+
+    function normalizarBusca(texto) {
+        return texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("pt-BR");
+    }
+
+    function semEstoque(produto) {
+        return produto.status === "ATIVO" && produto.quantidade_estoque === 0;
     }
 
     async function requisitar(url, opcoes = {}) {
@@ -71,29 +90,32 @@ document.addEventListener("DOMContentLoaded", () => {
             erro.campos = resultado.campos || {};
             throw erro;
         }
-
         return resultado;
     }
 
-    function criarElemento(tag, classe, texto) {
-        const elemento = document.createElement(tag);
-        if (classe) elemento.className = classe;
-        if (texto !== undefined) elemento.textContent = texto;
-        return elemento;
+    // ---------- modais ----------
+
+    function abrirModal(modal, focoInicial = null) {
+        focosAnteriores.set(modal, document.activeElement);
+        modal.classList.add("aberto");
+        modal.setAttribute("aria-hidden", "false");
+        const conteudo = modal.querySelector(".modal-conteudo");
+        if (conteudo) conteudo.scrollTop = 0;
+        const primeiroCampo = focoInicial || modal.querySelector(
+            "input:not([type='hidden']), select, textarea, button:not([disabled])",
+        );
+        primeiroCampo?.focus({ preventScroll: true });
     }
 
-    function formatarPreco(centavos) {
-        return (centavos / 100).toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-        });
+    function fecharModal(modal) {
+        if (!modal.classList.contains("aberto")) return;
+        modal.classList.remove("aberto");
+        modal.setAttribute("aria-hidden", "true");
+        const focoAnterior = focosAnteriores.get(modal);
+        if (focoAnterior?.isConnected) focoAnterior.focus();
     }
 
-    function formatarValidade(validade) {
-        if (!validade) return "Validade não informada";
-        const [ano, mes, dia] = validade.split("-");
-        return "Validade: " + dia + "/" + mes + "/" + ano;
-    }
+    // ---------- listagem ----------
 
     function criarBotao(texto, acao, classe) {
         const botao = criarElemento("button", classe, texto);
@@ -105,9 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function criarCard(produto) {
         const card = criarElemento("article", "card-produto");
         card.dataset.produtoId = produto.id_produto;
-        if (produto.status === "ATIVO" && produto.quantidade_estoque <= produto.estoque_minimo) {
-            card.classList.add("estoque-alerta");
-        }
+        if (semEstoque(produto)) card.classList.add("sem-estoque");
 
         const imagem = criarElemento("img", "imagem-produto");
         imagem.alt = produto.nome;
@@ -121,16 +141,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const conteudo = criarElemento("div", "conteudo-produto");
         conteudo.append(criarElemento("h3", "", produto.nome));
-        conteudo.append(criarElemento("p", "preco-produto", formatarPreco(produto.preco_centavos)));
-        conteudo.append(criarElemento("p", "detalhe-produto", "Código: " + produto.codigo_produto));
-        conteudo.append(criarElemento("p", "detalhe-produto", "Categoria: " + produto.categoria));
+        conteudo.append(criarElemento("p", "preco-produto", formatarPreco(produto.preco_venda_centavos)));
         conteudo.append(criarElemento(
             "p",
-            "detalhe-produto",
-            "Estoque: " + produto.quantidade_estoque
-                + " (mín. " + produto.estoque_minimo + " / máx. " + produto.estoque_maximo + ")",
+            "precos-produto",
+            "Compra: " + formatarPreco(produto.preco_compra_centavos),
         ));
-        conteudo.append(criarElemento("p", "validade", formatarValidade(produto.validade)));
+        conteudo.append(criarElemento("p", "detalhe-produto", "Código: " + produto.id_produto));
+        conteudo.append(criarElemento("p", "detalhe-produto", "Categoria: " + produto.categoria));
+        conteudo.append(criarElemento("p", "detalhe-produto", "Estoque: " + produto.quantidade_estoque));
 
         const selos = criarElemento("div", "selos-produto");
         if (produto.zero_lactose) selos.append(criarElemento("span", "selo", "Zero lactose"));
@@ -140,46 +159,32 @@ document.addEventListener("DOMContentLoaded", () => {
         if (produto.descricao) {
             conteudo.append(criarElemento("p", "detalhe-produto", produto.descricao));
         }
-
+        if (semEstoque(produto)) {
+            conteudo.append(criarElemento("span", "aviso-estoque", "Sem estoque"));
+        }
         if (produto.status === "INATIVO") {
             conteudo.append(criarElemento("span", "status-produto inativo", "Inativo"));
-        }
-
-        const hoje = new Date();
-        const hojeIso = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
-        if (produto.validade && produto.validade < hojeIso) {
-            card.classList.add("validade-alerta");
-            conteudo.append(criarElemento("span", "aviso-validade", "Validade vencida"));
         }
 
         const acoes = criarElemento("div", "acoes-produto");
         acoes.append(criarBotao("Editar", "editar", "botao botao-principal"));
         if (produto.status === "ATIVO") {
-            acoes.append(criarBotao("Inativar", "inativar", "botao botao-excluir"));
+            acoes.append(criarBotao("Excluir", "excluir", "botao botao-excluir"));
         } else {
             acoes.append(criarBotao("Reativar", "reativar", "botao botao-principal"));
         }
-        acoes.append(criarBotao(
-            "Excluir definitivamente",
-            "excluir",
-            "botao botao-exclusao-definitiva",
-        ));
         conteudo.append(acoes);
         card.append(conteudo);
         return card;
     }
 
     function atualizarResumo() {
-        const ativos = todosProdutos.filter((produto) => produto.status === "ATIVO");
-        const inativos = todosProdutos.filter((produto) => produto.status === "INATIVO");
-        const estoqueBaixo = ativos.filter((produto) => produto.quantidade_estoque <= produto.estoque_minimo);
-        document.getElementById("total-ativos").textContent = ativos.length;
-        document.getElementById("total-inativos").textContent = inativos.length;
-        document.getElementById("total-estoque-baixo").textContent = estoqueBaixo.length;
-    }
-
-    function normalizarBusca(texto) {
-        return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
+        document.getElementById("total-ativos").textContent =
+            todosProdutos.filter((produto) => produto.status === "ATIVO").length;
+        document.getElementById("total-inativos").textContent =
+            todosProdutos.filter((produto) => produto.status === "INATIVO").length;
+        document.getElementById("total-sem-estoque").textContent =
+            todosProdutos.filter(semEstoque).length;
     }
 
     function renderizarProdutos() {
@@ -191,11 +196,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const produtos = todosProdutos.filter((produto) => {
             const statusCorresponde = filtroAtual === "TODOS" || produto.status === filtroAtual;
             const buscaCorresponde = !termo || normalizarBusca(
-                [produto.nome, produto.codigo_produto, produto.categoria].join(" "),
+                [produto.nome, produto.categoria, String(produto.id_produto)].join(" "),
             ).includes(termo);
-            const estoqueCorresponde = !estoqueBaixoAtivo
-                || (produto.status === "ATIVO" && produto.quantidade_estoque <= produto.estoque_minimo);
-            return statusCorresponde && buscaCorresponde && estoqueCorresponde;
+            return statusCorresponde && buscaCorresponde && (!semEstoqueAtivo || semEstoque(produto));
         });
 
         contadorProdutos.textContent = `${produtos.length} ${produtos.length === 1 ? "produto encontrado" : "produtos encontrados"}`;
@@ -224,10 +227,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function limparErroCampo(formulario, nomeCampo) {
-        const campo = formulario.elements.namedItem(nomeCampo);
-        const mensagem = [...formulario.querySelectorAll("[data-error-for]")]
+    // ---------- formulários ----------
+
+    // A API devolve erros com o nome da coluna; a tela usa nomes mais curtos.
+    const CAMPO_VISUAL = {
+        preco_compra_centavos: "preco_compra",
+        preco_venda_centavos: "preco_venda",
+    };
+
+    function obterCampo(formulario, nome) {
+        return formulario.elements.namedItem(nome);
+    }
+
+    function mensagemDoCampo(formulario, nomeCampo) {
+        return [...formulario.querySelectorAll("[data-error-for]")]
             .find((elemento) => elemento.dataset.errorFor === nomeCampo);
+    }
+
+    function limparErroCampo(formulario, nomeCampo) {
+        const campo = obterCampo(formulario, nomeCampo);
+        const mensagem = mensagemDoCampo(formulario, nomeCampo);
         if (campo) {
             campo.removeAttribute("aria-invalid");
             const descricoes = (campo.getAttribute("aria-describedby") || "")
@@ -251,16 +270,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function exibirErrosFormulario(formulario, erros) {
         const feedback = formulario.querySelector(".feedback-form");
+        feedback.textContent = "";
         Object.entries(erros).forEach(([campo, mensagem]) => {
-            // A interface recebe reais, mas o contrato da API reporta erros em centavos.
-            const campoVisual = campo === "preco_centavos" ? "preco" : campo;
-            const controle = formulario.elements.namedItem(campoVisual);
-            const mensagemCampo = [...formulario.querySelectorAll("[data-error-for]")]
-                .find((elemento) => elemento.dataset.errorFor === campoVisual);
+            const campoVisual = CAMPO_VISUAL[campo] || campo;
+            const controle = obterCampo(formulario, campoVisual);
+            const mensagemCampo = mensagemDoCampo(formulario, campoVisual);
             if (controle && controle.type !== "hidden" && mensagemCampo) {
-                if (!mensagemCampo.id) {
-                    mensagemCampo.id = `${formulario.id}-erro-${campoVisual}`;
-                }
+                if (!mensagemCampo.id) mensagemCampo.id = `${formulario.id}-erro-${campoVisual}`;
                 controle.setAttribute("aria-invalid", "true");
                 const descricoes = new Set((controle.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean));
                 descricoes.add(mensagemCampo.id);
@@ -274,6 +290,28 @@ document.addEventListener("DOMContentLoaded", () => {
             feedback.textContent = `Revise os campos destacados. ${feedback.textContent}`.trim();
             formulario.querySelector("[aria-invalid='true']")?.focus();
         }
+    }
+
+    // Validação na tela (o servidor valida de novo; esta só evita idas desnecessárias).
+    function validarFormulario(formulario) {
+        const erros = {};
+        const nome = obterCampo(formulario, "nome").value.trim();
+        const categoria = obterCampo(formulario, "categoria").value.trim();
+        const compra = textoParaCentavos(obterCampo(formulario, "preco_compra").value);
+        const venda = textoParaCentavos(obterCampo(formulario, "preco_venda").value);
+        const quantidadeTexto = obterCampo(formulario, "quantidade_estoque").value.trim();
+
+        if (nome.length < 2) erros.nome = "Informe o nome do produto (mínimo 2 caracteres).";
+        if (categoria.length < 2) erros.categoria = "Informe a categoria (mínimo 2 caracteres).";
+        if (compra <= 0) erros.preco_compra = "Informe o preço de compra.";
+        if (venda <= 0) erros.preco_venda = "Informe o preço de venda.";
+        else if (compra > 0 && venda < compra) {
+            erros.preco_venda = "O preço de venda não pode ser menor que o preço de compra.";
+        }
+        if (quantidadeTexto !== "" && !/^\d+$/.test(quantidadeTexto)) {
+            erros.quantidade_estoque = "Informe uma quantidade inteira, sem sinal negativo.";
+        }
+        return erros;
     }
 
     function atualizarPreview(formulario, caminho = null, arquivo = null) {
@@ -295,69 +333,52 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function obterCampo(formulario, nome) {
-        return formulario.elements.namedItem(nome);
-    }
-
     function montarPayload(formulario, fotoCaminho = null) {
-        const numero = (nome) => Number(obterCampo(formulario, nome).value || 0);
-        const validade = obterCampo(formulario, "validade").value;
         const foto = obterCampo(formulario, "foto_caminho").value.trim();
-
         return {
-            codigo_produto: obterCampo(formulario, "codigo_produto").value.trim(),
             nome: obterCampo(formulario, "nome").value.trim(),
             categoria: obterCampo(formulario, "categoria").value.trim(),
             descricao: obterCampo(formulario, "descricao").value.trim(),
-            preco_centavos: Math.round(numero("preco") * 100),
-            quantidade_estoque: numero("quantidade_estoque"),
-            estoque_minimo: numero("estoque_minimo"),
-            estoque_maximo: numero("estoque_maximo"),
-            validade: validade || null,
+            preco_compra_centavos: textoParaCentavos(obterCampo(formulario, "preco_compra").value),
+            preco_venda_centavos: textoParaCentavos(obterCampo(formulario, "preco_venda").value),
+            quantidade_estoque: Number(obterCampo(formulario, "quantidade_estoque").value || 0),
             foto_caminho: fotoCaminho === null ? (foto || null) : fotoCaminho,
-            zero_lactose: obterCampo(formulario, "zero_lactose").checked,
-            zero_acucar: obterCampo(formulario, "zero_acucar").checked,
         };
     }
 
     function preencherFormulario(formulario, produto) {
         formulario.reset();
-        obterCampo(formulario, "codigo_produto").value = produto.codigo_produto;
         obterCampo(formulario, "nome").value = produto.nome;
         obterCampo(formulario, "categoria").value = produto.categoria;
         obterCampo(formulario, "descricao").value = produto.descricao || "";
-        obterCampo(formulario, "preco").value = (produto.preco_centavos / 100).toFixed(2);
+        obterCampo(formulario, "preco_compra").value = centavosParaTexto(produto.preco_compra_centavos);
+        obterCampo(formulario, "preco_venda").value = centavosParaTexto(produto.preco_venda_centavos);
         obterCampo(formulario, "quantidade_estoque").value = produto.quantidade_estoque;
-        obterCampo(formulario, "estoque_minimo").value = produto.estoque_minimo;
-        obterCampo(formulario, "estoque_maximo").value = produto.estoque_maximo;
-        obterCampo(formulario, "validade").value = produto.validade || "";
         obterCampo(formulario, "foto_caminho").value = produto.foto_caminho || "";
         atualizarPreview(formulario, produto.foto_caminho);
-        obterCampo(formulario, "zero_lactose").checked = produto.zero_lactose;
-        obterCampo(formulario, "zero_acucar").checked = produto.zero_acucar;
     }
 
-    async function enviarFormulario(evento, formulario, metodo, idProduto = null) {
-        evento.preventDefault();
+    async function salvarFormulario(formulario, metodo, idProduto = null) {
         limparErrosFormulario(formulario);
         mostrarMensagem(mensagemApi, "");
 
-        if (!formulario.reportValidity()) return;
+        const errosTela = validarFormulario(formulario);
+        if (Object.keys(errosTela).length) {
+            exibirErrosFormulario(formulario, errosTela);
+            return;
+        }
 
-        const botaoEnviar = formulario.querySelector("button[type='submit']");
-        const textoBotaoOriginal = botaoEnviar.textContent;
-        botaoEnviar.disabled = true;
-        botaoEnviar.textContent = metodo === "POST" ? "Cadastrando…" : "Salvando…";
+        const botaoSalvar = formulario.querySelector("button[type='submit']");
+        const textoOriginal = botaoSalvar.textContent;
+        botaoSalvar.disabled = true;
+        botaoSalvar.textContent = "Salvando…";
         try {
             let fotoCaminho = null;
             const imagem = obterCampo(formulario, "imagem").files[0];
             if (imagem) {
                 const dadosImagem = new FormData();
                 dadosImagem.append("imagem", imagem);
-                const resultadoUpload = await requisitar(UPLOAD_URL, {
-                    method: "POST",
-                    body: dadosImagem,
-                });
+                const resultadoUpload = await requisitar(UPLOAD_URL, { method: "POST", body: dadosImagem });
                 fotoCaminho = resultadoUpload.foto_caminho;
             }
             await requisitar(idProduto ? API_URL + "/" + idProduto : API_URL, {
@@ -369,11 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
             formulario.reset();
             atualizarPreview(formulario);
             await carregarProdutos();
-            mostrarMensagem(
-                mensagemApi,
-                metodo === "POST" ? "Produto cadastrado." : "Produto atualizado.",
-                "sucesso",
-            );
+            mostrarMensagem(mensagemApi, metodo === "POST" ? "Produto cadastrado." : "Produto atualizado.", "sucesso");
         } catch (erro) {
             if (Object.keys(erro.campos || {}).length) {
                 exibirErrosFormulario(formulario, erro.campos);
@@ -381,8 +398,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 formulario.querySelector(".feedback-form").textContent = erro.message;
             }
         } finally {
-            botaoEnviar.disabled = false;
-            botaoEnviar.textContent = textoBotaoOriginal;
+            botaoSalvar.disabled = false;
+            botaoSalvar.textContent = textoOriginal;
         }
     }
 
@@ -390,17 +407,29 @@ document.addEventListener("DOMContentLoaded", () => {
         formularioCadastro.reset();
         atualizarPreview(formularioCadastro);
         limparErrosFormulario(formularioCadastro);
-        abrirModal(modalCadastro, obterCampo(formularioCadastro, "codigo_produto"));
+        abrirModal(modalCadastro, obterCampo(formularioCadastro, "nome"));
     }
 
     [formularioCadastro, formularioEdicao].forEach((formulario) => {
+        // Enter dentro de um campo NÃO grava: o produto só é salvo pelo clique no botão.
+        formulario.addEventListener("keydown", (evento) => {
+            if (evento.key === "Enter" && evento.target.tagName !== "TEXTAREA" && evento.target.type !== "submit") {
+                evento.preventDefault();
+            }
+        });
+
+        formulario.querySelectorAll(".campo-moeda").forEach((campo) => {
+            campo.addEventListener("input", () => aplicarMascaraMoeda(campo));
+        });
+
         formulario.querySelectorAll("[data-error-for]").forEach((mensagem) => {
-            const campo = formulario.elements.namedItem(mensagem.dataset.errorFor);
+            const campo = obterCampo(formulario, mensagem.dataset.errorFor);
             if (!campo) return;
             const limparErro = () => limparErroCampo(formulario, mensagem.dataset.errorFor);
             campo.addEventListener("input", limparErro);
             campo.addEventListener("change", limparErro);
         });
+
         const seletorImagem = obterCampo(formulario, "imagem");
         seletorImagem.addEventListener("change", () => {
             const arquivo = seletorImagem.files[0];
@@ -423,39 +452,50 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // Só grava quando o envio vem do clique no botão de salvar.
+    formularioCadastro.addEventListener("submit", (evento) => {
+        evento.preventDefault();
+        if (evento.submitter?.type !== "submit") return;
+        salvarFormulario(formularioCadastro, "POST");
+    });
+
+    formularioEdicao.addEventListener("submit", (evento) => {
+        evento.preventDefault();
+        if (evento.submitter?.type !== "submit" || !produtoSelecionado) return;
+        salvarFormulario(formularioEdicao, "PUT", produtoSelecionado.id_produto);
+    });
+
+    // ---------- filtros e menu ----------
+
     document.getElementById("abrir-cadastro-produto").addEventListener("click", abrirCadastro);
     document.getElementById("abrir-cadastro-produto-topo").addEventListener("click", abrirCadastro);
 
+    function selecionarFiltroStatus(status) {
+        filtroAtual = status;
+        filtrosStatus.forEach((botao) => {
+            const selecionado = botao.dataset.filtroStatus === status;
+            botao.classList.toggle("selecionado", selecionado);
+            botao.setAttribute("aria-pressed", String(selecionado));
+        });
+    }
+
     filtrosStatus.forEach((botao) => {
         botao.addEventListener("click", () => {
-            filtroAtual = botao.dataset.filtroStatus;
-            estoqueBaixoAtivo = false;
-            const filtroEstoque = document.getElementById("filtrar-estoque-baixo");
-            filtroEstoque.setAttribute("aria-pressed", "false");
-            filtroEstoque.classList.remove("ativo");
-            filtrosStatus.forEach((item) => {
-                const selecionado = item === botao;
-                item.classList.toggle("selecionado", selecionado);
-                item.setAttribute("aria-pressed", String(selecionado));
-            });
+            semEstoqueAtivo = false;
+            filtroSemEstoque.setAttribute("aria-pressed", "false");
+            filtroSemEstoque.classList.remove("ativo");
+            selecionarFiltroStatus(botao.dataset.filtroStatus);
             renderizarProdutos();
         });
     });
 
     buscaProdutos.addEventListener("input", renderizarProdutos);
 
-    document.getElementById("filtrar-estoque-baixo").addEventListener("click", (evento) => {
-        estoqueBaixoAtivo = !estoqueBaixoAtivo;
-        evento.currentTarget.setAttribute("aria-pressed", String(estoqueBaixoAtivo));
-        evento.currentTarget.classList.toggle("ativo", estoqueBaixoAtivo);
-        if (estoqueBaixoAtivo) {
-            filtroAtual = "ATIVO";
-            filtrosStatus.forEach((botao) => {
-                const selecionado = botao.dataset.filtroStatus === "ATIVO";
-                botao.classList.toggle("selecionado", selecionado);
-                botao.setAttribute("aria-pressed", String(selecionado));
-            });
-        }
+    filtroSemEstoque.addEventListener("click", () => {
+        semEstoqueAtivo = !semEstoqueAtivo;
+        filtroSemEstoque.setAttribute("aria-pressed", String(semEstoqueAtivo));
+        filtroSemEstoque.classList.toggle("ativo", semEstoqueAtivo);
+        if (semEstoqueAtivo) selecionarFiltroStatus("ATIVO");
         renderizarProdutos();
     });
 
@@ -465,12 +505,21 @@ document.addEventListener("DOMContentLoaded", () => {
         evento.currentTarget.setAttribute("aria-expanded", String(!recolhido));
         evento.currentTarget.textContent = recolhido ? "Expandir" : "Recolher";
     });
+
     document.getElementById("fechar-cadastro-produto").addEventListener("click", () => fecharModal(modalCadastro));
     document.getElementById("fechar-editar-produto").addEventListener("click", () => fecharModal(modalEdicao));
     document.getElementById("fechar-excluir-produto").addEventListener("click", () => fecharModal(modalExclusao));
+    document.getElementById("botao-cancelar-exclusao").addEventListener("click", () => fecharModal(modalExclusao));
 
+    modais.forEach((modal) => {
+        modal.addEventListener("click", (evento) => {
+            if (evento.target === modal) fecharModal(modal);
+        });
+    });
+
+    // Esc fecha o modal aberto e Tab circula apenas dentro dele.
     document.addEventListener("keydown", (evento) => {
-        const modalAberto = document.querySelector(".modal-overlay.aberto");
+        const modalAberto = modais.find((modal) => modal.classList.contains("aberto"));
         if (!modalAberto) return;
         if (evento.key === "Escape") {
             evento.preventDefault();
@@ -479,36 +528,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (evento.key !== "Tab") return;
         const focaveis = [...modalAberto.querySelectorAll(
-            "button:not([disabled]), input:not([type='hidden']):not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex='-1'])",
-        )].filter((elemento) => !elemento.hidden);
+            "a[href], button:not([disabled]), input:not([disabled]):not([type='hidden']), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])",
+        )].filter((elemento) => elemento.getClientRects().length > 0);
         if (!focaveis.length) return;
         const primeiro = focaveis[0];
         const ultimo = focaveis[focaveis.length - 1];
-        if (evento.shiftKey && document.activeElement === primeiro) {
+        if (evento.shiftKey && (document.activeElement === primeiro || !modalAberto.contains(document.activeElement))) {
             evento.preventDefault();
             ultimo.focus();
-        } else if (!evento.shiftKey && document.activeElement === ultimo) {
+        } else if (!evento.shiftKey && (document.activeElement === ultimo || !modalAberto.contains(document.activeElement))) {
             evento.preventDefault();
             primeiro.focus();
         }
     });
 
-    formularioCadastro.addEventListener("submit", (evento) => {
-        enviarFormulario(evento, formularioCadastro, "POST");
-    });
-
-    formularioEdicao.addEventListener("submit", (evento) => {
-        if (produtoSelecionado) {
-            enviarFormulario(evento, formularioEdicao, "PUT", produtoSelecionado.id_produto);
-        } else {
-            evento.preventDefault();
-        }
-    });
+    // ---------- ações dos cards ----------
 
     lista.addEventListener("click", async (evento) => {
         const botao = evento.target.closest("button[data-acao]");
         if (!botao) return;
-
         const card = botao.closest("[data-produto-id]");
         const produto = produtosPorId.get(card?.dataset.produtoId);
         if (!produto) return;
@@ -521,24 +559,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (botao.dataset.acao === "inativar" || botao.dataset.acao === "excluir") {
+        if (botao.dataset.acao === "excluir") {
             produtoSelecionado = produto;
-            acaoConfirmacao = botao.dataset.acao === "excluir" ? "EXCLUIR" : "INATIVAR";
-            const excluirDefinitivamente = acaoConfirmacao === "EXCLUIR";
-            tituloConfirmacao.textContent = excluirDefinitivamente
-                ? "Excluir produto definitivamente"
-                : "Inativar produto";
-            textoConfirmacao.textContent = excluirDefinitivamente
-                ? `Deseja excluir "${produto.nome}"? O produto sairá do banco; o histórico de auditoria será mantido e não será possível reativá-lo.`
-                : `Deseja inativar "${produto.nome}"? Ele sairá do catálogo, mas continuará salvo e poderá ser reativado.`;
-            botaoConfirmarExclusao.textContent = excluirDefinitivamente
-                ? "Excluir definitivamente"
-                : "Inativar produto";
-            botaoConfirmarExclusao.classList.toggle(
-                "botao-exclusao-definitiva",
-                excluirDefinitivamente,
-            );
-            abrirModal(modalExclusao);
+            textoConfirmacao.textContent = `Deseja excluir "${produto.nome}"? Ele sairá do catálogo, mas continuará salvo no banco como inativo e poderá ser reativado.`;
+            abrirModal(modalExclusao, document.getElementById("botao-cancelar-exclusao"));
             return;
         }
 
@@ -556,68 +580,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // "Excluir" é uma exclusão lógica: o produto fica INATIVO e continua no banco.
     botaoConfirmarExclusao.addEventListener("click", async () => {
         if (!produtoSelecionado) return;
         botaoConfirmarExclusao.disabled = true;
         try {
-            const excluindoDefinitivamente = acaoConfirmacao === "EXCLUIR";
-            const url = API_URL + "/" + produtoSelecionado.id_produto
-                + (excluindoDefinitivamente ? "" : "/inativar");
-            await requisitar(url, { method: excluindoDefinitivamente ? "DELETE" : "PATCH" });
+            await requisitar(API_URL + "/" + produtoSelecionado.id_produto + "/inativar", { method: "PATCH" });
             fecharModal(modalExclusao);
             produtoSelecionado = null;
-            acaoConfirmacao = null;
             await carregarProdutos();
             buscaProdutos.focus({ preventScroll: true });
-            mostrarMensagem(
-                mensagemApi,
-                excluindoDefinitivamente
-                    ? "Produto excluído. O histórico de auditoria foi preservado."
-                    : "Produto inativado.",
-                "sucesso",
-            );
+            mostrarMensagem(mensagemApi, "Produto excluído (inativado). Ele continua salvo e pode ser reativado.", "sucesso");
         } catch (erro) {
             mostrarMensagem(mensagemApi, erro.message, "erro");
         } finally {
             botaoConfirmarExclusao.disabled = false;
-        }
-    });
-
-    [modalCadastro, modalEdicao, modalExclusao].forEach((modal) => {
-        modal.addEventListener("click", (evento) => {
-            if (evento.target === modal) fecharModal(modal);
-        });
-    });
-
-    document.addEventListener("keydown", (evento) => {
-        const modalAberto = [modalCadastro, modalEdicao, modalExclusao]
-            .find((modal) => modal.classList.contains("aberto"));
-        if (!modalAberto) return;
-
-        if (evento.key === "Escape") {
-            evento.preventDefault();
-            fecharModal(modalAberto);
-            return;
-        }
-
-        if (evento.key !== "Tab") return;
-        const focaveis = [...modalAberto.querySelectorAll(
-            "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])",
-        )].filter((elemento) => elemento.getClientRects().length > 0);
-        if (!focaveis.length) {
-            evento.preventDefault();
-            modalAberto.focus();
-            return;
-        }
-
-        const primeiro = focaveis[0];
-        const ultimo = focaveis[focaveis.length - 1];
-        if (evento.shiftKey && (document.activeElement === primeiro || !modalAberto.contains(document.activeElement))) {
-            evento.preventDefault();
-            ultimo.focus();
-        } else if (!evento.shiftKey && (document.activeElement === ultimo || !modalAberto.contains(document.activeElement))) {
-            evento.preventDefault();
-            primeiro.focus();
         }
     });
 
