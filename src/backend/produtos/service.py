@@ -8,20 +8,15 @@
 """
 import unicodedata
 
+from ..erros import ErroValidacao, NaoEncontrado
 from . import repository as produto_repository
 from .validacao import validar_produto
 
 CATEGORIAS_COM_SELOS = {"fruta", "frutas"}
 
 
-class ErroValidacao(Exception):
-    def __init__(self, campos):
-        super().__init__("Revise os campos informados.")
-        self.campos = campos
-
-
-class ProdutoNaoEncontrado(Exception):
-    pass
+class ProdutoNaoEncontrado(NaoEncontrado):
+    mensagem_padrao = "Produto não encontrado."
 
 
 def _normalizar(texto):

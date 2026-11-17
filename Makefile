@@ -1,7 +1,7 @@
 PYTHON ?= python
 
 .DEFAULT_GOAL := help
-.PHONY: help setup up down db-up db-down migrate seed api web test status
+.PHONY: help setup up down db-up db-down migrate seed admin api test status
 
 help:
 	@$(PYTHON) scripts/dev.py help
@@ -30,8 +30,8 @@ seed:
 api:
 	@$(PYTHON) scripts/dev.py api
 
-web:
-	@$(PYTHON) scripts/dev.py web
+admin:
+	@$(PYTHON) scripts/dev.py admin
 
 test:
 	@$(PYTHON) scripts/dev.py test

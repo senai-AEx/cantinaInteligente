@@ -1,57 +1,58 @@
 """Aplicação Flask da Cantina Inteligente.
 
+Um único servidor entrega as telas (src/frontend) e a API (/api/...), na mesma
+porta. Assim a sessão de login funciona por cookie, sem CORS.
+
 Executar a partir da raiz do repositório:
     python -m flask --app src.backend.app run --debug
-(ou simplesmente `make up` / `make api`).
+(ou simplesmente `make up`).
 """
+from datetime import timedelta
+import os
 from pathlib import Path
+import secrets
 
 import mysql.connector
-from flask import Flask, jsonify
-from flask_cors import CORS
+from flask import Flask, abort, jsonify, send_from_directory
 from werkzeug.exceptions import HTTPException
 
+from .admin import admin_api
+from .carteira import carteira_api
+from .compras import compras_api
 from .conexao import conectar
+from .erros import ErroAplicacao
 from .produtos import produtos_api
 from .uploads import uploads_api
+from .usuarios import auth_api
 
 RAIZ_PROJETO = Path(__file__).resolve().parents[2]
+PASTA_FRONTEND = RAIZ_PROJETO / "src" / "frontend"
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 # Mantém acentos legíveis nas respostas JSON.
 app.json.ensure_ascii = False
 # Limite do corpo da requisição (~6 MiB): a foto pode ter até 5 MiB.
 app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
 app.config["PRODUCT_IMAGE_FOLDER"] = RAIZ_PROJETO / "assets" / "produtos"
+# Em desenvolvimento, o navegador sempre busca a versão mais nova das telas.
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
-# CORS permite que as telas servidas em outra porta (5500, Live Server ou Vite)
-# chamem a API Flask na porta 5000 durante o desenvolvimento.
-CORS(
-    app,
-    resources={
-        r"/api/*": {
-            "origins": [
-                "http://localhost:5500",
-                "http://127.0.0.1:5500",
-                "http://localhost:5501",
-                "http://127.0.0.1:5501",
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-            ]
-        }
-    },
-    allow_headers=["Content-Type", "X-Actor"],
-    methods=["GET", "POST", "PUT", "PATCH", "OPTIONS"],
+# Sessão de login: cookie assinado, inacessível ao JavaScript e não enviado
+# por outros sites. Sem SECRET_KEY no .env, uma chave temporária é gerada e os
+# logins caem a cada reinício do servidor.
+app.secret_key = os.getenv("SECRET_KEY") or secrets.token_hex(32)
+app.config.update(
+    SESSION_COOKIE_NAME="cantina_sessao",
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
 )
 
-app.register_blueprint(produtos_api)
-app.register_blueprint(uploads_api)
+for modulo in (auth_api, produtos_api, uploads_api, carteira_api, compras_api, admin_api):
+    app.register_blueprint(modulo)
 
 
-@app.get("/")
-def inicio():
-    return jsonify(mensagem="API Cantina Inteligente funcionando!")
-
+# ---------- saúde ----------
 
 @app.get("/api/health")
 def health():
@@ -79,6 +80,44 @@ def health_db():
             cursor.close()
         if connection is not None and connection.is_connected():
             connection.close()
+
+
+# ---------- telas (arquivos estáticos) ----------
+
+@app.get("/")
+def inicio():
+    return send_from_directory(PASTA_FRONTEND, "index.html")
+
+
+@app.get("/assets/produtos/<path:nome>")
+def foto_produto(nome):
+    return send_from_directory(app.config["PRODUCT_IMAGE_FOLDER"], nome)
+
+
+@app.get("/<path:caminho>")
+def arquivo_frontend(caminho):
+    if caminho.startswith("api/"):
+        abort(404)
+    return send_from_directory(PASTA_FRONTEND, caminho)
+
+
+# ---------- erros ----------
+
+@app.errorhandler(ErroAplicacao)
+def erro_aplicacao(exc):
+    return jsonify(exc.para_json()), exc.status
+
+
+@app.errorhandler(mysql.connector.Error)
+def erro_banco(exc):
+    app.logger.error("Erro no MySQL", exc_info=(type(exc), exc, exc.__traceback__))
+    return jsonify(erro="Não foi possível acessar o banco de dados. Tente novamente."), 503
+
+
+@app.errorhandler(RuntimeError)
+def erro_configuracao(exc):
+    app.logger.error("Erro de configuração: %s", exc)
+    return jsonify(erro=str(exc)), 503
 
 
 @app.errorhandler(HTTPException)

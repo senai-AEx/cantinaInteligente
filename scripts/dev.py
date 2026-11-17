@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import os
+import secrets
 import shutil
 import socket
 import subprocess
@@ -15,10 +16,8 @@ ENV_EXAMPLE = ROOT / ".env.example"
 DB_CONTAINER = "cantina-mysql"
 DB_IMAGE = "mysql:8.4"
 DB_VOLUME = "cantina-mysql-data"
-API_PORT = 5000
-WEB_PORT = 5500
+APP_PORT = 5000
 MAX_MYSQL_WAIT_SECONDS = 90
-FRONTEND_ROOT = ROOT / "src" / "frontend"
 
 
 def read_env_file():
@@ -37,10 +36,53 @@ def read_env_file():
     return values
 
 
+def gerar_senha_admin():
+    """Senha de demonstração que atende à regra do sistema (letra e número)."""
+    return "Cantina-" + secrets.token_hex(3)
+
+
+def completar_env():
+    """Acrescenta ao .env as chaves novas do .env.example, sem mexer nas preenchidas."""
+    atuais = read_env_file()
+    exemplo = {}
+    for line in ENV_EXAMPLE.read_text(encoding="utf-8-sig").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            key, value = line.split("=", 1)
+            exemplo[key.strip()] = value.strip()
+    geradas = {"SECRET_KEY": lambda: secrets.token_hex(32), "ADMIN_SENHA": gerar_senha_admin}
+    novas = []
+    for key, value in exemplo.items():
+        if atuais.get(key):
+            continue
+        if key in geradas:
+            value = geradas[key]()
+        if key in atuais:
+            # A chave existe, mas está vazia: só preenche as que o sistema gera.
+            if key not in geradas:
+                continue
+            linhas = [
+                f"{key}={value}" if linha.strip().startswith(key + "=") else linha
+                for linha in ENV_FILE.read_text(encoding="utf-8-sig").splitlines()
+            ]
+            ENV_FILE.write_text("\n".join(linhas) + "\n", encoding="utf-8")
+        else:
+            novas.append(f"{key}={value}")
+    if novas:
+        with ENV_FILE.open("a", encoding="utf-8") as arquivo:
+            arquivo.write(
+                "\n# Acrescentado automaticamente a partir de .env.example\n"
+                + "\n".join(novas)
+                + "\n"
+            )
+        print("Seu .env recebeu as chaves novas: " + ", ".join(n.split("=", 1)[0] for n in novas))
+
+
 def ensure_env_file():
     if not ENV_FILE.exists():
         shutil.copyfile(ENV_EXAMPLE, ENV_FILE)
         print("Arquivo .env criado a partir de .env.example.")
+    completar_env()
     values = read_env_file()
     required = ("MYSQL_DATABASE", "MYSQL_USER", "MYSQL_PASSWORD")
     missing = [key for key in required if not values.get(key)]
@@ -84,7 +126,8 @@ def docker_inspect():
 
 
 def container_not_found(result):
-    return "No such object" in result.stderr
+    # O texto muda entre versões do Docker ("No such object" ou "no such object").
+    return "no such object" in result.stderr.lower()
 
 
 def docker_mysql(sql, values, *, capture=False):
@@ -124,6 +167,11 @@ def start_database(values):
         if not root_password:
             raise RuntimeError("Configure MYSQL_ROOT_PASSWORD no .env para criar o MySQL.")
         port = values.get("MYSQL_PORT", "3306")
+        if port_is_open(int(port)):
+            raise RuntimeError(
+                f"A porta {port} já está em uso por outro programa (talvez um MySQL instalado "
+                "no computador). Mude MYSQL_PORT no .env para 3307 e rode o comando de novo."
+            )
         command = [
             "docker", "run", "--name", DB_CONTAINER,
             "--publish", f"{port}:3306",
@@ -146,17 +194,27 @@ def start_database(values):
     else:
         print(f"Container {DB_CONTAINER} já está rodando.")
 
+    # Na primeira inicialização o MySQL sobe um servidor temporário que ainda não
+    # tem a senha root definida; "Access denied" nesse período é normal. Só é
+    # tratado como senha errada se continuar acontecendo depois de alguns segundos.
     deadline = time.monotonic() + MAX_MYSQL_WAIT_SECONDS
+    acesso_negado_desde = None
     while time.monotonic() < deadline:
         try:
             if docker_mysql("SELECT 1;", values) == "1":
                 print("MySQL pronto.")
                 return
+            acesso_negado_desde = None
         except RuntimeError as error:
             if "Access denied" in str(error) or "ERROR 1045" in str(error):
-                raise RuntimeError(
-                    "Senha root incorreta. Confira MYSQL_ROOT_PASSWORD no .env com a senha configurada no container."
-                ) from error
+                acesso_negado_desde = acesso_negado_desde or time.monotonic()
+                if time.monotonic() - acesso_negado_desde > 40:
+                    raise RuntimeError(
+                        "Senha root incorreta. Confira MYSQL_ROOT_PASSWORD no .env com a senha "
+                        "configurada no container."
+                    ) from error
+            else:
+                acesso_negado_desde = None
         time.sleep(2)
     raise RuntimeError(
         "O MySQL não ficou pronto. Confira o Docker Desktop e a senha MYSQL_ROOT_PASSWORD do container no .env."
@@ -220,6 +278,11 @@ def apply_migrations(values):
             "A tabela produtos está parcialmente migrada. Confira as colunas antes de continuar."
         )
 
+    # A 006 usa CREATE TABLE IF NOT EXISTS: pode ser aplicada sempre.
+    nome_006 = "006_usuarios_carteira_compras_mysql.sql"
+    docker_mysql((migrations / nome_006).read_text(encoding="utf-8-sig"), values)
+    print(f"Migração conferida: {nome_006}")
+
 
 def seed():
     values = ensure_database()
@@ -239,23 +302,14 @@ def ensure_database():
     return values
 
 
-def serve_api():
+def servidor():
     python = python_venv()
     if not python.exists():
         raise RuntimeError("Ambiente Python ausente. Rode make setup primeiro.")
     return [
         str(python), "-m", "flask", "--app", "src.backend.app", "run",
-        "--debug", "--no-reload", "--host", "127.0.0.1", "--port", str(API_PORT),
+        "--debug", "--no-reload", "--host", "127.0.0.1", "--port", str(APP_PORT),
     ]
-
-
-def serve_web():
-    python = python_venv()
-    if not python.exists():
-        raise RuntimeError("Ambiente Python ausente. Rode make setup primeiro.")
-    if not (FRONTEND_ROOT / "index.html").is_file():
-        raise RuntimeError("Página inicial do frontend não encontrada em src/frontend/index.html.")
-    return [str(python), "scripts/serve_frontend.py", str(WEB_PORT)]
 
 
 def port_is_open(port):
@@ -266,54 +320,40 @@ def port_is_open(port):
         return False
 
 
-def start_process(name, command, port):
-    if port_is_open(port):
-        print(f"{name} já está disponível em 127.0.0.1:{port}.")
-        return None
-    process = subprocess.Popen(command, cwd=ROOT)
-    print(f"{name} iniciado em 127.0.0.1:{port}.")
-    return process
-
-
-def run_services(include_web=True):
+def run_services():
+    """Sobe o banco, aplica as migrações e inicia o Flask (telas + API na mesma porta)."""
     ensure_database()
-    services = [("Flask", serve_api(), API_PORT)]
-    frontend_exists = (FRONTEND_ROOT / "index.html").is_file()
-    if include_web and frontend_exists:
-        services.append(("Frontend", serve_web(), WEB_PORT))
-
-    children = []
+    base = f"http://127.0.0.1:{APP_PORT}"
+    if port_is_open(APP_PORT):
+        print(f"O sistema já está rodando em {base}.")
+        return
+    process = subprocess.Popen(servidor(), cwd=ROOT)
+    print(f"Sistema:        {base}/")
+    print(f"Catálogo:       {base}/html/catalogo_produtos.html")
+    print(f"Administração:  {base}/html/catalogo_produtos_adm.html")
+    print(f"Teste do banco: {base}/api/health/db")
+    print("Pressione Ctrl+C para parar. O MySQL continuará ligado (use make down para parar).")
     try:
-        for name, command, port in services:
-            process = start_process(name, command, port)
-            if process is not None:
-                children.append((name, process))
-        print(f"API: http://127.0.0.1:{API_PORT}/api/health")
-        print(f"Banco: http://127.0.0.1:{API_PORT}/api/health/db")
-        if frontend_exists and include_web:
-            print(f"Início: http://127.0.0.1:{WEB_PORT}/")
-            print(f"Admin: http://127.0.0.1:{WEB_PORT}/html/catalogo_produtos_adm.html")
-            print(f"Catálogo: http://127.0.0.1:{WEB_PORT}/html/catalogo_produtos.html")
-        elif include_web:
-            print("Página inicial do frontend não encontrada; confira src/frontend/index.html.")
-        print("Pressione Ctrl+C para parar os servidores. O MySQL continuará ligado.")
-        while True:
-            for name, process in children:
-                code = process.poll()
-                if code is not None:
-                    raise RuntimeError(f"{name} encerrou com código {code}.")
+        while process.poll() is None:
             time.sleep(0.5)
+        raise RuntimeError(f"O servidor encerrou com código {process.returncode}.")
     except KeyboardInterrupt:
-        print("\nEncerrando os servidores locais...")
+        print("\nEncerrando o servidor...")
     finally:
-        for _, process in children:
-            if process.poll() is None:
-                process.terminate()
-        for _, process in children:
+        if process.poll() is None:
+            process.terminate()
             try:
                 process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 process.kill()
+
+
+def criar_admin():
+    ensure_database()
+    python = python_venv()
+    if not python.exists():
+        raise RuntimeError("Ambiente Python ausente. Rode make setup primeiro.")
+    run([str(python), "scripts/criar_admin.py"])
 
 
 def setup():
@@ -357,33 +397,33 @@ def status():
     else:
         state = "rodando" if inspected.stdout.strip().lower() == "true" else "parado"
         print(f"MySQL: {state}.")
-    for name, port in (("Flask", API_PORT), ("Frontend", WEB_PORT)):
-        print(f"{name}: {'rodando' if port_is_open(port) else 'parado'}.")
+    estado = "rodando" if port_is_open(APP_PORT) else "parado"
+    print(f"Sistema (Flask): {estado}.")
 
 
 def test():
     python = python_venv()
     if not python.exists():
         raise RuntimeError("Ambiente Python ausente. Rode make setup primeiro.")
-    run([str(python), "-m", "unittest", "discover", "-s", "tests", "-v"])
+    run([str(python), "-m", "unittest", "discover", "-s", "tests", "-t", ".", "-v"])
 
 
 def print_help():
     print("Cantina Inteligente — atalhos de desenvolvimento")
-    print("  make setup    cria .env se necessário e prepara o ambiente Python")
-    print("  make up       inicia/cria MySQL, aplica migrações e sobe API + frontend disponível")
+    print("  make setup    cria/completa o .env e prepara o ambiente Python")
+    print("  make up       inicia o MySQL, aplica migrações e sobe o sistema em http://127.0.0.1:5000")
+    print("  make admin    cria (ou redefine) o administrador com os dados ADMIN_* do .env")
+    print("  make seed     insere produtos de exemplo se a tabela estiver vazia")
+    print("  make migrate  aplica migrações MySQL pendentes")
+    print("  make test     executa os testes automatizados")
+    print("  make status   mostra o que está rodando")
     print("  make down     para o MySQL sem apagar os dados")
     print("  make db-up    inicia somente o MySQL")
-    print("  make db-down  para somente o MySQL")
-    print("  make migrate  aplica migrações MySQL pendentes")
-    print("  make seed     insere produtos de exemplo se a tabela estiver vazia")
-    print("  make api      inicia MySQL/migrações e roda somente a API")
-    print("  make web      serve as telas em http://127.0.0.1:5500")
-    print("  make test     executa os testes automatizados")
-    print("  make status   mostra quais serviços estão ativos")
 
 
 def main():
+    # Mostra as mensagens na ordem certa mesmo quando a saída vai para outro programa.
+    sys.stdout.reconfigure(line_buffering=True)
     actions = {
         "help": print_help,
         "setup": setup,
@@ -392,8 +432,8 @@ def main():
         "db-down": database_down,
         "migrate": ensure_database,
         "seed": seed,
-        "api": lambda: run_services(include_web=False),
-        "web": lambda: subprocess.run(serve_web(), cwd=ROOT, check=True),
+        "api": run_services,
+        "admin": criar_admin,
         "test": test,
         "status": status,
     }

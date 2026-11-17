@@ -4,6 +4,7 @@ import tempfile
 import unittest
 
 from src.backend.app import app
+from tests.apoio import ADMINISTRADOR, simular_login
 
 
 class UploadImagemProdutoTests(unittest.TestCase):
@@ -14,6 +15,7 @@ class UploadImagemProdutoTests(unittest.TestCase):
         app.config["PRODUCT_IMAGE_FOLDER"] = Path(self.pasta_temporaria.name)
         app.testing = True
         self.client = app.test_client()
+        simular_login(self, self.client, ADMINISTRADOR)
 
     def tearDown(self):
         app.config["PRODUCT_IMAGE_FOLDER"] = self.config_original

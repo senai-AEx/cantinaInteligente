@@ -1,8 +1,10 @@
-"""Upload das fotos dos produtos (JPG, PNG ou WebP de até 5 MB)."""
+"""Upload das fotos dos produtos (JPG, PNG ou WebP de até 5 MB). Somente administrador."""
 from pathlib import Path
 from uuid import uuid4
 
 from flask import Blueprint, current_app, jsonify, request
+
+from .seguranca import somente_administrador
 
 LIMITE_IMAGEM_BYTES = 5 * 1024 * 1024
 
@@ -21,6 +23,7 @@ def _erro(mensagem, campo, status=422):
 
 
 @uploads_api.post("/api/uploads/produtos")
+@somente_administrador
 def enviar_foto_produto():
     imagem = request.files.get("imagem")
     if imagem is None or not imagem.filename:

@@ -7,6 +7,7 @@ from unittest.mock import patch
 from src.backend.app import app
 from src.backend.produtos import service
 from src.backend.produtos.validacao import validar_produto
+from tests.apoio import ADMINISTRADOR, CLIENTE, simular_login
 
 PRODUTO_VALIDO = {
     "nome": "Suco de uva 200 ml",
@@ -74,6 +75,7 @@ class ProdutosApiTests(unittest.TestCase):
         substituto.start()
         self.addCleanup(substituto.stop)
         self.cliente = app.test_client()
+        simular_login(self, self.cliente, ADMINISTRADOR)
 
     def cadastrar(self, **alteracoes):
         return self.cliente.post("/api/produtos", json={**PRODUTO_VALIDO, **alteracoes})
@@ -142,6 +144,31 @@ class ProdutosApiTests(unittest.TestCase):
             self.cliente.put("/api/produtos/99", json=PRODUTO_VALIDO).status_code, 404
         )
         self.assertEqual(self.cliente.patch("/api/produtos/99/inativar").status_code, 404)
+
+
+class PermissaoProdutosTests(unittest.TestCase):
+    """Só o administrador grava; o catálogo é público."""
+
+    def setUp(self):
+        self.repo = RepositorioFalso()
+        substituto = patch.object(service, "produto_repository", self.repo)
+        substituto.start()
+        self.addCleanup(substituto.stop)
+        self.cliente = app.test_client()
+
+    def test_catalogo_e_publico(self):
+        self.assertEqual(self.cliente.get("/api/produtos").status_code, 200)
+
+    def test_sem_login_nao_cadastra(self):
+        resposta = self.cliente.post("/api/produtos", json=PRODUTO_VALIDO)
+        self.assertEqual(resposta.status_code, 401)
+        self.assertEqual(self.repo.produtos, {})
+
+    def test_cliente_nao_cadastra_nem_inativa(self):
+        simular_login(self, self.cliente, CLIENTE)
+        self.assertEqual(self.cliente.post("/api/produtos", json=PRODUTO_VALIDO).status_code, 403)
+        self.assertEqual(self.cliente.patch("/api/produtos/1/inativar").status_code, 403)
+        self.assertEqual(self.repo.produtos, {})
 
 
 class ValidacaoProdutoTests(unittest.TestCase):
