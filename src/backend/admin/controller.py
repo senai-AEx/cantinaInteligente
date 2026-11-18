@@ -85,3 +85,15 @@ def relatorio_saldos():
 @somente_administrador
 def relatorio_estoque():
     return jsonify(admin_service.relatorio_estoque()), 200
+
+
+@somente_administrador
+def listar_compras():
+    """Compras registradas: quem comprou o quê no período."""
+    resposta = admin_service.listar_compras(
+        request.args.get("de", ""),
+        request.args.get("ate", ""),
+        request.args.get("id_usuario", ""),
+        ler_limite(padrao=100, maximo=500),
+    )
+    return jsonify(resposta), 200

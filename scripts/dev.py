@@ -1,5 +1,6 @@
 """Atalhos locais de desenvolvimento para Windows, macOS e Linux."""
 
+from datetime import datetime
 from pathlib import Path
 import os
 import secrets
@@ -50,7 +51,11 @@ def completar_env():
         if line and not line.startswith("#") and "=" in line:
             key, value = line.split("=", 1)
             exemplo[key.strip()] = value.strip()
-    geradas = {"SECRET_KEY": lambda: secrets.token_hex(32), "ADMIN_SENHA": gerar_senha_admin}
+    geradas = {
+        "SECRET_KEY": lambda: secrets.token_hex(32),
+        "ADMIN_SENHA": gerar_senha_admin,
+        "CLIENTE_SENHA": gerar_senha_admin,
+    }
     novas = []
     for key, value in exemplo.items():
         if atuais.get(key):
@@ -306,9 +311,10 @@ def servidor():
     python = python_venv()
     if not python.exists():
         raise RuntimeError("Ambiente Python ausente. Rode make setup primeiro.")
+    host = read_env_file().get("APP_HOST") or "127.0.0.1"
     return [
         str(python), "-m", "flask", "--app", "src.backend.app", "run",
-        "--debug", "--no-reload", "--host", "127.0.0.1", "--port", str(APP_PORT),
+        "--debug", "--no-reload", "--host", host, "--port", str(APP_PORT),
     ]
 
 
@@ -354,6 +360,66 @@ def criar_admin():
     if not python.exists():
         raise RuntimeError("Ambiente Python ausente. Rode make setup primeiro.")
     run([str(python), "scripts/criar_admin.py"])
+
+
+def demo():
+    """Produtos de exemplo + administrador + cliente com crédito, para testar e apresentar."""
+    seed()
+    python = python_venv()
+    if not python.exists():
+        raise RuntimeError("Ambiente Python ausente. Rode make setup primeiro.")
+    run([str(python), "scripts/criar_demo.py"])
+
+
+def credenciais():
+    """Mostra os dados de acesso de demonstração guardados no .env deste computador."""
+    values = ensure_env_file()
+    print("Credenciais de demonstração (ficam só no seu .env; crie os usuários com make demo)")
+    for titulo, prefixo in (("Administrador", "ADMIN"), ("Cliente", "CLIENTE")):
+        print(f"\n{titulo}")
+        print(f"  matrícula: {values.get(prefixo + '_MATRICULA', '')}")
+        print(f"  e-mail:    {values.get(prefixo + '_EMAIL', '')}")
+        print(f"  CPF:       {values.get(prefixo + '_CPF', '')}")
+        print(f"  senha:     {values.get(prefixo + '_SENHA', '')}")
+    print("\nO login aceita matrícula, e-mail ou CPF.")
+
+
+def backup():
+    """Grava uma cópia completa do banco em backups/ (RNF de recuperação)."""
+    values = ensure_env_file()
+    start_database(values)
+    root_password = values.get("MYSQL_ROOT_PASSWORD") or values.get("MYSQL_PASSWORD")
+    process_env = os.environ.copy()
+    process_env["MYSQL_PWD"] = root_password
+    pasta = ROOT / "backups"
+    pasta.mkdir(exist_ok=True)
+    arquivo = pasta / f"cantina-{datetime.now():%Y%m%d-%H%M%S}.sql"
+    resultado = subprocess.run(
+        [
+            "docker", "exec", "-e", "MYSQL_PWD", DB_CONTAINER, "mysqldump",
+            "--default-character-set=utf8mb4", "--single-transaction", "--no-tablespaces",
+            "-u", "root", values["MYSQL_DATABASE"],
+        ],
+        cwd=ROOT, capture_output=True, env=process_env,
+    )
+    if resultado.returncode != 0:
+        raise RuntimeError(resultado.stderr.decode("utf-8", "replace").strip() or "Falha no backup.")
+    arquivo.write_bytes(resultado.stdout)
+    print(f"Backup gravado em {arquivo.relative_to(ROOT)} ({len(resultado.stdout) // 1024} KB).")
+
+
+def restore():
+    """Restaura o banco a partir de um arquivo de backups/. Substitui os dados atuais."""
+    if len(sys.argv) < 3 or not sys.argv[2].strip():
+        raise RuntimeError("Informe o arquivo: make restore ARQUIVO=backups/cantina-AAAAMMDD-HHMMSS.sql")
+    arquivo = (ROOT / sys.argv[2]).resolve()
+    if not arquivo.is_file():
+        raise RuntimeError(f"Arquivo não encontrado: {sys.argv[2]}")
+    values = ensure_env_file()
+    start_database(values)
+    sql = f"USE {values['MYSQL_DATABASE']};\n" + arquivo.read_text(encoding="utf-8")
+    docker_mysql(sql, values)
+    print(f"Banco restaurado a partir de {arquivo.name}.")
 
 
 def setup():
@@ -413,7 +479,11 @@ def print_help():
     print("  make setup    cria/completa o .env e prepara o ambiente Python")
     print("  make up       inicia o MySQL, aplica migrações e sobe o sistema em http://127.0.0.1:5000")
     print("  make admin    cria (ou redefine) o administrador com os dados ADMIN_* do .env")
+    print("  make demo     produtos de exemplo + administrador + cliente com crédito")
+    print("  make credenciais  mostra matrícula e senha dos usuários de demonstração")
     print("  make seed     insere produtos de exemplo se a tabela estiver vazia")
+    print("  make backup   grava uma cópia do banco em backups/")
+    print("  make restore ARQUIVO=backups/arquivo.sql  restaura uma cópia")
     print("  make migrate  aplica migrações MySQL pendentes")
     print("  make test     executa os testes automatizados")
     print("  make status   mostra o que está rodando")
@@ -434,6 +504,10 @@ def main():
         "seed": seed,
         "api": run_services,
         "admin": criar_admin,
+        "demo": demo,
+        "credenciais": credenciais,
+        "backup": backup,
+        "restore": restore,
         "test": test,
         "status": status,
     }

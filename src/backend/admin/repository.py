@@ -86,6 +86,40 @@ def _movimentacao_json(row):
     }
 
 
+def _compra_json(row):
+    return {
+        "id_compra": row["id_compra"],
+        "data_hora": data_utc(row["data_hora"]),
+        "valor_total_centavos": row["valor_total_centavos"],
+        "usuario": {
+            "id_usuario": row["id_usuario"],
+            "nome": row["nome"],
+            "matricula": row["matricula"],
+        },
+        "itens": [],
+    }
+
+
+def juntar_itens(compras, linhas):
+    """Coloca cada linha de `itens_compra` na lista `itens` da sua compra.
+
+    As linhas chegam de uma única consulta para todas as compras da página
+    (evita uma consulta por compra) e a ordem delas é mantida.
+    """
+    itens_por_compra = {compra["id_compra"]: compra["itens"] for compra in compras}
+    for row in linhas:
+        itens_por_compra[row["id_compra"]].append(
+            {
+                "id_produto": row["id_produto"],
+                "nome": row["nome"],
+                "quantidade": row["quantidade"],
+                "preco_unitario_centavos": row["preco_unitario_centavos"],
+                "subtotal_centavos": row["subtotal_centavos"],
+            }
+        )
+    return compras
+
+
 # ---------- usuários: consultas com conexão própria ----------
 
 def listar_usuarios(termo, status, perfil):
@@ -223,10 +257,64 @@ def listar_movimentacoes(inicio_utc, fim_utc, tipo, id_usuario, limite):
         _fechar(connection, cursor)
 
 
+# ---------- compras registradas ----------
+
+def listar_compras(inicio_utc, fim_utc, id_usuario, limite):
+    """Devolve (compras mais recentes primeiro, com usuário e itens; total do filtro)."""
+    # `filtro` é montado apenas com textos fixos; os valores vão em `params`.
+    condicoes = ["c.data_hora >= %s", "c.data_hora < %s"]
+    params = [inicio_utc, fim_utc]
+    if id_usuario is not None:
+        condicoes.append("c.id_usuario = %s")
+        params.append(id_usuario)
+    filtro = " AND ".join(condicoes)
+
+    connection = cursor = None
+    try:
+        connection = conectar()
+        cursor = connection.cursor(dictionary=True)
+
+        # O total não usa LIMIT: conta tudo o que o filtro alcança.
+        cursor.execute(
+            f"SELECT COUNT(*) AS total_compras FROM compras c WHERE {filtro}", params
+        )
+        total_compras = inteiro(cursor.fetchone()["total_compras"])
+
+        cursor.execute(
+            f"""SELECT c.id_compra, c.data_hora, c.valor_total_centavos,
+                       u.id_usuario, u.nome, u.matricula
+                FROM compras c
+                JOIN usuarios u ON u.id_usuario = c.id_usuario
+                WHERE {filtro}
+                ORDER BY c.data_hora DESC, c.id_compra DESC
+                LIMIT %s""",
+            params + [limite],
+        )
+        compras = [_compra_json(row) for row in cursor.fetchall()]
+
+        if compras:
+            # Uma consulta só para os itens de todas as compras da página.
+            # `marcadores` é apenas "%s, %s, ..."; os ids vão como parâmetros.
+            marcadores = ", ".join(["%s"] * len(compras))
+            cursor.execute(
+                f"""SELECT i.id_compra, i.id_produto, p.nome, i.quantidade,
+                           i.preco_unitario_centavos, i.subtotal_centavos
+                    FROM itens_compra i
+                    JOIN produtos p ON p.id_produto = i.id_produto
+                    WHERE i.id_compra IN ({marcadores})
+                    ORDER BY i.id_compra, i.id_item_compra""",
+                [compra["id_compra"] for compra in compras],
+            )
+            juntar_itens(compras, cursor.fetchall())
+        return compras, total_compras
+    finally:
+        _fechar(connection, cursor)
+
+
 # ---------- relatórios ----------
 
 def relatorio_vendas(inicio_utc, fim_utc):
-    """Devolve (totais, por_produto, por_dia) das compras do período."""
+    """Devolve (totais, por_produto, por_dia, por_usuario) das compras do período."""
     periodo = (inicio_utc, fim_utc)
     connection = cursor = None
     try:
@@ -303,7 +391,44 @@ def relatorio_vendas(inicio_utc, fim_utc):
             }
             for row in cursor.fetchall()
         ]
-        return totais, por_produto, por_dia
+
+        # Consumo por usuário. Compras e itens são somados em subconsultas
+        # separadas: juntar `compras` direto com `itens_compra` repetiria o
+        # valor da compra uma vez para cada item dela.
+        cursor.execute(
+            """SELECT u.id_usuario, u.nome, u.matricula,
+                      tc.quantidade_compras, COALESCE(ti.itens, 0) AS itens,
+                      tc.total_centavos
+               FROM (
+                   SELECT id_usuario, COUNT(*) AS quantidade_compras,
+                          SUM(valor_total_centavos) AS total_centavos
+                   FROM compras
+                   WHERE data_hora >= %s AND data_hora < %s
+                   GROUP BY id_usuario
+               ) tc
+               JOIN usuarios u ON u.id_usuario = tc.id_usuario
+               LEFT JOIN (
+                   SELECT c.id_usuario, SUM(i.quantidade) AS itens
+                   FROM itens_compra i
+                   JOIN compras c ON c.id_compra = i.id_compra
+                   WHERE c.data_hora >= %s AND c.data_hora < %s
+                   GROUP BY c.id_usuario
+               ) ti ON ti.id_usuario = tc.id_usuario
+               ORDER BY tc.total_centavos DESC, u.nome, u.id_usuario""",
+            periodo + periodo,
+        )
+        por_usuario = [
+            {
+                "id_usuario": row["id_usuario"],
+                "nome": row["nome"],
+                "matricula": row["matricula"],
+                "quantidade_compras": inteiro(row["quantidade_compras"]),
+                "itens": inteiro(row["itens"]),
+                "total_centavos": inteiro(row["total_centavos"]),
+            }
+            for row in cursor.fetchall()
+        ]
+        return totais, por_produto, por_dia, por_usuario
     finally:
         _fechar(connection, cursor)
 

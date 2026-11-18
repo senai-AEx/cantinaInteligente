@@ -147,3 +147,20 @@ def atualizar_acesso(cursor, id_usuario, senha_hash, perfil):
            WHERE id_usuario = %s""",
         (senha_hash, ID_TIPO[perfil], id_usuario),
     )
+
+
+def buscar_senha_hash(cursor, id_usuario, bloquear=False):
+    """Hash da senha do usuário, ou None se ele não existir."""
+    sql = "SELECT senha_hash FROM usuarios WHERE id_usuario = %s"
+    if bloquear:
+        sql += " FOR UPDATE"
+    cursor.execute(sql, (id_usuario,))
+    row = cursor.fetchone()
+    return row["senha_hash"] if row else None
+
+
+def atualizar_senha(cursor, id_usuario, senha_hash):
+    cursor.execute(
+        "UPDATE usuarios SET senha_hash = %s WHERE id_usuario = %s",
+        (senha_hash, id_usuario),
+    )

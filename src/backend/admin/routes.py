@@ -53,3 +53,7 @@ admin_api.add_url_rule(
 admin_api.add_url_rule(
     "/relatorios/estoque", view_func=admin_controller.relatorio_estoque, methods=["GET"]
 )
+# Compras registradas (quem comprou o quê).
+admin_api.add_url_rule(
+    "/compras", view_func=admin_controller.listar_compras, methods=["GET"]
+)

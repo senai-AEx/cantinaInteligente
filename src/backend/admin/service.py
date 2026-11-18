@@ -150,20 +150,34 @@ def validar_filtros_usuarios(q, status, perfil):
     return termo, status, perfil
 
 
+def _ler_id_usuario(valor, erros):
+    """Filtro opcional ?id_usuario=: vazio vale None (todos os usuários)."""
+    texto = (valor or "").strip()
+    if not texto:
+        return None
+    if _INTEIRO_POSITIVO.fullmatch(texto) and 1 <= int(texto) <= MAX_INT:
+        return int(texto)
+    erros["id_usuario"] = "Informe um identificador de usuário válido."
+    return None
+
+
 def validar_filtros_movimentacoes(tipo, id_usuario):
     """Devolve (tipo, id_usuario ou None) ou lança ErroValidacao."""
     erros = {}
     tipo = _ler_opcao(tipo, TIPOS_FILTRO, "tipo", erros)
-    texto = (id_usuario or "").strip()
-    id_filtrado = None
-    if texto:
-        if _INTEIRO_POSITIVO.fullmatch(texto) and 1 <= int(texto) <= MAX_INT:
-            id_filtrado = int(texto)
-        else:
-            erros["id_usuario"] = "Informe um identificador de usuário válido."
+    id_filtrado = _ler_id_usuario(id_usuario, erros)
     if erros:
         raise ErroValidacao(erros)
     return tipo, id_filtrado
+
+
+def validar_filtros_compras(id_usuario):
+    """Devolve o id_usuario do filtro (ou None) ou lança ErroValidacao."""
+    erros = {}
+    id_filtrado = _ler_id_usuario(id_usuario, erros)
+    if erros:
+        raise ErroValidacao(erros)
+    return id_filtrado
 
 
 # ---------- usuários ----------
@@ -329,6 +343,22 @@ def listar_movimentacoes(de, ate, tipo, id_usuario, limite, hoje=None):
     }
 
 
+# ---------- compras registradas ----------
+
+def listar_compras(de, ate, id_usuario, limite, hoje=None):
+    """Quem comprou o quê no período. `total_compras` ignora o limite da página."""
+    periodo = interpretar_periodo(de, ate, hoje or hoje_brasilia())
+    id_usuario = validar_filtros_compras(id_usuario)
+    compras, total_compras = admin_repository.listar_compras(
+        periodo.inicio_utc, periodo.fim_utc, id_usuario, limite
+    )
+    return {
+        "periodo": periodo_json(periodo),
+        "total_compras": total_compras,
+        "compras": compras,
+    }
+
+
 # ---------- relatórios ----------
 
 def montar_resumo_vendas(quantidade_compras, itens_vendidos, total_centavos, custo_centavos):
@@ -347,7 +377,7 @@ def montar_resumo_vendas(quantidade_compras, itens_vendidos, total_centavos, cus
 
 def relatorio_vendas(de, ate, hoje=None):
     periodo = interpretar_periodo(de, ate, hoje or hoje_brasilia())
-    totais, por_produto, por_dia = admin_repository.relatorio_vendas(
+    totais, por_produto, por_dia, por_usuario = admin_repository.relatorio_vendas(
         periodo.inicio_utc, periodo.fim_utc
     )
     return {
@@ -355,6 +385,7 @@ def relatorio_vendas(de, ate, hoje=None):
         "resumo": montar_resumo_vendas(**totais),
         "por_produto": por_produto,
         "por_dia": por_dia,
+        "por_usuario": por_usuario,
     }
 
 

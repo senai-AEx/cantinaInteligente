@@ -38,6 +38,12 @@ def main():
     except ErroValidacao as erro:
         for campo, mensagem in (erro.campos or {}).items():
             print(f"{CAMPOS.get(campo, campo)}: {mensagem}", file=sys.stderr)
+        if "senha" in (erro.campos or {}):
+            print(
+                "A senha do administrador precisa ter de 8 a 72 caracteres, com pelo menos "
+                "uma letra e um número. Nada foi alterado: a senha anterior continua valendo.",
+                file=sys.stderr,
+            )
         return 1
     acao = "criado" if criado else "atualizado"
     print(f"Administrador {acao}: {usuario['nome']} — matrícula {usuario['matricula']}.")

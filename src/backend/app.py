@@ -22,8 +22,9 @@ from .compras import compras_api
 from .conexao import conectar
 from .erros import ErroAplicacao
 from .produtos import produtos_api
+from .qr import qr_api
 from .uploads import uploads_api
-from .usuarios import auth_api
+from .usuarios import auth_api, usuarios_admin_api
 
 RAIZ_PROJETO = Path(__file__).resolve().parents[2]
 PASTA_FRONTEND = RAIZ_PROJETO / "src" / "frontend"
@@ -48,7 +49,17 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
 )
 
-for modulo in (auth_api, produtos_api, uploads_api, carteira_api, compras_api, admin_api):
+MODULOS = (
+    auth_api,
+    usuarios_admin_api,
+    produtos_api,
+    uploads_api,
+    carteira_api,
+    compras_api,
+    admin_api,
+    qr_api,
+)
+for modulo in MODULOS:
     app.register_blueprint(modulo)
 
 

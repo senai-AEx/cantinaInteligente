@@ -46,6 +46,24 @@ EDICAO_CLIENTE = {
     "email": "maria@exemplo.com",
     "perfil": "CLIENTE",
 }
+CONSUMO_MARIA = {
+    "id_usuario": 2,
+    "nome": "Maria Souza",
+    "matricula": "202612345",
+    "quantidade_compras": 3,
+    "itens": 8,
+    "total_centavos": 4350,
+}
+COMPRA_12 = {
+    "id_compra": 12,
+    "data_hora": "2026-11-17T22:50:03.120000Z",
+    "valor_total_centavos": 450,
+    "usuario": {"id_usuario": 2, "nome": "Maria Souza", "matricula": "202612345"},
+    "itens": [
+        {"id_produto": 3, "nome": "Suco de uva 200 ml", "quantidade": 1,
+         "preco_unitario_centavos": 450, "subtotal_centavos": 450},
+    ],
+}
 
 
 def ajuste(**alteracoes):
@@ -72,6 +90,7 @@ class RepositorioFalso:
         self.duplicado = None  # campo que a próxima gravação acusa como repetido
         self.gravacoes_de_status = 0
         self.consulta_movimentacoes = None
+        self.consulta_compras = None
         self.perfil_dos_saldos = None
 
     @contextmanager
@@ -111,7 +130,11 @@ class RepositorioFalso:
             "total_centavos": 14250,
             "custo_centavos": 9000,
         }
-        return totais, [], []
+        return totais, [], [], [dict(CONSUMO_MARIA)]
+
+    def listar_compras(self, inicio_utc, fim_utc, id_usuario, limite):
+        self.consulta_compras = (inicio_utc, fim_utc, id_usuario, limite)
+        return [dict(COMPRA_12)], 12
 
     def listar_saldos(self, perfil):
         self.perfil_dos_saldos = perfil
@@ -264,6 +287,15 @@ class FiltrosTests(CasoAdmin):
                 )
                 self.assertEqual(set(campos), {"id_usuario"})
 
+    def test_filtro_de_compras(self):
+        self.assertIsNone(service.validar_filtros_compras(""))
+        self.assertIsNone(service.validar_filtros_compras(None))
+        self.assertEqual(service.validar_filtros_compras(" 7 "), 7)
+        for texto in ("abc", "0", "-1", "7.5", "99999999999"):
+            with self.subTest(id_usuario=texto):
+                campos = self.campos_invalidos(service.validar_filtros_compras, texto)
+                self.assertEqual(set(campos), {"id_usuario"})
+
 
 class AjusteTests(CasoAdmin):
     def test_ajuste_valido(self):
@@ -391,6 +423,49 @@ class ApoioDoRepositorioTests(unittest.TestCase):
     def test_padrao_de_busca_trata_curingas_como_texto(self):
         self.assertEqual(repository.padrao_busca("maria"), "%maria%")
         self.assertEqual(repository.padrao_busca("50%_a\\b"), "%50\\%\\_a\\\\b%")
+
+    def test_juntar_itens_distribui_cada_item_na_sua_compra(self):
+        def linha(id_compra, id_produto, nome, quantidade, preco):
+            return {
+                "id_compra": id_compra,
+                "id_produto": id_produto,
+                "nome": nome,
+                "quantidade": quantidade,
+                "preco_unitario_centavos": preco,
+                "subtotal_centavos": quantidade * preco,
+            }
+
+        # Compras na ordem da página (mais recente primeiro); itens na ordem do SQL.
+        compras = [
+            {"id_compra": 12, "itens": []},
+            {"id_compra": 11, "itens": []},
+            {"id_compra": 10, "itens": []},
+        ]
+        linhas = [
+            linha(10, 3, "Suco de uva 200 ml", 2, 450),
+            linha(12, 5, "Pão de queijo", 1, 500),
+            linha(12, 3, "Suco de uva 200 ml", 1, 450),
+        ]
+        resultado = repository.juntar_itens(compras, linhas)
+
+        self.assertIs(resultado, compras)
+        self.assertEqual([compra["id_compra"] for compra in compras], [12, 11, 10])
+        self.assertEqual([item["id_produto"] for item in compras[0]["itens"]], [5, 3])
+        self.assertEqual(compras[1]["itens"], [])
+        self.assertEqual(
+            compras[2]["itens"],
+            [
+                {
+                    "id_produto": 3,
+                    "nome": "Suco de uva 200 ml",
+                    "quantidade": 2,
+                    "preco_unitario_centavos": 450,
+                    "subtotal_centavos": 900,
+                }
+            ],
+        )
+        # A chave id_compra da linha não vaza para o item devolvido à tela.
+        self.assertNotIn("id_compra", compras[0]["itens"][0])
 
 
 class UsuariosTests(CasoAdmin):
@@ -551,6 +626,41 @@ class UsuariosTests(CasoAdmin):
         self.assertEqual(relatorio["resumo"]["ticket_medio_centavos"], 1187)
         self.assertEqual(relatorio["por_produto"], [])
         self.assertEqual(relatorio["por_dia"], [])
+        self.assertEqual(relatorio["por_usuario"], [CONSUMO_MARIA])
+        self.assertEqual(
+            set(relatorio), {"periodo", "resumo", "por_produto", "por_dia", "por_usuario"}
+        )
+
+    def test_compras_enviam_o_intervalo_utc_e_o_filtro_ao_repositorio(self):
+        resposta = service.listar_compras("2026-11-01", "2026-11-17", " 2 ", 100, hoje=HOJE)
+        self.assertEqual(
+            self.repo.consulta_compras,
+            (datetime(2026, 11, 1, 3, 0), datetime(2026, 11, 18, 3, 0), 2, 100),
+        )
+        self.assertEqual(
+            resposta,
+            {
+                "periodo": {"de": "2026-11-01", "ate": "2026-11-17"},
+                "total_compras": 12,
+                "compras": [COMPRA_12],
+            },
+        )
+
+    def test_compras_sem_filtros_usam_o_periodo_padrao_e_todos_os_usuarios(self):
+        resposta = service.listar_compras("", "", "", 100, hoje=HOJE)
+        self.assertEqual(resposta["periodo"], {"de": "2026-10-18", "ate": "2026-11-17"})
+        self.assertIsNone(self.repo.consulta_compras[2])
+
+    def test_compras_com_filtro_invalido_nao_chegam_ao_repositorio(self):
+        self.assertEqual(
+            set(self.campos_invalidos(service.listar_compras, "", "", "abc", 100, hoje=HOJE)),
+            {"id_usuario"},
+        )
+        self.assertEqual(
+            set(self.campos_invalidos(service.listar_compras, "ontem", "", "", 100, hoje=HOJE)),
+            {"de"},
+        )
+        self.assertIsNone(self.repo.consulta_compras)
 
     def test_relatorio_de_saldos_soma_somente_clientes(self):
         relatorio = service.relatorio_saldos()
