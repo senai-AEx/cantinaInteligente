@@ -24,7 +24,11 @@ O `make setup` instala o que está em `requirements.txt`: Flask (com Werkzeug, q
 
 ## Executar localmente
 
-Pré-requisitos: **Python 3**, **Docker Desktop** (aberto) e **GNU Make**. No terminal, dentro da pasta do repositório:
+Pré-requisitos: **Python 3** (3.10 ou mais nova), **Docker Desktop** (aberto) e **GNU Make**.
+
+> Primeira vez? Siga o passo a passo completo, com a instalação no Windows, a primeira execução e os problemas comuns, em **[docs/como-rodar.md](docs/como-rodar.md)**.
+
+No terminal, dentro da pasta do repositório:
 
 ```sh
 make setup

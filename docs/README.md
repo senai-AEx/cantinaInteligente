@@ -4,6 +4,7 @@
 
 | Documento | Para que serve |
 | --- | --- |
+| [**Como rodar o projeto**](como-rodar.md) | Passo a passo para iniciantes: instalação no Windows, primeira execução, roteiro de 5 minutos e problemas comuns. |
 | [**Documento do Sistema**](documento-do-sistema.md) | Versão final, completa, para copiar ao template e gerar o PDF da AV05. Começa com o bloco "Como usar este arquivo" e a lista de itens a confirmar. |
 | [Diagramas](diagramas/README.md) | Um arquivo `.mmd` por diagrama (MER, UML e topologia) e as instruções para exportar em PNG. |
 | [Roteiro de testes manuais](testes-manuais.md) | Casos numerados do sistema completo: cadastro e login, produtos, carteira, compra, histórico, painel, relatórios, segurança e layout. |
