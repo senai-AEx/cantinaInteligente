@@ -52,6 +52,7 @@ Fonte única para backend e frontend. Produtos estão detalhados em [contrato-ap
 | `POST /api/auth/login` | público | `identificador` (matrícula, e-mail ou CPF), `senha` | `200 {"usuario"}` |
 | `POST /api/auth/logout` | público | — | `200 {"mensagem"}` |
 | `GET /api/auth/eu` | público | — | `200 {"usuario": {...}}` ou `{"usuario": null}` |
+| `PUT /api/auth/senha` | login | `senha_atual`, `nova_senha`, `confirmar_senha` | `200 {"mensagem": "Senha alterada."}` |
 
 Regras dos campos (iguais na tela e no servidor):
 
@@ -63,6 +64,8 @@ Regras dos campos (iguais na tela e no servidor):
 | `email` | formato de e-mail, até 150 caracteres; gravado em minúsculas; único |
 | `senha` | 8 a 72 caracteres, com letra e número |
 | `confirmar_senha` | igual a `senha` |
+
+Troca de senha (`PUT /api/auth/senha`): `senha_atual` precisa conferir (senão `422` em `senha_atual`: "Senha atual incorreta."); `nova_senha` segue a regra de senha e deve ser diferente da atual; `confirmar_senha` igual a `nova_senha`. A sessão continua aberta.
 
 Duplicidade responde `422` com o campo: `{"campos": {"matricula": "Já existe um cadastro com esta matrícula."}}`. Login incorreto responde `401` com a mesma mensagem para qualquer causa; usuário inativo responde `403`.
 
@@ -105,7 +108,10 @@ Erros `409`:
 | `PUT /api/admin/usuarios/{id}` | `nome`, `matricula`, `email`, `perfil` | `200 {"usuario"}` |
 | `PATCH /api/admin/usuarios/{id}/inativar` | — | `200 {"usuario"}` |
 | `PATCH /api/admin/usuarios/{id}/reativar` | — | `200 {"usuario"}` |
+| `POST /api/admin/usuarios/{id}/senha` | `nova_senha`, `confirmar_senha` | `200 {"usuario"}` |
 | `POST /api/admin/usuarios/{id}/ajustes` | `valor_centavos` (com sinal, ≠ 0, módulo até 100000), `motivo` (5 a 150 caracteres), `chave_idempotencia` | `201 {"movimentacao", "carteira"}` |
+
+Redefinir senha: o administrador define uma senha provisória (mesma regra de senha) e a informa ao usuário pessoalmente; depois o usuário troca em "Minha conta". Erros `422` em `nova_senha` ou `confirmar_senha`.
 
 Regras: usuários não são apagados. O administrador não pode inativar a si mesmo nem tirar o próprio perfil de administrador (`409`, `codigo: "OPERACAO_PROPRIA"`). CPF não é editável. Ajuste que deixaria o saldo negativo responde `409` `SALDO_INSUFICIENTE`. Descrição do ajuste: `"Ajuste da administração: <motivo>"`.
 
@@ -140,6 +146,28 @@ Período padrão: últimos 30 dias (inclusive hoje). `de` e `ate` são datas loc
 
 `por_produto` em ordem de `total_centavos` decrescente; `por_dia` em ordem de data.
 
+O relatório de vendas traz também o consumo por usuário, em ordem de `total_centavos` decrescente:
+
+```json
+"por_usuario": [{"id_usuario": 7, "nome": "Maria Souza", "matricula": "202612345",
+                 "quantidade_compras": 3, "itens": 8, "total_centavos": 4350}]
+```
+
+### Compras registradas
+
+`GET /api/admin/compras?de=AAAA-MM-DD&ate=AAAA-MM-DD&id_usuario=&limite=100` (limite de 1 a 500) mostra quem comprou o quê:
+
+```json
+{"periodo": {"de": "2026-10-18", "ate": "2026-11-17"},
+ "total_compras": 12,
+ "compras": [{"id_compra": 12, "data_hora": "2026-11-17T22:50:03.120000Z", "valor_total_centavos": 450,
+              "usuario": {"id_usuario": 7, "nome": "Maria Souza", "matricula": "202612345"},
+              "itens": [{"id_produto": 3, "nome": "Suco de uva 200 ml", "quantidade": 1,
+                         "preco_unitario_centavos": 450, "subtotal_centavos": 450}]}]}
+```
+
+Mais recentes primeiro. `total_compras` conta todas as compras do período filtrado, não só as devolvidas. Mesmas regras de período dos relatórios.
+
 `GET /api/admin/relatorios/saldos` →
 
 ```json
@@ -160,6 +188,22 @@ Somente perfil `CLIENTE`, por saldo decrescente.
 ```
 
 `valor_estoque_centavos` = quantidade × preço de compra. Ordem: `quantidade_estoque` crescente (os zerados primeiro), depois nome. `sem_estoque` conta só produtos ativos com quantidade zero.
+
+## QR Code — `src/backend/qr/` (somente `ADMINISTRADOR`)
+
+O QR Code facilita o registro da compra: o cliente aponta a câmera do celular e o catálogo abre já com o produto na sacola.
+
+| Rota | Resposta |
+| --- | --- |
+| `GET /api/qrcode` | `200 {"url_base": "http://192.168.0.10:5000", "url_cantina": ".../html/catalogo_produtos.html", "url_produto": ".../html/catalogo_produtos.html?adicionar={id}", "somente_local": false}` |
+| `GET /api/qrcode/cantina.svg` | Imagem SVG (`image/svg+xml`) com o QR do catálogo |
+| `GET /api/qrcode/produtos/{id}.svg` | Imagem SVG com o QR que adiciona o produto à sacola; produto inexistente: `404` |
+
+- `url_base` vem de `URL_PUBLICA` no `.env`; sem ela, usa o endereço pelo qual o administrador está acessando.
+- `somente_local` é `true` quando o endereço é `127.0.0.1` ou `localhost`: o QR só abre neste computador, não no celular. A tela deve avisar.
+- Use as rotas `.svg` direto em `<img src>`; `url_produto` traz o texto `{id}` para a tela trocar pelo código do produto.
+
+**No catálogo:** `/html/catalogo_produtos.html?adicionar=<id_produto>` coloca 1 unidade do produto na sacola (se estiver ativo e com estoque), mostra um aviso e remove o parâmetro do endereço para não repetir ao recarregar.
 
 ## Produtos e upload (resumo)
 

@@ -8,7 +8,7 @@
 
 A stack confirmada é **Python + Flask + MySQL**, com HTML/CSS/JavaScript no frontend. Um único servidor Flask entrega as telas e a API em `http://127.0.0.1:5000`.
 
-**17/11/2026 (noite) — sistema completo implementado na develop.** Todos os itens da demanda, exceto o QR Code, estão no código:
+**17/11/2026 (noite) — sistema completo implementado na develop.** Os 12 itens da demanda estão no código:
 
 | Item da demanda | Situação |
 | --- | --- |
@@ -17,9 +17,10 @@ A stack confirmada é **Python + Flask + MySQL**, com HTML/CSS/JavaScript no fro
 | Créditos na carteira; consulta de saldo e extrato | Feito (issue #12) |
 | Registro de compras com desconto do saldo e baixa do estoque | Feito (issue #13) |
 | Histórico de compras | Feito (issue #14) |
+| Troca e redefinição de senha | Feito (não estava na demanda; evita usuário preso sem acesso) |
 | Painel administrativo: usuários, produtos e movimentações | Feito (issues #11 e #14) |
-| Relatórios de vendas, saldos, estoque e depósitos declarados | Feito (issue #14) |
-| QR Code para facilitar o registro | **Não feito** (a demanda trata como possibilidade) |
+| Relatórios de vendas, saldos, estoque, depósitos declarados e compras por usuário | Feito (issue #14) |
+| QR Code para facilitar o registro | Feito: QR da cantina e de cada produto, gerados no painel |
 
 Como foi verificado em 17/11: 120 testes automatizados passando; 131 conferências da API contra o MySQL real (incluindo dois usuários disputando o último item e clique duplo simultâneo); e os fluxos do cliente e do administrador percorridos no navegador, em 1280 px e em 360 px.
 

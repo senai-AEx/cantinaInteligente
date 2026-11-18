@@ -13,8 +13,14 @@ Projeto Aplicado II — Centro Universitário SENAI Santa Catarina. Stack: **Pyt
 | Carteira: adicionar crédito e consultar saldo e extrato | Movimentações financeiras com filtros |
 | Compra com desconto automático do saldo e baixa do estoque | Relatórios de vendas, saldos, estoque e depósitos declarados |
 | Histórico de compras | Auditoria das alterações de produtos |
+| Troca da própria senha | Redefinição de senha de um usuário |
+| Compra rápida pelo QR Code do produto | QR Codes para imprimir (cantina e produtos) |
 
 Nada é apagado do banco: excluir um produto ou um usuário apenas o deixa inativo.
+
+## Dependências
+
+O `make setup` instala o que está em `requirements.txt`: Flask (com Werkzeug, que guarda as senhas em hash), mysql-connector-python, python-dotenv e segno (gera os QR Codes). O banco roda em Docker. O backup usa o `mysqldump` que já vem na imagem do MySQL, então não há nada a instalar além de Python, Docker e Make. A lista completa, com o motivo de cada item, está em [docs/arquitetura.md](docs/arquitetura.md#dependências).
 
 ## Executar localmente
 
@@ -35,14 +41,14 @@ Inicia o MySQL (container `cantina-mysql`, dados no volume `cantina-mysql-data`)
 Na primeira vez, em outro terminal:
 
 ```sh
-make seed
+make demo
 ```
+
+Insere produtos de exemplo e cria dois usuários de demonstração: um administrador e um cliente com R$ 50,00 de crédito. Para ver a matrícula e a senha de cada um (ficam só no seu `.env`):
 
 ```sh
-make admin
+make credenciais
 ```
-
-O primeiro insere produtos de exemplo; o segundo cria o administrador de demonstração com os dados `ADMIN_*` do seu `.env` (a matrícula e a senha estão lá).
 
 | Endereço | Tela |
 | --- | --- |
@@ -60,12 +66,29 @@ O primeiro insere produtos de exemplo; o segundo cria o administrador de demonst
 | --- | --- |
 | `make setup` | Prepara o `.env` e o ambiente Python |
 | `make up` | Banco + migrações + sistema |
-| `make admin` | Cria ou redefine o administrador (dados `ADMIN_*` do `.env`) |
+| `make demo` | Produtos de exemplo + administrador + cliente com crédito |
+| `make credenciais` | Mostra matrícula e senha dos usuários de demonstração |
+| `make admin` | Cria ou redefine só o administrador (dados `ADMIN_*` do `.env`) |
 | `make seed` | Insere produtos de exemplo se a tabela estiver vazia |
+| `make backup` | Grava uma cópia do banco em `backups/` |
+| `make restore ARQUIVO=backups/arquivo.sql` | Restaura uma cópia (substitui os dados atuais) |
 | `make migrate` | Aplica migrações pendentes |
 | `make test` | Testes automatizados |
 | `make status` | Mostra o que está rodando |
 | `make down` | Para o MySQL preservando os dados |
+
+### QR Code e teste pelo celular
+
+No painel, a tela **QR Codes** gera o código da cantina (abre o catálogo) e um por produto (abre o catálogo com o item já na sacola), prontos para imprimir.
+
+O QR Code leva o endereço do sistema. Com o padrão (`127.0.0.1`) ele só abre neste computador. Para abrir pelo celular na mesma rede Wi-Fi, ajuste no `.env` e reinicie o `make up`:
+
+```
+APP_HOST=0.0.0.0
+URL_PUBLICA=http://<IP deste computador na rede>:5000
+```
+
+Use isso só em rede de confiança: o sistema fica acessível a quem estiver na mesma rede.
 
 ### Problemas comuns
 
@@ -80,7 +103,7 @@ O primeiro insere produtos de exemplo; o segundo cria o administrador de demonst
 3. Rode `make setup` e depois:
 
 ```sh
-.venv/Scripts/python scripts/criar_admin.py
+.venv/Scripts/python scripts/criar_demo.py
 ```
 
 ```sh
@@ -96,7 +119,7 @@ assets/produtos/   fotos enviadas pela tela (não versionadas)
 database/          migrations/, seeds/ e schema.sql
 docs/              documentação (índice em docs/README.md)
 scripts/           atalhos usados pelo Makefile
-src/backend/       API Flask: usuarios, produtos, carteira, compras e admin,
+src/backend/       API Flask: usuarios, produtos, carteira, compras, admin e qr,
                    cada módulo em camadas routes → controller → service → repository
 src/frontend/      telas HTML, CSS e JavaScript (servidas pelo próprio Flask)
 tests/             testes automatizados

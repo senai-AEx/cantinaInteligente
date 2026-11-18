@@ -19,11 +19,12 @@ cantinaInteligente/
 │   │   ├── erros.py        erros de negócio convertidos em respostas JSON
 │   │   ├── http.py         leitura do JSON, datas em UTC, chave de idempotência
 │   │   ├── uploads.py      upload das fotos dos produtos
-│   │   ├── usuarios/       cadastro e login (/api/auth)
+│   │   ├── usuarios/       cadastro, login e troca de senha (/api/auth)
 │   │   ├── produtos/       cadastro e catálogo de produtos (/api/produtos)
 │   │   ├── carteira/       saldo, extrato e créditos (/api/carteira)
 │   │   ├── compras/        registro e histórico de compras (/api/compras)
-│   │   └── admin/          usuários, movimentações e relatórios (/api/admin)
+│   │   ├── admin/          usuários, movimentações, compras e relatórios (/api/admin)
+│   │   └── qr/             QR Codes da cantina e dos produtos (/api/qrcode)
 │   └── frontend/           telas HTML, CSS e JavaScript, servidas pelo próprio Flask
 └── tests/                  testes automatizados (`make test`)
 ```
@@ -57,12 +58,13 @@ Para criar um módulo novo, copie a estrutura de um existente e registre o bluep
 
 | Módulo | Rotas | Acesso | Responsabilidade |
 | --- | --- | --- | --- |
-| `usuarios` | `/api/auth/cadastro`, `/login`, `/logout`, `/eu` | Público | Cadastro (perfil Cliente e carteira com saldo zero na mesma transação), login por matrícula, e-mail ou CPF, sessão. |
+| `usuarios` | `/api/auth/cadastro`, `/login`, `/logout`, `/eu`, `/senha`; `/api/admin/usuarios/<id>/senha` | Público; troca de senha exige login |  Cadastro (perfil Cliente e carteira com saldo zero na mesma transação), login por matrícula, e-mail ou CPF, sessão. |
 | `produtos` | `/api/produtos` | Consulta pública; gravação só para Administrador | CRUD com exclusão lógica, selos automáticos e auditoria. |
 | `uploads.py` | `/api/uploads/produtos` | Administrador | Recebe a foto do produto (JPG, PNG ou WebP até 5 MB). |
 | `carteira` | `/api/carteira`, `/movimentacoes`, `/creditos` | Login obrigatório | Saldo, extrato e crédito declarado pelo usuário. |
 | `compras` | `/api/compras` | Login obrigatório | Registro da compra (estoque, saldo e movimentação em uma transação) e histórico. |
-| `admin` | `/api/admin/usuarios`, `/movimentacoes`, `/relatorios/...` | Administrador | Gestão de usuários, ajuste de saldo, movimentações com filtros e relatórios de vendas, saldos e estoque. O relatório de depósitos declarados da tela usa a consulta de movimentações do tipo `CREDITO`. |
+| `qr` | `/api/qrcode`, `/api/qrcode/cantina.svg`, `/api/qrcode/produtos/<id>.svg` | Administrador | Gera os QR Codes em SVG (biblioteca `segno`) e os endereços que eles abrem: o catálogo, ou o catálogo com um produto já na sacola. |
+| `admin` | `/api/admin/usuarios`, `/movimentacoes`, `/compras`, `/relatorios/...` | Administrador | Gestão de usuários, ajuste de saldo, movimentações com filtros e relatórios de vendas, saldos e estoque. O relatório de depósitos declarados da tela usa a consulta de movimentações do tipo `CREDITO`. |
 
 O detalhe de cada rota está no [contrato da API](contrato-api.md) e na [API de produtos](contrato-api-produtos.md).
 
@@ -141,3 +143,20 @@ Duas formas de preparar o banco:
 2. **`database/schema.sql`**: cria o banco já no formato atual, para quem usa o MySQL Workbench sem Docker.
 
 Toda mudança no banco entra como uma migração nova e também no `schema.sql`.
+
+## Dependências
+
+Tudo o que o projeto usa, com o motivo de cada item. Não há serviço pago nem licença a comprar.
+
+| Dependência | Onde é usada | Para que serve | Como é instalada |
+| --- | --- | --- | --- |
+| Python 3 | Servidor e scripts | Executa a aplicação e os atalhos do `make`. | Instalado no computador (python.org). |
+| Flask 3 (inclui Werkzeug) | `src/backend/app.py` | Servidor web, rotas, sessão por cookie e senhas em hash (`werkzeug.security`). | `requirements.txt`, via `make setup`. |
+| mysql-connector-python | `src/backend/conexao.py` | Conexão com o MySQL. | `requirements.txt`. |
+| python-dotenv | `src/backend/conexao.py`, `scripts/` | Lê as configurações do arquivo `.env`. | `requirements.txt`. |
+| segno | `src/backend/qr/` | Gera os QR Codes em SVG para impressão. | `requirements.txt`. |
+| Docker Desktop | `make up`, `make backup`, `make restore` | Executa o MySQL em contêiner. | Instalado no computador (docker.com). |
+| MySQL 8.4 (imagem `mysql:8.4`) | Contêiner `cantina-mysql` | Banco de dados; traz o `mysqldump` usado pelo backup. | Baixada pelo `make up`. |
+| GNU Make | `Makefile` | Atalhos dos comandos do projeto. | Instalado no computador. |
+
+Para atualizar as bibliotecas Python, mude a versão em `requirements.txt` e rode `make setup`. Para o banco, a versão da imagem fica em `scripts/dev.py` (`DB_IMAGE`).

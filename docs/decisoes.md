@@ -12,6 +12,8 @@ Registro das escolhas do grupo e dos motivos. A justificativa completa das tecno
 | Frontend | HTML, CSS e JavaScript puros | Sem etapa de build; roda em qualquer navegador atual, no celular e no computador. |
 | Sessão | Cookie assinado do Flask | Já vem no framework; `HttpOnly` e `SameSite=Lax`; não exige token no navegador. |
 | Senha | Hash com `werkzeug.security` | Já vem com o Flask; a senha nunca é gravada em texto puro. |
+| QR Code | Biblioteca `segno` | Só Python, sem dependências extras; gera SVG nítido para impressão, sem arquivos de imagem guardados no servidor. |
+| Backup | `mysqldump` dentro do contêiner MySQL | Cópia completa e restauração com um comando (`make backup` e `make restore`), sem programa extra no computador. |
 | Dinheiro | Inteiros em centavos | Evita erros de arredondamento. |
 | Datas | Sessão MySQL em UTC | Registros consistentes; a tela mostra no horário local e os relatórios usam datas de Brasília. |
 | Ambiente | Docker (MySQL) + Make | Mesmo banco e mesmos comandos em todos os computadores. |

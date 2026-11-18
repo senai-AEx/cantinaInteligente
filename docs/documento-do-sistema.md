@@ -7,8 +7,7 @@
 > 3. **Itens a confirmar.** Procure por `[CONFIRMAR` e resolva cada um antes de exportar o PDF. São eles:
 >    - Histórico de Versões: datas, autores e revisores das versões 1.9 a 2.2 (estão como "Equipe 4").
 >    - 3.1: nome da coordenação do curso (o nome veio da versão de agosto).
->    - RF13 (QR Code): dizer se foi implementado ou se fica como evolução.
->    - RNF04 (backup), RNF05 (desempenho) e RNF12 (acessibilidade, requisito novo sugerido).
+>    - RNF12 (acessibilidade, requisito novo sugerido): o grupo decide se mantém.
 >    - 7.4: conferir os nomes das operações com o código final.
 >    - 7.6 e 8.1: dizer se o sistema foi publicado online ou se roda só no ambiente local.
 >    - 9.1: confirmar o GitHub Projects no lugar do Trello e o acesso da professora ao quadro.
@@ -143,7 +142,7 @@ Todo usuário que se cadastra pelo sistema recebe o perfil Cliente. O primeiro A
 | Requisito |
 | --- |
 | **RF01:** O sistema deve permitir que o usuário crie o próprio cadastro informando nome, matrícula, CPF, e-mail e senha, validando os dados e recusando matrícula, CPF ou e-mail já cadastrados. |
-| **RF02:** O sistema deve permitir que o usuário cadastrado faça login informando matrícula, e-mail ou CPF e a senha, e que encerre a sessão quando desejar. |
+| **RF02:** O sistema deve permitir que o usuário cadastrado faça login informando matrícula, e-mail ou CPF e a senha, e que encerre a sessão quando desejar. O usuário logado pode trocar a própria senha, confirmando a senha atual. |
 | **RF03:** O sistema deve permitir ao administrador cadastrar, consultar, alterar, inativar e reativar os produtos da Cantina da Honestidade. O código do produto é gerado automaticamente e o cadastro registra nome, categoria, descrição, foto, preço de compra, preço de venda e quantidade em estoque. A exclusão é lógica: o produto fica inativo e permanece no banco de dados. |
 | **RF04:** O sistema deve listar para os clientes os produtos ativos da cantina (catálogo), informando nome, preço de venda, foto, disponibilidade em estoque e, quando aplicável, os selos de zero lactose e zero açúcar. |
 | **RF05:** O sistema deve permitir que o cliente adicione produtos disponíveis a uma sacola de compras, altere as quantidades e remova itens antes de finalizar a compra, informando o valor total dos produtos selecionados. |
@@ -152,9 +151,9 @@ Todo usuário que se cadastra pelo sistema recebe o perfil Cliente. O primeiro A
 | **RF08:** O sistema deve permitir que o cliente logado finalize e registre a compra dos produtos da sacola, abatendo automaticamente do seu saldo de créditos o valor total da compra, e deve apresentar uma mensagem de agradecimento ao final. |
 | **RF09:** O sistema deve atualizar a quantidade disponível em estoque após o registro da compra, considerando os produtos comprados como retirados. |
 | **RF10:** O sistema deve permitir que o usuário consulte o histórico das suas compras, com data e hora, produtos, quantidades, preços e valor total. |
-| **RF11:** O sistema deve permitir ao administrador gerenciar os usuários (consultar, alterar os dados, alterar o perfil, inativar e reativar), lançar ajustes de saldo com motivo e consultar as movimentações financeiras com filtros por período, tipo e usuário. |
-| **RF12:** O sistema deve permitir ao administrador consultar relatórios de vendas por período (total vendido, quantidade de compras, vendas por produto e por dia), de saldos dos usuários, de estoque (quantidades, valor em estoque e produtos sem estoque) e de depósitos declarados no período, para conferência com a caixa. |
-| **RF13:** O sistema deve disponibilizar QR Code para facilitar o registro da compra: um QR Code da cantina, que abre o catálogo, e um QR Code por produto, que adiciona o item à sacola. **[CONFIRMAR se foi implementado. Se não foi, manter o requisito e escrever: "Previsto como evolução; não faz parte desta entrega."]** |
+| **RF11:** O sistema deve permitir ao administrador gerenciar os usuários (consultar, alterar os dados, alterar o perfil, inativar e reativar), lançar ajustes de saldo com motivo e consultar as movimentações financeiras com filtros por período, tipo e usuário. O administrador também pode redefinir a senha de um usuário, definindo uma senha provisória. |
+| **RF12:** O sistema deve permitir ao administrador consultar relatórios de vendas por período (total vendido, quantidade de compras, vendas por produto e por dia), de saldos dos usuários, de estoque (quantidades, valor em estoque e produtos sem estoque) e de depósitos declarados no período, para conferência com a caixa. O administrador consulta ainda as compras registradas no período, com o usuário e os itens de cada uma, e o consumo por usuário. |
+| **RF13:** O sistema deve disponibilizar QR Code para facilitar o registro da compra: um QR Code da cantina, que abre o catálogo, e um QR Code por produto, que adiciona o item à sacola. Os códigos são gerados pelo próprio sistema, na tela "QR Codes" do painel, prontos para impressão. |
 
 **Correspondência com a demanda e com a versão anterior deste documento**
 
@@ -195,8 +194,8 @@ Requisitos retirados: o antigo **RF04** (fornecedores) e o antigo **RF10** (caus
 
 Observações para o grupo (retirar do PDF depois de resolver):
 
-- **[CONFIRMAR RNF04: o backup diário não está automatizado no projeto. Manter como requisito da implantação na unidade ou ajustar a redação.]**
-- **[CONFIRMAR RNF05: o tempo de resposta não foi medido formalmente. Manter como meta ou medir no roteiro de testes.]**
+- **RNF04:** o projeto traz os comandos `make backup` (grava uma cópia completa do banco na pasta `backups/`) e `make restore` (restaura uma cópia). Os dois foram executados no ambiente local. O agendamento diário é configurado na implantação, no servidor da unidade.
+- **RNF05:** medido em 17/11/2026 no ambiente local, com 20 consultas seguidas de cada tipo: o percentil 95 ficou abaixo de 0,1 s para catálogo, saldo, extrato, histórico e relatório de vendas. A medição não simula vários usuários ao mesmo tempo.
 - **[CONFIRMAR RNF12: requisito novo, sugerido para ligar o documento ao checklist da norma cobrado na AV06. O grupo decide se mantém.]**
 
 **Correspondência com a versão anterior:** os antigos RNF06 (idempotência) e RNF09 (auditabilidade) saíram desta lista porque são regras de negócio e agora são a RN01 e a RN02 da seção 5.3. Com isso, os antigos RNF07, RNF08, RNF10, RNF11, RNF12 e RNF13 passaram a ser, nesta ordem, RNF06, RNF07, RNF08, RNF09, RNF10 e RNF11. O RNF01 teve a data corrigida (era "maio de 2023").
@@ -393,7 +392,7 @@ flowchart LR
         uc11(["UC11 - Lançar ajuste de saldo"])
         uc12(["UC12 - Consultar movimentações"])
         uc13(["UC13 - Emitir relatórios"])
-        uc14(["UC14 - Ler QR Code (previsto)"])
+        uc14(["UC14 - Ler QR Code do produto"])
     end
 
     cliente --- uc01
@@ -420,7 +419,6 @@ flowchart LR
     classDef ator stroke-width:3px
     classDef previsto stroke-dasharray: 5 5
     class cliente,admin ator
-    class uc14 previsto
 ```
 
 Fonte: Elaborado pela equipe do Projeto Aplicado II (2026).
@@ -440,7 +438,7 @@ Fonte: Elaborado pela equipe do Projeto Aplicado II (2026).
 | UC11 - Lançar ajuste de saldo | Administrador | RF11 |
 | UC12 - Consultar movimentações | Administrador | RF11 |
 | UC13 - Emitir relatórios | Administrador | RF12 |
-| UC14 - Ler QR Code (previsto) | Cliente | RF13 |
+| UC14 - Ler QR Code do produto | Cliente | RF13 |
 
 ### 7.2 Diagrama de Sequência
 
@@ -908,6 +906,8 @@ A Cantina Inteligente é uma aplicação web cliente/servidor: o navegador mostr
 | **Python 3** | Linguagem do servidor (regras de negócio e acesso ao banco). | É gratuita, tem sintaxe simples e é conhecida pela equipe, o que facilita a manutenção e a continuidade nos próximos Projetos Aplicados. |
 | **Flask 3** | Framework web: recebe as requisições, entrega as telas e disponibiliza a API. | É leve e exige pouca configuração. Permite separar o sistema em módulos independentes, o que atende à expansão futura. Já traz a sessão por cookie assinado e, com a biblioteca Werkzeug que o acompanha, as funções de hash de senha. |
 | **MySQL 8** | Banco de dados relacional com usuários, carteiras, movimentações, compras, produtos e auditoria. | Saldo e estoque exigem transações, chaves estrangeiras, valores únicos e restrições de validação, e o MySQL oferece tudo isso gratuitamente. Também permite bloquear um registro durante uma operação, o que evita inconsistência entre compras e saldos. |
+| **segno** | Gera os QR Codes da cantina e de cada produto, em SVG, para impressão. | É gratuita e sem dependências extras. Gera imagens nítidas em qualquer tamanho, sem guardar arquivos de imagem no servidor. |
+| **Werkzeug** (incluso no Flask) | Guarda as senhas como hash e confere o login. | Já vem com o Flask, sem custo extra. O banco nunca guarda a senha em texto puro. |
 | **MySQL Connector/Python** | Liga o Python ao MySQL. | É o conector oficial do MySQL. As consultas usam parâmetros, o que protege contra injeção de SQL. |
 | **HTML5, CSS3 e JavaScript** | Telas do cliente e do administrador, máscaras e validações dos campos. | Funcionam em qualquer navegador atual, no celular e no computador, sem instalar aplicativo. Não dependem de ferramentas pagas nem de etapa de compilação. |
 | **Git e GitHub** | Controle de versões do código e da documentação, revisão por pull request e quadro de tarefas. | São gratuitos, registram o que cada integrante fez e permitem o trabalho em paralelo com branches (`develop` para integração e `main` para as entregas). |

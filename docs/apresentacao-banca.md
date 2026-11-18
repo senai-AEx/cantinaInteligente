@@ -107,7 +107,7 @@ O vídeo completo tem cerca de 7 min 45 s. Os tempos acima consideram a versão 
 - Checklist da norma aplicado às telas
 - O que foi atendido: navegação por teclado, link "Pular para o conteúdo", rótulos nos campos, erro junto ao campo, contraste de cores
 - O que foi corrigido depois do checklist e o que ficou justificado
-- Números: itens atendidos, não atendidos e não aplicáveis **[CONFIRMAR: preencher com o resultado do arquivo `docs/checklist-acessibilidade-nbr17225.md`]**
+- Números (de 146 itens da norma): 77 atendem, 32 atendem após correção, 31 não se aplicam e 6 não atendem (2 requisitos e 4 recomendações, todos documentados no checklist). **[CONFIRMAR: rever depois dos testes no navegador do grupo]**
 - Diagrama: nenhum (tabela-resumo do checklist ou um print da ferramenta)
 
 ### Slide 12 — Resultados e próximos passos (Integrante 1)

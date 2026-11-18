@@ -285,3 +285,36 @@ O checklist completo da ABNT NBR 17225:2025 é registrado em `docs/checklist-ace
 - **[CONFIRMAR: nomes dos botões e das abas]** Os textos em negrito foram conferidos com as telas em 17/11/2026, quando elas ainda estavam sendo finalizadas. Se algum botão ou aba mudar de nome, ajuste o caso correspondente.
 - **[CONFIRMAR: códigos dos produtos]** Os exemplos de API usam `id_produto` 2 (Sanduíche Natural) e 4 (Maçã), que são os códigos em um banco criado do zero com `make seed`. Confira os códigos no painel antes de usar.
 - **[CONFIRMAR: mensagens exatas]** As mensagens de erro citadas entre aspas vêm do código de 17/11/2026; se o texto mudar, o que vale é o comportamento descrito.
+
+## Senha, QR Code e compras por usuário
+
+Casos acrescentados em 17/11/2026. Para os usuários de demonstração, rode `make demo` e veja os dados de acesso com `make credenciais`.
+
+### Senha (RF02 e RF11)
+
+- [ ] **S01 — Trocar a própria senha.** Logado como cliente, abra **Minha conta > Alterar senha**, informe a senha atual, a nova e a confirmação e clique no botão. *Esperado:* mensagem de sucesso, formulário limpo e a sessão continua aberta. Saia e entre de novo: a senha antiga é recusada e a nova funciona.
+- [ ] **S02 — Senha atual errada.** Informe uma senha atual incorreta. *Esperado:* erro junto ao campo "Senha atual"; nada muda.
+- [ ] **S03 — Regras da nova senha.** Tente uma nova senha fraca, uma igual à atual e uma confirmação diferente. *Esperado:* cada caso é recusado com a mensagem no campo certo.
+- [ ] **S04 — Enter não grava.** Pressione Enter nos campos e na caixa "Mostrar senhas". *Esperado:* nada é enviado; só o botão grava.
+- [ ] **S05 — Administrador redefine a senha.** No painel, em **Usuários**, clique em **Redefinir senha** na linha de um cliente, defina uma senha provisória e confirme. *Esperado:* mensagem "Senha de ... redefinida."; o cliente entra com a senha provisória e a antiga é recusada.
+- [ ] **S06 — Cliente não redefine.** Logado como cliente, no Console: `fetch("/api/admin/usuarios/1/senha", {method: "POST", headers: {"Content-Type": "application/json"}, body: "{}"}).then((r) => console.log(r.status))`. *Esperado:* `403`.
+
+### QR Code (RF13)
+
+- [ ] **Q01 — Tela de QR Codes.** No painel, abra **QR Codes**. *Esperado:* o cartaz da cantina e uma etiqueta por produto ativo, cada uma com nome, preço e código. Com o endereço padrão (`127.0.0.1`), a tela avisa que os códigos só funcionam neste computador.
+- [ ] **Q02 — Produto pelo QR Code.** Abra `http://127.0.0.1:5000/html/catalogo_produtos.html?adicionar=1` (troque o número pelo código de um produto com estoque). *Esperado:* o catálogo abre com 1 unidade do produto na sacola e um aviso; o endereço fica sem `?adicionar`; recarregar a página não soma de novo.
+- [ ] **Q03 — Produto indisponível.** Repita com o código de um produto inativo, sem estoque ou inexistente, e com `?adicionar=abc`. *Esperado:* aviso "Este produto não está disponível agora." e a sacola não muda.
+- [ ] **Q04 — Compra em três passos.** Com o cliente logado e com saldo: abrir o endereço do QR Code, clicar em **Finalizar compra** e em **Confirmar compra**. *Esperado:* compra registrada.
+- [ ] **Q05 — Impressão.** Use **Imprimir cartaz da cantina** e **Imprimir etiquetas dos produtos**. *Esperado:* cada botão imprime só a sua parte, sem menu; as etiquetas saem em três colunas, sem etiqueta cortada entre páginas.
+- [ ] **Q06 — Pelo celular (opcional).** Com `APP_HOST=0.0.0.0` e `URL_PUBLICA` preenchida no `.env` (veja o README), reinicie o sistema, imprima ou mostre um QR Code na tela e leia com a câmera do celular na mesma rede. *Esperado:* o catálogo abre no celular com o produto na sacola.
+- [ ] **Q07 — Somente administrador.** Sem login, abra `http://127.0.0.1:5000/api/qrcode/cantina.svg`. *Esperado:* resposta `401`.
+
+### Compras registradas e consumo por usuário (RF12)
+
+- [ ] **C01 — Aba Compras.** No painel, em **Relatórios > Compras**. *Esperado:* as compras do período, da mais recente para a mais antiga, com data, número, usuário, itens e total; o cartão "Compras no período" bate com a lista.
+- [ ] **C02 — Filtro por usuário.** Escolha um usuário no filtro da aba. *Esperado:* só as compras dele; um usuário sem compras mostra a mensagem de lista vazia.
+- [ ] **C03 — Consumo por usuário.** Em **Relatórios > Vendas**, confira a tabela "Consumo por usuário". *Esperado:* a soma dos totais dos usuários é igual ao "Total vendido".
+
+### Backup (RNF04)
+
+- [ ] **B01 — Cópia e restauração.** Rode `make backup`, faça uma compra de teste e rode `make restore ARQUIVO=backups/<arquivo gerado>`. *Esperado:* o arquivo aparece em `backups/`; depois da restauração, a compra de teste não existe mais.

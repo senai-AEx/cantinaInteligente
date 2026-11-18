@@ -26,8 +26,9 @@
 | Documento | Para que serve |
 | --- | --- |
 | [Estado atual e próximas entregas](estado-atual-e-proximas-entregas.md) | Onde o projeto está, devolutivas da professora e prazos. |
+| [Checklist de acessibilidade (NBR 17225)](checklist-acessibilidade-nbr17225.md) | Auditoria das telas contra o checklist da norma, as correções feitas e o que o grupo ainda precisa testar no navegador. |
 | [Histórico da AV04](historico/av04/) | Requisitos, roteiro e checklist apresentados em 15/10/2026 (modelo antigo de produto). |
 
-O checklist da ABNT NBR 17225:2025, pedido na AV06, deve ser registrado em `docs/checklist-acessibilidade-nbr17225.md` (arquivo previsto no plano de execução, ainda a criar).
+O checklist da ABNT NBR 17225:2025, pedido na AV06, está em `docs/checklist-acessibilidade-nbr17225.md` (auditoria por leitura de código; os testes no navegador ficam para o grupo preencher).
 
 Para executar o projeto, veja o [README principal](../README.md). Para o fluxo de branches e commits, veja o [CONTRIBUTING](../CONTRIBUTING.md).
