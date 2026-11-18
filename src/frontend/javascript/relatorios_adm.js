@@ -1,5 +1,6 @@
-// Tela administrativa de relatórios: vendas, saldos, estoque e depósitos declarados,
-// em abas, com seletor de período e impressão do relatório visível.
+// Tela administrativa de relatórios: vendas, compras registradas (quem comprou o quê),
+// saldos, estoque e depósitos declarados, em abas, com seletor de período e impressão
+// do relatório visível.
 // Usa as funções compartilhadas do objeto Cantina (base.js).
 document.addEventListener("DOMContentLoaded", async () => {
     "use strict";
@@ -10,6 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const DIAS_PADRAO = 30;
     const LIMITE_DEPOSITOS = 200;
+    const LIMITE_COMPRAS = 200;
     const el = Cantina.criarElemento;
 
     const formularioPeriodo = document.getElementById("form-periodo");
@@ -18,13 +20,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     const botoesAtalho = [...document.querySelectorAll("[data-atalho-dias]")];
     const listaDeAbas = document.getElementById("abas-relatorios");
     const abas = [...listaDeAbas.querySelectorAll("[role='tab']")];
+    const formularioCompras = document.getElementById("form-compras");
+    const filtroUsuarioCompras = document.getElementById("compras-usuario");
 
     // Cada relatório: se depende do período, de onde vem e como é desenhado.
+    // Opcionais: "formulario" e "filtro" (filtro próprio da aba, que entra na consulta),
+    // "descricaoExtra" (complemento da linha de período) e "aoAbrir" (ao abrir a aba).
     const RELATORIOS = {
         vendas: {
             usaPeriodo: true,
             url: (periodo) => `/api/admin/relatorios/vendas?${new URLSearchParams(periodo)}`,
             renderizar: renderizarVendas,
+        },
+        compras: {
+            usaPeriodo: true,
+            formulario: formularioCompras,
+            filtro: () => filtroUsuarioCompras.value,
+            url: (periodo) => {
+                const parametros = new URLSearchParams({ ...periodo, limite: String(LIMITE_COMPRAS) });
+                if (filtroUsuarioCompras.value) parametros.set("id_usuario", filtroUsuarioCompras.value);
+                return `/api/admin/compras?${parametros}`;
+            },
+            descricaoExtra: () => (filtroUsuarioCompras.value ? ` · Usuário: ${rotuloDoUsuarioFiltrado()}` : ""),
+            aoAbrir: carregarOpcoesDeUsuario,
+            renderizar: renderizarCompras,
         },
         saldos: {
             usaPeriodo: false,
@@ -49,6 +68,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let periodo = null; // { de: "AAAA-MM-DD", ate: "AAAA-MM-DD" } aplicado
     let relatorioAtivo = "vendas";
+    let opcoesDeUsuario = "pendentes"; // "pendentes", "carregando" ou "prontas" (filtro da aba Compras)
 
     // ---------- datas (o período da API usa datas de Brasília, AAAA-MM-DD) ----------
 
@@ -188,6 +208,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             celula(preco(item.lucro_centavos), "numero"),
         ]));
 
+        // Consumo por usuário: quem comprou e quanto, do maior para o menor total.
+        preencherTabela("vendas-por-usuario", dados.por_usuario, 5, "Nenhum usuário fez compras neste período.", (usuario) => linha([
+            celula(usuario.nome, "", true),
+            celula(usuario.matricula || "—", "texto-quebravel"),
+            celula(inteiro(usuario.quantidade_compras), "numero"),
+            celula(inteiro(usuario.itens), "numero"),
+            celula(preco(usuario.total_centavos), "numero"),
+        ]));
+
         const dias = dados.por_dia || [];
         const maiorTotal = Math.max(0, ...dias.map((dia) => Number(dia.total_centavos || 0)));
         preencherTabela("vendas-por-dia", dias, 3, "Nenhuma venda no período.", (dia) => linha([
@@ -195,6 +224,77 @@ document.addEventListener("DOMContentLoaded", async () => {
             celula(inteiro(dia.quantidade_compras), "numero"),
             celula(criarBarra(dia.total_centavos, maiorTotal)),
         ]));
+    }
+
+    // Itens de uma compra, um por linha: "2 × Barra de Cereal".
+    function listaDeItens(itens) {
+        if (!itens || !itens.length) return document.createTextNode("—");
+        const lista = el("ul", "lista-itens-compra");
+        // role="list": a lista continua anunciada mesmo sem os marcadores (list-style: none).
+        lista.setAttribute("role", "list");
+        itens.forEach((item) => {
+            lista.append(el("li", "", `${inteiro(item.quantidade)} × ${item.nome}`));
+        });
+        return lista;
+    }
+
+    function renderizarCompras(dados) {
+        const compras = dados.compras || [];
+        const total = Number(dados.total_compras ?? compras.length);
+        definirTexto("compras-total", inteiro(total));
+        definirTexto("compras-quantidade", inteiro(compras.length));
+
+        // total_compras conta todo o período; a lista traz só as mais recentes, até o limite.
+        const avisoLimite = document.getElementById("compras-aviso-limite");
+        avisoLimite.hidden = total <= compras.length;
+        avisoLimite.textContent = avisoLimite.hidden
+            ? ""
+            : `A lista mostra só as ${inteiro(compras.length)} compras mais recentes, de um total de ${inteiro(total)} no período. Para ver as demais, reduza o período ou escolha um usuário.`;
+
+        const textoVazio = filtroUsuarioCompras.value
+            ? "Este usuário não fez compras neste período."
+            : "Nenhuma compra registrada neste período.";
+        preencherTabela("compras-lista", compras, 5, textoVazio, (compra) => {
+            const usuario = compra.usuario || {};
+            const celulaUsuario = celula("");
+            celulaUsuario.append(el("span", "nome-usuario", usuario.nome || "Usuário não identificado"));
+            if (usuario.matricula) {
+                celulaUsuario.append(el("span", "texto-secundario", `Matrícula ${usuario.matricula}`));
+            }
+            return linha([
+                celula(Cantina.formatarDataHora(compra.data_hora), "celula-data"),
+                // \u00a0 = espaço que não quebra: "Nº 12" fica sempre na mesma linha.
+                celula(`Nº\u00a0${compra.id_compra}`, "", true),
+                celulaUsuario,
+                celula(listaDeItens(compra.itens)),
+                celula(preco(compra.valor_total_centavos), "numero"),
+            ]);
+        });
+    }
+
+    function rotuloDoUsuarioFiltrado() {
+        const opcao = filtroUsuarioCompras.selectedOptions[0];
+        return opcao ? opcao.textContent : `nº ${filtroUsuarioCompras.value}`;
+    }
+
+    // Lista de usuários do filtro da aba Compras, buscada na primeira vez que a aba abre.
+    // Se falhar, o filtro fica só com "Todos os usuários" e tenta de novo na próxima abertura.
+    async function carregarOpcoesDeUsuario() {
+        if (opcoesDeUsuario !== "pendentes") return;
+        opcoesDeUsuario = "carregando";
+        try {
+            const resultado = await Cantina.requisitar("/api/admin/usuarios?status=TODOS&perfil=TODOS");
+            const selecionado = filtroUsuarioCompras.value;
+            const opcoes = (resultado.usuarios || []).map((usuario) => {
+                const inativo = usuario.status === "INATIVO" ? " (inativo)" : "";
+                return new Option(`${usuario.nome} — matrícula ${usuario.matricula}${inativo}`, String(usuario.id_usuario));
+            });
+            filtroUsuarioCompras.replaceChildren(new Option("Todos os usuários", ""), ...opcoes);
+            filtroUsuarioCompras.value = selecionado;
+            opcoesDeUsuario = "prontas";
+        } catch {
+            opcoesDeUsuario = "pendentes";
+        }
     }
 
     function renderizarSaldos(dados) {
@@ -290,23 +390,39 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (RELATORIOS[nome].usaPeriodo) {
             const de = dados?.periodo?.de || periodo.de;
             const ate = dados?.periodo?.ate || periodo.ate;
-            saida.textContent = de === ate
+            const textoPeriodo = de === ate
                 ? `Período: ${formatarDia(de)}`
                 : `Período: ${formatarDia(de)} a ${formatarDia(ate)}`;
+            saida.textContent = textoPeriodo + (RELATORIOS[nome].descricaoExtra?.() || "");
         } else {
             saida.textContent = `Situação atual, consultada em ${Cantina.formatarDataHora(new Date().toISOString())}. Não depende do período.`;
         }
     }
 
-    // Busca o relatório só quando ainda não foi carregado para o período atual.
+    // 422: a API recusou algum filtro; cada mensagem vai para junto do seu campo
+    // (datas no formulário de período; os demais no filtro da própria aba).
+    function exibirErrosDosFiltros(definicao, campos) {
+        const doPeriodo = {};
+        const daAba = {};
+        Object.entries(campos).forEach(([campo, mensagem]) => {
+            const destino = definicao.formulario?.elements.namedItem(campo) ? daAba : doPeriodo;
+            destino[campo] = mensagem;
+        });
+        if (Object.keys(doPeriodo).length) Cantina.exibirErros(formularioPeriodo, doPeriodo);
+        if (Object.keys(daAba).length) Cantina.exibirErros(definicao.formulario, daAba);
+    }
+
+    // Busca o relatório só quando ainda não foi carregado para o período (e o filtro) atual.
     async function carregarRelatorio(nome, { forcar = false } = {}) {
         const definicao = RELATORIOS[nome];
         const controle = controles[nome];
-        const chave = definicao.usaPeriodo ? `${periodo.de}|${periodo.ate}` : "atual";
+        const chave = (definicao.usaPeriodo ? `${periodo.de}|${periodo.ate}` : "atual")
+            + (definicao.filtro ? `|${definicao.filtro()}` : "");
         if (!forcar && controle.chave === chave) return;
 
         const pedido = ++controle.pedido;
         controle.chave = chave;
+        if (definicao.formulario) Cantina.limparErros(definicao.formulario);
         descreverPeriodo(nome);
         mostrarEstado(nome, "Carregando relatório…");
 
@@ -319,9 +435,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         } catch (erro) {
             if (pedido !== controle.pedido) return;
             controle.chave = null; // permite tentar de novo
-            // 422: a API recusou o período; a mensagem vai para junto do campo.
             const camposInvalidos = Object.keys(erro.campos || {}).length > 0;
-            if (camposInvalidos) Cantina.exibirErros(formularioPeriodo, erro.campos);
+            if (camposInvalidos) exibirErrosDosFiltros(definicao, erro.campos);
             mostrarEstado(nome, tratarErro(erro), {
                 erro: true,
                 aoTentar: camposInvalidos ? null : () => carregarRelatorio(nome, { forcar: true }),
@@ -344,6 +459,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (registrarNaUrl) {
             window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${relatorioAtivo}`);
         }
+        RELATORIOS[relatorioAtivo].aoAbrir?.();
         carregarRelatorio(relatorioAtivo);
     }
 
@@ -412,6 +528,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     });
 
+    // ---------- filtro de usuário da aba Compras ----------
+
+    // É uma consulta (nada é gravado): a lista é refeita ao escolher o usuário.
+    filtroUsuarioCompras.addEventListener("change", () => carregarRelatorio("compras"));
+    // O botão "Atualizar lista" (ou Enter no campo) refaz a consulta com o filtro escolhido.
+    formularioCompras.addEventListener("submit", (evento) => {
+        evento.preventDefault();
+        carregarRelatorio("compras", { forcar: true });
+    });
+
     // ---------- impressão ----------
 
     // Sai só o relatório da aba aberta (as outras estão com hidden), com título,
@@ -431,7 +557,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     periodo = padrao;
     marcarAtalhoAtivo();
 
-    // Abre a aba indicada na URL (#saldos, #estoque, #depositos); sem isso, Vendas.
+    // Abre a aba indicada na URL (#compras, #saldos, #estoque, #depositos); sem isso, Vendas.
     const abaInicial = abas.find((aba) => aba.dataset.relatorio === window.location.hash.slice(1)) || abas[0];
     selecionarAba(abaInicial, { registrarNaUrl: false });
 });

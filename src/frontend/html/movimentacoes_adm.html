@@ -22,7 +22,7 @@
 
             <div class="layout-admin">
 
-                <!-- MENU LATERAL (igual nas quatro telas do painel) -->
+                <!-- MENU LATERAL (igual nas cinco telas do painel) -->
                 <aside class="menu-admin nao-imprimir" id="menu-admin">
                     <div class="menu-admin-topo">
                         <div>
@@ -36,11 +36,12 @@
 
                     <div id="navegacao-admin" class="navegacao-admin">
                         <nav aria-label="Painel administrativo">
-                            <ul class="menu-admin-lista">
-                                <li><a href="/html/catalogo_produtos_adm.html">Produtos</a></li>
+                            <ul class="menu-admin-lista" role="list">
+                                <li><a href="/html/catalogo_produtos_adm.html">Produtos<span class="somente-leitor"> do painel</span></a></li>
                                 <li><a href="/html/usuarios_adm.html">Usuários</a></li>
                                 <li><a href="/html/movimentacoes_adm.html" aria-current="page">Movimentações</a></li>
                                 <li><a href="/html/relatorios_adm.html">Relatórios</a></li>
+                                <li><a href="/html/qrcodes_adm.html">QR Codes</a></li>
                                 <li class="menu-admin-separado"><a href="/html/catalogo_produtos.html">Ver catálogo da cantina</a></li>
                             </ul>
                         </nav>
@@ -65,6 +66,7 @@
                         <h2 id="titulo-filtros" class="somente-leitor">Filtros</h2>
                         <!-- novalidate: as datas são validadas pelo JavaScript, com a mensagem junto ao campo. -->
                         <form id="form-filtros" class="filtros-admin" novalidate>
+                            <p class="texto-apoio">Campos com <span class="obrigatorio">*</span> são obrigatórios.</p>
                             <div class="campo-formulario">
                                 <label for="filtro-de">Data inicial <span class="obrigatorio" aria-hidden="true">*</span></label>
                                 <input type="date" id="filtro-de" name="de" required>

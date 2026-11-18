@@ -3,56 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#fffaf5">
-    <meta name="description" content="Cantina da Honestidade: veja os produtos, adicione créditos à sua carteira e registre suas compras.">
+    <meta name="theme-color" content="#fffaf4">
+    <meta name="description" content="Cantina da Honestidade do SENAI Fraiburgo: pegue o que quiser, registre sua compra e pague com o saldo da sua conta.">
     <title>Início | Cantina da Honestidade</title>
+    <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="/css/home.css">
 </head>
 <body>
-    <a class="pular-conteudo" href="#conteudo-principal">Pular para o conteúdo</a>
-
-    <header class="topo">
-        <a class="marca" href="/" aria-label="Cantina da Honestidade — início">
-            <span class="marca-icone" aria-hidden="true">C</span>
-            <span>Cantina <strong>da Honestidade</strong></span>
-        </a>
-        <a class="atalho-topo" href="/html/catalogo_produtos.html">Ver produtos <span aria-hidden="true">↗</span></a>
-    </header>
+    <div id="header-container"></div>
 
     <main id="conteudo-principal">
-        <section class="apresentacao" aria-labelledby="titulo-principal">
-            <p class="etiqueta">Cantina Inteligente · Grupo 4</p>
-            <h1 id="titulo-principal">Bem-vindo à<br><span>Cantina da Honestidade</span></h1>
-            <p class="subtitulo">Uma iniciativa baseada na confiança, na honestidade e na solidariedade. Escolha por onde quer começar.</p>
-        </section>
 
-        <section class="opcoes" aria-label="Escolha uma área">
-            <article class="cartao cartao-cliente">
-                <div class="cartao-icone cliente-icone" aria-hidden="true">♡</div>
-                <p class="cartao-etiqueta">Para quem vai comprar</p>
-                <h2>Área do cliente</h2>
-                <p>Veja os produtos, adicione créditos à sua carteira e registre suas compras com o seu saldo.</p>
-                <a class="botao botao-principal" href="/html/catalogo_produtos.html">Explorar produtos <span aria-hidden="true">→</span></a>
-                <div class="links-secundarios">
-                    <a href="/html/login.html">Entrar</a>
-                    <span aria-hidden="true">·</span>
-                    <a href="/html/cadastro.html">Criar cadastro</a>
-                    <span aria-hidden="true">·</span>
-                    <a href="/html/minha_conta.html">Minha conta</a>
+        <!-- ABERTURA -->
+        <section class="abertura" aria-labelledby="titulo-principal">
+            <div class="container abertura-conteudo">
+                <div class="abertura-texto">
+                    <p class="sobretitulo">SENAI Fraiburgo</p>
+                    <h1 id="titulo-principal">Cantina da <span>Honestidade</span></h1>
+                    <p class="frase-abertura">
+                        Pegue o que quiser, registre sua compra e pague com o saldo da sua conta.
+                        Simples assim, na base da confiança.
+                    </p>
+
+                    <!-- Visitante: é o que aparece sem JavaScript e para quem ainda não entrou. -->
+                    <div class="acoes-abertura" id="acoes-visitante">
+                        <div class="botoes-abertura">
+                            <a class="botao botao-principal" href="/html/cadastro.html">Criar minha conta</a>
+                            <a class="botao botao-secundario" href="/html/catalogo_produtos.html">Ver produtos</a>
+                        </div>
+                        <a class="link-acao" href="/html/login.html">Já tenho conta</a>
+                    </div>
+
+                    <!-- Quem já entrou: o home.js preenche o nome e o saldo e mostra este bloco
+                         no lugar do bloco de visitante. -->
+                    <div class="acoes-abertura" id="acoes-logado" hidden>
+                        <p class="saudacao-abertura" id="saudacao-inicio">Olá!</p>
+                        <p class="saldo-abertura">
+                            <span>Seu saldo:</span>
+                            <strong id="saldo-inicio">—</strong>
+                        </p>
+                        <div class="botoes-abertura">
+                            <a class="botao botao-principal" href="/html/catalogo_produtos.html">Ver produtos</a>
+                            <a class="botao botao-secundario" href="/html/minha_conta.html#creditos">Adicionar crédito</a>
+                            <!-- Só para administradores (o home.js tira o hidden). -->
+                            <a class="botao botao-painel" id="botao-painel" href="/html/catalogo_produtos_adm.html" hidden>Abrir painel da administração</a>
+                        </div>
+                    </div>
                 </div>
-            </article>
 
-            <article class="cartao cartao-admin">
-                <div class="cartao-icone admin-icone" aria-hidden="true">▤</div>
-                <p class="cartao-etiqueta">Para a equipe da cantina</p>
-                <h2>Administração</h2>
-                <p>Gerencie produtos, usuários, movimentações e relatórios da cantina.</p>
-                <a class="botao botao-secundario" href="/html/catalogo_produtos_adm.html">Abrir painel admin <span aria-hidden="true">→</span></a>
-                <p class="nota-admin">Acesso só para contas de administrador.</p>
-            </article>
+                <!-- Ilustração decorativa feita só com CSS -->
+                <div class="abertura-ilustracao" aria-hidden="true">
+                    <div class="selo-confianca">
+                        <span class="selo-emoji">🤝</span>
+                        <span class="selo-texto">Feita de<br>confiança</span>
+                    </div>
+                    <span class="bolha bolha-1">🥪</span>
+                    <span class="bolha bolha-2">🥤</span>
+                    <span class="bolha bolha-3">🍪</span>
+                </div>
+            </div>
         </section>
 
-        <p class="rodape">Feita com confiança para a nossa comunidade.</p>
+        <!-- COMO FUNCIONA -->
+        <section class="como-funciona" aria-labelledby="titulo-como-funciona">
+            <div class="container">
+                <div class="cabecalho-secao">
+                    <h2 id="titulo-como-funciona">Como funciona</h2>
+                    <p>Três passos, sem complicação.</p>
+                </div>
+
+                <!-- role="list": mantém a lista para leitores de tela mesmo sem os marcadores -->
+                <ol class="passos" role="list">
+                    <li class="passo">
+                        <div class="topo-passo" aria-hidden="true">
+                            <span class="numero-passo">1</span>
+                            <span class="icone-passo">💰</span>
+                        </div>
+                        <h3><span class="somente-leitor">Passo 1: </span>Coloque o dinheiro na caixa</h3>
+                        <p>Deposite na caixa da cantina e declare o valor em Minha conta. Ele vira saldo.</p>
+                    </li>
+                    <li class="passo">
+                        <div class="topo-passo" aria-hidden="true">
+                            <span class="numero-passo">2</span>
+                            <span class="icone-passo">🛍️</span>
+                        </div>
+                        <h3><span class="somente-leitor">Passo 2: </span>Escolha seus produtos</h3>
+                        <p>Veja os preços no catálogo e monte sua sacola. Pelo QR Code do produto é ainda mais rápido.</p>
+                    </li>
+                    <li class="passo">
+                        <div class="topo-passo" aria-hidden="true">
+                            <span class="numero-passo">3</span>
+                            <span class="icone-passo">✅</span>
+                        </div>
+                        <h3><span class="somente-leitor">Passo 3: </span>Registre a compra</h3>
+                        <p>Confirme e o valor sai do seu saldo. Você acompanha tudo no extrato.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- FAIXA DE VALORES -->
+        <section class="faixa-valores" aria-labelledby="titulo-vantagens">
+            <div class="container">
+                <!-- Título só para leitores de tela: toda seção tem um cabeçalho que a identifica. -->
+                <h2 id="titulo-vantagens" class="somente-leitor">Vantagens da Cantina da Honestidade</h2>
+                <ul class="lista-valores" role="list">
+                    <li>
+                        <span class="icone-valor" aria-hidden="true">⚡</span>
+                        Sem fila e sem atendente
+                    </li>
+                    <li>
+                        <span class="icone-valor" aria-hidden="true">🧾</span>
+                        Você vê seu saldo e seu histórico
+                    </li>
+                    <li>
+                        <span class="icone-valor" aria-hidden="true">🧡</span>
+                        Cada registro ajuda a cantina a continuar
+                    </li>
+                </ul>
+            </div>
+        </section>
+
     </main>
+
+    <div id="footer-container"></div>
+    <script src="/javascript/base.js"></script>
+    <script src="/javascript/home.js"></script>
 </body>
 </html>

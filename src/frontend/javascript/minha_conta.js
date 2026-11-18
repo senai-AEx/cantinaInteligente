@@ -1,5 +1,5 @@
 // Minha conta: resumo do usuário, declaração de crédito (depósito na caixa),
-// extrato da carteira e histórico de compras. A tela exige login.
+// extrato da carteira, histórico de compras e troca de senha. A tela exige login.
 document.addEventListener("DOMContentLoaded", () => {
     "use strict";
 
@@ -32,6 +32,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const tituloCompras = document.getElementById("titulo-compras");
     const estadoCompras = document.getElementById("estado-compras");
     const listaCompras = document.getElementById("lista-compras");
+
+    // Alterar senha
+    const formSenha = document.getElementById("form-senha");
+    const camposSenha = {
+        senha_atual: formSenha.elements.namedItem("senha_atual"),
+        nova_senha: formSenha.elements.namedItem("nova_senha"),
+        confirmar_senha: formSenha.elements.namedItem("confirmar_senha"),
+    };
+    const mostrarSenhas = document.getElementById("mostrar-senhas-conta");
+    const regrasSenha = document.getElementById("regras-senha");
+    const feedbackSenha = formSenha.querySelector(".feedback-form");
+    const botaoSenha = document.getElementById("botao-senha");
+    const mensagemSenha = document.getElementById("mensagem-senha");
 
     let saldoCentavos = null;
     let enviando = false;
@@ -263,6 +276,8 @@ document.addEventListener("DOMContentLoaded", () => {
         topo.append(identificacao, total);
 
         const itens = elemento("ul", "itens-da-compra");
+        // role="list": a lista continua anunciada mesmo sem os marcadores (list-style: none).
+        itens.setAttribute("role", "list");
         itens.setAttribute("aria-label", `Itens da compra nº ${compra.id_compra}`);
         (Array.isArray(compra.itens) ? compra.itens : []).forEach((item) => itens.append(criarItemDaCompra(item)));
 
@@ -298,10 +313,113 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // ---------- alterar senha ----------
+    // As senhas ficam só nos campos e no corpo da requisição: nunca vão para mensagens nem para o console.
+
+    let trocandoSenha = false;
+
+    // Marca cada regra como cumprida (✓) ou não (○) enquanto o usuário digita a nova senha.
+    function atualizarRegrasDaSenha() {
+        const senha = camposSenha.nova_senha.value;
+        const cumpridas = {
+            tamanho: senha.length >= 8 && senha.length <= 72,
+            letra: /[A-Za-zÀ-ÿ]/.test(senha),
+            numero: /\d/.test(senha),
+        };
+        regrasSenha.querySelectorAll("[data-regra]").forEach((item) => {
+            const cumprida = cumpridas[item.dataset.regra];
+            item.classList.toggle("regra-cumprida", cumprida);
+            item.querySelector(".marca-regra").textContent = cumprida ? "✓" : "○";
+            item.querySelector("[data-estado-regra]").textContent = cumprida ? "(cumprida)" : "(falta cumprir)";
+        });
+    }
+
+    // Mostra ou esconde o que foi digitado nos três campos.
+    function aplicarMostrarSenhas() {
+        const tipo = mostrarSenhas.checked ? "text" : "password";
+        Object.values(camposSenha).forEach((campo) => { campo.type = tipo; });
+    }
+
+    // Mesmas regras do servidor (contrato da API).
+    function validarTrocaDeSenha(dados) {
+        const erros = {};
+
+        if (!dados.senha_atual) erros.senha_atual = "Informe sua senha atual.";
+
+        if (!dados.nova_senha) erros.nova_senha = "Crie uma nova senha.";
+        else if (!Cantina.validarSenha(dados.nova_senha)) {
+            erros.nova_senha = "A nova senha precisa ter de 8 a 72 caracteres, com pelo menos uma letra e um número.";
+        } else if (dados.nova_senha === dados.senha_atual) {
+            erros.nova_senha = "A nova senha precisa ser diferente da senha atual.";
+        }
+
+        if (!dados.confirmar_senha) erros.confirmar_senha = "Digite a nova senha de novo para confirmar.";
+        else if (dados.confirmar_senha !== dados.nova_senha) erros.confirmar_senha = "As senhas não são iguais.";
+
+        return erros;
+    }
+
+    async function alterarSenha() {
+        if (trocandoSenha) return;
+        Cantina.limparErros(formSenha);
+        Cantina.mostrarMensagem(mensagemSenha, "");
+
+        const dados = {
+            senha_atual: camposSenha.senha_atual.value,
+            nova_senha: camposSenha.nova_senha.value,
+            confirmar_senha: camposSenha.confirmar_senha.value,
+        };
+        if (Cantina.exibirErros(formSenha, validarTrocaDeSenha(dados))) return;
+
+        trocandoSenha = true;
+        try {
+            await Cantina.comBotaoOcupado(botaoSenha, "Alterando senha...", () =>
+                Cantina.requisitar("/api/auth/senha", { method: "PUT", json: dados }));
+
+            // Senha trocada: os campos esvaziam e voltam a esconder o que for digitado.
+            formSenha.reset();
+            aplicarMostrarSenhas();
+            atualizarRegrasDaSenha();
+            Cantina.mostrarMensagem(mensagemSenha, "Senha alterada. Use a nova senha no próximo acesso.", "sucesso");
+        } catch (erro) {
+            // Sessão expirada: volta para o login.
+            if (erro.status === 401) {
+                Cantina.irParaLogin();
+                return;
+            }
+            // Erros por campo vindos da API (por exemplo, senha atual incorreta).
+            if (Object.keys(erro.campos || {}).length) {
+                Cantina.exibirErros(formSenha, erro.campos);
+                return;
+            }
+            Cantina.mostrarMensagem(feedbackSenha, erro.message, "erro");
+        } finally {
+            trocandoSenha = false;
+        }
+    }
+
+    camposSenha.nova_senha.addEventListener("input", atualizarRegrasDaSenha);
+    mostrarSenhas.addEventListener("change", aplicarMostrarSenhas);
+    // Enter na caixa "Mostrar senhas" enviaria o formulário: aqui ele não faz nada (a barra de espaço marca a caixa).
+    mostrarSenhas.addEventListener("keydown", (evento) => {
+        if (evento.key === "Enter") evento.preventDefault();
+    });
+
+    Cantina.ligarLimpezaDeErros(formSenha);
+    // Regra do sistema: Enter em um campo não grava; só o clique no botão "Alterar senha".
+    Cantina.bloquearEnvioPorEnter(formSenha);
+
+    formSenha.addEventListener("submit", (evento) => {
+        evento.preventDefault();
+        alterarSenha();
+    });
+
+    atualizarRegrasDaSenha();
+
     // ---------- início ----------
 
     // Depois que as listas carregam a página muda de altura: reposiciona na seção pedida
-    // no endereço (#creditos, #extrato, #compras...).
+    // no endereço (#creditos, #extrato, #compras, #senha...).
     function irParaSecaoDoEndereco() {
         const id = window.location.hash.slice(1);
         if (!id) return;

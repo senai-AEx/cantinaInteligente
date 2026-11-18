@@ -242,10 +242,19 @@
     margin-top: 4px;
 }
 
+/* Aviso do tempo de sessão (8 horas sem uso) */
+
+.aviso-sessao {
+    margin-top: 18px;
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
 /* LINK ENTRE AS TELAS */
 
 .texto-alternativo {
-    margin-top: 24px;
+    margin-top: 16px;
     color: var(--cor-texto-suave);
     font-size: 14px;
     text-align: center;

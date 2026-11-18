@@ -130,7 +130,7 @@
                     >
                     <small class="dica-campo" id="dica-senha-cadastro">A senha precisa ter:</small>
                     <!-- Cada regra mostra ✓ ou ○ e um texto para leitores de tela: não depende só da cor. -->
-                    <ul class="regras-senha" id="regras-senha">
+                    <ul class="regras-senha" id="regras-senha" role="list">
                         <li data-regra="tamanho">
                             <span class="marca-regra" aria-hidden="true">○</span>
                             de 8 a 72 caracteres
@@ -177,6 +177,12 @@
                 <button type="submit" class="botao botao-principal" id="botao-cadastro">Criar conta</button>
 
             </form>
+
+            <!-- Aviso do limite de inatividade (o cadastro já deixa a pessoa com o acesso aberto). -->
+            <p class="aviso-sessao">
+                Ao criar a conta você já entra no sistema. Por segurança, o acesso termina depois de
+                8 horas sem uso; depois disso, é só entrar de novo.
+            </p>
 
             <p class="texto-alternativo">
                 Já tem uma conta?

@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const formularioEdicao = document.getElementById("form-editar-produto");
     const textoConfirmacao = document.getElementById("texto-confirmacao-exclusao");
     const botaoConfirmarExclusao = document.getElementById("botao-confirmar-exclusao");
+    const erroExclusao = document.getElementById("erro-excluir-produto");
     const buscaProdutos = document.getElementById("busca-produtos");
     const contadorProdutos = document.getElementById("contador-produtos");
     const filtroSemEstoque = document.getElementById("filtrar-sem-estoque");
@@ -114,15 +115,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ---------- listagem ----------
 
-    function criarBotao(texto, acao, classe) {
+    // O nome do produto entra no rótulo acessível, pois os botões se repetem em cada cartão
+    // ("Editar: Suco de uva"). O texto visível continua no começo do rótulo.
+    function criarBotao(texto, acao, classe, produto) {
         const botao = criarElemento("button", classe, texto);
         botao.type = "button";
         botao.dataset.acao = acao;
+        botao.setAttribute("aria-label", `${texto}: ${produto.nome}`);
         return botao;
     }
 
     function criarCard(produto) {
-        const card = criarElemento("article", "card-produto");
+        // Cada cartão é um item da lista de produtos (o contêiner recebe role="list").
+        const card = criarElemento("div", "card-produto");
+        card.setAttribute("role", "listitem");
         card.dataset.produtoId = produto.id_produto;
         if (semEstoque(produto)) card.classList.add("sem-estoque");
 
@@ -164,11 +170,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const acoes = criarElemento("div", "acoes-produto");
-        acoes.append(criarBotao("Editar", "editar", "botao botao-principal"));
+        acoes.append(criarBotao("Editar", "editar", "botao botao-principal", produto));
         if (produto.status === "ATIVO") {
-            acoes.append(criarBotao("Excluir", "excluir", "botao botao-excluir"));
+            acoes.append(criarBotao("Excluir", "excluir", "botao botao-excluir", produto));
         } else {
-            acoes.append(criarBotao("Reativar", "reativar", "botao botao-principal"));
+            acoes.append(criarBotao("Reativar", "reativar", "botao botao-principal", produto));
         }
         conteudo.append(acoes);
         card.append(conteudo);
@@ -199,6 +205,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         contadorProdutos.textContent = `${produtos.length} ${produtos.length === 1 ? "produto encontrado" : "produtos encontrados"}`;
+        // Com produtos na tela, o contêiner é anunciado como lista ("lista com N itens").
+        if (produtos.length) lista.setAttribute("role", "list");
+        else lista.removeAttribute("role");
         if (produtos.length === 0) {
             const mensagem = todosProdutos.length === 0
                 ? "Seu catálogo ainda está vazio. Cadastre o primeiro produto para começar."
@@ -213,7 +222,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Depois de gravar, a lista é refeita e o botão que tinha o foco deixa de existir:
+    // o foco vai para o botão "Editar" do mesmo produto (ou para o campo de busca, se o
+    // produto saiu da lista filtrada), em vez de se perder no começo da página.
+    function focarProduto(idProduto) {
+        const card = [...lista.querySelectorAll("[data-produto-id]")]
+            .find((item) => item.dataset.produtoId === String(idProduto));
+        const destino = card?.querySelector("button[data-acao='editar']") || buscaProdutos;
+        destino.focus();
+    }
+
     async function carregarProdutos() {
+        lista.removeAttribute("role");
         lista.replaceChildren(criarElemento("p", "estado-lista", "Carregando produtos..."));
         try {
             todosProdutos = await requisitar(API_URL + "?status=TODOS");
@@ -386,6 +406,8 @@ document.addEventListener("DOMContentLoaded", () => {
             formulario.reset();
             atualizarPreview(formulario);
             await carregarProdutos();
+            // Na edição, o foco tinha voltado para o botão "Editar" do cartão, que foi refeito.
+            if (idProduto) focarProduto(idProduto);
             mostrarMensagem(mensagemApi, metodo === "POST" ? "Produto cadastrado." : "Produto atualizado.", "sucesso");
         } catch (erro) {
             if (Object.keys(erro.campos || {}).length) {
@@ -554,6 +576,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (botao.dataset.acao === "excluir") {
             produtoSelecionado = produto;
             textoConfirmacao.textContent = `Deseja excluir "${produto.nome}"? Ele sairá do catálogo, mas continuará salvo no banco como inativo e poderá ser reativado.`;
+            erroExclusao.textContent = "";
             abrirModal(modalExclusao, document.getElementById("botao-cancelar-exclusao"));
             return;
         }
@@ -563,6 +586,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 await requisitar(API_URL + "/" + produto.id_produto + "/reativar", { method: "PATCH" });
                 await carregarProdutos();
+                focarProduto(produto.id_produto);
                 mostrarMensagem(mensagemApi, "Produto reativado.", "sucesso");
             } catch (erro) {
                 mostrarMensagem(mensagemApi, erro.message, "erro");
@@ -576,6 +600,7 @@ document.addEventListener("DOMContentLoaded", () => {
     botaoConfirmarExclusao.addEventListener("click", async () => {
         if (!produtoSelecionado) return;
         botaoConfirmarExclusao.disabled = true;
+        erroExclusao.textContent = "";
         try {
             await requisitar(API_URL + "/" + produtoSelecionado.id_produto + "/inativar", { method: "PATCH" });
             fecharModal(modalExclusao);
@@ -584,7 +609,8 @@ document.addEventListener("DOMContentLoaded", () => {
             buscaProdutos.focus({ preventScroll: true });
             mostrarMensagem(mensagemApi, "Produto excluído (inativado). Ele continua salvo e pode ser reativado.", "sucesso");
         } catch (erro) {
-            mostrarMensagem(mensagemApi, erro.message, "erro");
+            // O modal continua aberto: a mensagem aparece dentro dele (e é anunciada por role="alert").
+            erroExclusao.textContent = erro.message;
         } finally {
             botaoConfirmarExclusao.disabled = false;
         }

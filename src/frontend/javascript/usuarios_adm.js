@@ -1,5 +1,6 @@
-// Tela administrativa de usuários: busca, edição do cadastro, inativação/reativação
-// e ajuste de saldo. Usa as funções compartilhadas do objeto Cantina (base.js).
+// Tela administrativa de usuários: busca, edição do cadastro, inativação/reativação,
+// ajuste de saldo e redefinição de senha. Usa as funções compartilhadas do objeto
+// Cantina (base.js).
 document.addEventListener("DOMContentLoaded", async () => {
     "use strict";
 
@@ -26,9 +27,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const modalEdicao = document.getElementById("modal-editar-usuario");
     const modalSituacao = document.getElementById("modal-situacao-usuario");
     const modalAjuste = document.getElementById("modal-ajuste-saldo");
-    const modais = [modalEdicao, modalSituacao, modalAjuste];
+    const modalSenha = document.getElementById("modal-redefinir-senha");
+    const modais = [modalEdicao, modalSituacao, modalAjuste, modalSenha];
     const formularioEdicao = document.getElementById("form-editar-usuario");
     const formularioAjuste = document.getElementById("form-ajuste-saldo");
+    const formularioSenha = document.getElementById("form-redefinir-senha");
+    const caixaMostrarSenhas = document.getElementById("mostrar-senhas");
     const botaoConfirmarSituacao = document.getElementById("confirmar-situacao");
     const erroSituacao = document.getElementById("erro-situacao-usuario");
     const saldoResultante = document.getElementById("ajuste-saldo-resultante");
@@ -52,6 +56,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function campoAjuste(nome) {
         return formularioAjuste.elements.namedItem(nome);
+    }
+
+    function campoSenha(nome) {
+        return formularioSenha.elements.namedItem(nome);
     }
 
     function valorComSinal(centavos) {
@@ -122,6 +130,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         modal.classList.remove("aberto");
         modal.setAttribute("aria-hidden", "true");
         document.body.classList.remove("modal-aberto");
+        // Senhas digitadas não ficam guardadas na página depois que o modal fecha.
+        if (modal === modalSenha) limparFormularioSenha();
         const focoAnterior = focosAnteriores.get(modal);
         if (focoAnterior?.isConnected) focoAnterior.focus();
     }
@@ -239,6 +249,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         acoes.append(
             botaoDeAcao("Editar", "editar", `Editar ${usuario.nome}`),
             botaoDeAcao("Ajustar saldo", "ajustar", `Ajustar saldo de ${usuario.nome}`),
+            botaoDeAcao("Redefinir senha", "senha", `Redefinir senha de ${usuario.nome}`),
         );
         // O administrador não pode inativar a própria conta: a ação nem é oferecida.
         if (!proprio) {
@@ -566,9 +577,88 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
+    // ---------- redefinição de senha ----------
+
+    // A caixa "Mostrar senhas" troca os dois campos entre texto oculto e texto visível.
+    function aplicarVisibilidadeDasSenhas() {
+        const tipo = caixaMostrarSenhas.checked ? "text" : "password";
+        campoSenha("nova_senha").type = tipo;
+        campoSenha("confirmar_senha").type = tipo;
+    }
+
+    // Apaga as senhas, desmarca "Mostrar senhas" e tira as mensagens de erro.
+    function limparFormularioSenha() {
+        formularioSenha.reset();
+        aplicarVisibilidadeDasSenhas();
+        Cantina.limparErros(formularioSenha);
+    }
+
+    function abrirRedefinicao(usuario) {
+        usuarioSelecionado = usuario;
+        limparFormularioSenha();
+        document.getElementById("senha-usuario").textContent = `${usuario.nome} (matrícula ${usuario.matricula})`;
+        abrirModal(modalSenha, campoSenha("nova_senha"));
+    }
+
+    // Mesma regra de senha do servidor (que valida de novo). A senha não é
+    // aparada: espaços digitados fazem parte dela.
+    function validarRedefinicao() {
+        const erros = {};
+        const novaSenha = campoSenha("nova_senha").value;
+        const confirmacao = campoSenha("confirmar_senha").value;
+
+        if (!novaSenha) erros.nova_senha = "Informe a nova senha.";
+        else if (!Cantina.validarSenha(novaSenha)) {
+            erros.nova_senha = "A senha precisa ter de 8 a 72 caracteres, com pelo menos uma letra e um número.";
+        }
+
+        if (!confirmacao) erros.confirmar_senha = "Digite a senha de novo para confirmar.";
+        else if (confirmacao !== novaSenha) erros.confirmar_senha = "As senhas não são iguais.";
+        return erros;
+    }
+
+    async function salvarSenha() {
+        const usuario = usuarioSelecionado;
+        if (!usuario) return;
+        Cantina.limparErros(formularioSenha);
+        if (Cantina.exibirErros(formularioSenha, validarRedefinicao())) return;
+
+        const dados = {
+            nova_senha: campoSenha("nova_senha").value,
+            confirmar_senha: campoSenha("confirmar_senha").value,
+        };
+        const botaoSalvar = formularioSenha.querySelector("button[type='submit']");
+        await Cantina.comBotaoOcupado(botaoSalvar, "Redefinindo…", async () => {
+            try {
+                const resultado = await Cantina.requisitar(`${API}/${usuario.id_usuario}/senha`, { method: "POST", json: dados });
+                // Fechar o modal apaga os campos e devolve o foco ao botão "Redefinir senha" da linha.
+                fecharModal(modalSenha);
+                // A mensagem cita só o nome: a senha nunca aparece na tela.
+                Cantina.mostrarMensagem(mensagemApi, `Senha de ${resultado.usuario?.nome || usuario.nome} redefinida.`, "sucesso");
+            } catch (erro) {
+                if (Object.keys(erro.campos || {}).length) {
+                    Cantina.exibirErros(formularioSenha, erro.campos);
+                } else {
+                    formularioSenha.querySelector(".feedback-form").textContent = tratarErro(erro);
+                }
+            }
+        });
+    }
+
+    caixaMostrarSenhas.addEventListener("change", aplicarVisibilidadeDasSenhas);
+
+    // Enter em uma caixa de seleção enviaria o formulário: aqui ele só marca ou
+    // desmarca a caixa, porque a senha é gravada apenas pelo clique no botão.
+    caixaMostrarSenhas.addEventListener("keydown", (evento) => {
+        if (evento.key !== "Enter") return;
+        evento.preventDefault();
+        caixaMostrarSenhas.checked = !caixaMostrarSenhas.checked;
+        aplicarVisibilidadeDasSenhas();
+    });
+
     // ---------- formulários: máscaras, erros e gravação só pelo botão ----------
 
-    [formularioEdicao, formularioAjuste].forEach((formulario) => {
+    [formularioEdicao, formularioAjuste, formularioSenha].forEach((formulario) => {
         Cantina.bloquearEnvioPorEnter(formulario);
         Cantina.ligarLimpezaDeErros(formulario);
     });
@@ -596,6 +686,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         salvarAjuste();
     });
 
+    formularioSenha.addEventListener("submit", (evento) => {
+        evento.preventDefault();
+        if (evento.submitter?.type !== "submit") return;
+        salvarSenha();
+    });
+
     // ---------- ações da tabela ----------
 
     corpoTabela.addEventListener("click", (evento) => {
@@ -606,6 +702,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         Cantina.mostrarMensagem(mensagemApi, "");
         if (botao.dataset.acao === "editar") abrirEdicao(usuario);
         else if (botao.dataset.acao === "ajustar") abrirAjuste(usuario);
+        else if (botao.dataset.acao === "senha") abrirRedefinicao(usuario);
         else if (botao.dataset.acao === "situacao") abrirSituacao(usuario);
     });
 

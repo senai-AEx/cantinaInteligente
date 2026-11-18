@@ -134,8 +134,10 @@ body.modal-aberto {
 }
 
 .link-acao {
-    display: inline-block;
-    padding: 10px 2px;
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    padding: 0 2px;
     color: var(--cor-primaria-escura);
     font-weight: 700;
     text-decoration: underline;
@@ -144,6 +146,13 @@ body.modal-aberto {
 
 .link-acao:hover {
     color: var(--cor-texto);
+}
+
+/* Destinos da rolagem automática (QR Code do produto, link "Ir para a sacola"):
+   não ficam colados no topo da tela */
+#aviso-qr,
+.carrinho {
+    scroll-margin-top: 16px;
 }
 
 .hero-catalogo {
@@ -167,6 +176,7 @@ body.modal-aberto {
     max-width: 690px;
 }
 
+/* O texto fica em minúsculas no HTML (leitores de tela) e maiúsculo só na tela. */
 .eyebrow {
     display: block;
     margin-bottom: 10px;
@@ -174,6 +184,7 @@ body.modal-aberto {
     font-size: 11px;
     font-weight: 800;
     letter-spacing: .13em;
+    text-transform: uppercase;
 }
 
 .hero-texto h1 {
@@ -496,15 +507,14 @@ body.modal-aberto {
     letter-spacing: -.03em;
 }
 
+/* A descrição aparece inteira (antes era cortada em 2 linhas): com zoom ou com
+   mais espaçamento de texto, nenhum trecho some — pode trazer ingredientes. */
 .descricao-produto {
-    display: -webkit-box;
-    overflow: hidden;
     margin: 0 0 10px;
     color: var(--loja-muted);
     font-size: 13px;
-    line-height: 1.45;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
 }
 
 .validade-produto {
@@ -856,6 +866,8 @@ body.modal-aberto {
 }
 
 .mensagem-honestidade p {
+    /* Linhas com até cerca de 80 caracteres, mesmo em telas largas */
+    max-width: 70ch;
     color: var(--loja-muted);
     font-size: 14px;
 }

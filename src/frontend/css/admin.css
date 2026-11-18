@@ -1,11 +1,12 @@
 /* ============================================================
    PAINEL ADMINISTRATIVO — estilos compartilhados
-   Usado por usuarios_adm.html, movimentacoes_adm.html e
-   relatorios_adm.html. Carregue DEPOIS do base.css: as cores
-   vêm das variáveis de lá (contraste mínimo de 4,5:1).
+   Usado por usuarios_adm.html, movimentacoes_adm.html,
+   relatorios_adm.html e qrcodes_adm.html. Carregue DEPOIS do
+   base.css: as cores vêm das variáveis de lá (contraste mínimo
+   de 4,5:1).
    O menu lateral é o mesmo do painel de produtos; o bloco
    "MENU DO PAINEL" de catalogo_produtos_adm.css repete estas
-   regras para as quatro telas ficarem iguais.
+   regras para as cinco telas ficarem iguais.
    ============================================================ */
 
 :root {
@@ -100,6 +101,17 @@
 .periodo-relatorio {
     color: var(--cor-texto-suave);
     font-size: 14px;
+}
+
+/* Linhas com até cerca de 80 caracteres, mesmo em telas largas */
+.introducao p,
+.texto-apoio,
+.contador-lista,
+.periodo-relatorio,
+.texto-modal,
+.texto-confirmacao,
+.qr-aviso-local p {
+    max-width: 70ch;
 }
 
 .contador-lista {
@@ -480,8 +492,11 @@
     color: var(--admin-verde);
 }
 
+/* A segunda declaração dá texto alternativo vazio à marca: o estado já é anunciado
+   por aria-pressed. Navegadores que não conhecem essa forma ficam com a primeira. */
 .botao-atalho[aria-pressed="true"]::before {
     content: "✓ ";
+    content: "✓ " / "";
 }
 
 /* Opções de rádio em forma de botão grande (tipo do ajuste de saldo) */
@@ -567,8 +582,9 @@
     text-align: right;
 }
 
+/* 900px: a coluna de ações ganhou o botão "Redefinir senha". */
 .tabela-usuarios {
-    min-width: 860px;
+    min-width: 900px;
 }
 
 .tabela-movimentacoes {
@@ -581,6 +597,24 @@
 
 .tabela-media {
     min-width: 520px;
+}
+
+/* Compras registradas (aba Compras dos relatórios): data, número, usuário, itens e total. */
+.tabela-compras {
+    min-width: 640px;
+}
+
+/* Itens de uma compra: um produto por linha dentro da célula ("2 × Barra de Cereal"). */
+.lista-itens-compra {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 170px;
+    list-style: none;
+}
+
+.lista-itens-compra li {
+    overflow-wrap: anywhere;
 }
 
 .celula-data,
@@ -675,6 +709,17 @@
     font-weight: 700;
 }
 
+/* Aviso de lista cortada pelo limite: os totais continuam valendo para o período todo. */
+.aviso-limite {
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    border-left: 4px solid var(--cor-primaria);
+    border-radius: var(--raio);
+    background: var(--cor-aviso-clara);
+    color: var(--cor-texto);
+    font-size: 14px;
+}
+
 
 /* ---------- barra horizontal dos relatórios (decorativa) ---------- */
 
@@ -762,6 +807,214 @@
     margin: 22px 0 8px;
     color: var(--admin-titulo);
     font-size: 17px;
+}
+
+
+/* ---------- QR Codes: endereço, cartaz e etiquetas ----------
+   Tela qrcodes_adm.html. As regras de papel (cartaz em uma página
+   e etiquetas em três colunas) estão no @media print, no fim. */
+
+/* Aviso de endereço local: moldura grossa, símbolo e a palavra
+   "Atenção" no texto (não depende só da cor). */
+.qr-aviso-local {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 0 14px;
+    padding: 14px 16px;
+    border: 2px solid var(--cor-primaria-escura);
+    border-left-width: 8px;
+    border-radius: var(--raio);
+    background: var(--cor-aviso-clara);
+    color: var(--cor-texto);
+}
+
+.qr-aviso-icone {
+    flex: 0 0 auto;
+    color: var(--cor-primaria-escura);
+    font-size: 26px;
+    line-height: 1.1;
+}
+
+.qr-aviso-local strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 16px;
+    line-height: 1.3;
+}
+
+.qr-endereco {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--admin-borda);
+    border-radius: var(--raio);
+    background: var(--admin-suave);
+    color: var(--cor-texto);
+    font-size: 14px;
+}
+
+.qr-endereco.estado-erro {
+    border-color: var(--cor-erro);
+    background: var(--cor-erro-clara);
+    color: var(--cor-erro);
+    font-weight: 700;
+}
+
+.qr-endereco .botao {
+    margin-top: 10px;
+}
+
+.qr-endereco:focus-visible {
+    outline: 3px solid var(--cor-primaria);
+    outline-offset: 2px;
+}
+
+.qr-url {
+    overflow-wrap: anywhere;
+}
+
+.qr-secao {
+    margin-top: 26px;
+}
+
+/* Título e explicação de um lado, botão de imprimir do outro. */
+.qr-cabecalho-secao {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 18px;
+    margin-bottom: 14px;
+}
+
+.qr-cabecalho-secao > div {
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.qr-cabecalho-secao .titulo-secao {
+    margin: 0 0 4px;
+}
+
+.qr-cabecalho-secao .botao {
+    flex: 0 0 auto;
+}
+
+/* Imagem do QR Code: sempre quadrada e sobre fundo branco, para a câmera ler. */
+.qr-imagem {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    background: #ffffff;
+}
+
+/* Entra no lugar da imagem que não carregou: o texto diz o que houve. */
+.qr-indisponivel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    padding: 10px;
+    border: 2px dashed var(--cor-erro);
+    border-radius: var(--raio);
+    background: var(--cor-erro-clara);
+    color: var(--cor-erro);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: center;
+}
+
+.qr-cartaz {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: 440px;
+    margin: 0 auto;
+    padding: 26px 22px;
+    border: 1px solid var(--admin-borda);
+    border-radius: 16px;
+    background: var(--cor-superficie);
+    box-shadow: var(--sombra);
+    text-align: center;
+}
+
+.qr-cartaz .qr-imagem,
+.qr-cartaz .qr-indisponivel {
+    max-width: 300px;
+}
+
+.qr-cartaz-titulo {
+    color: var(--admin-titulo);
+    font-size: clamp(22px, 4vw, 28px);
+    letter-spacing: -.02em;
+    line-height: 1.2;
+}
+
+.qr-cartaz-frase {
+    color: var(--cor-texto);
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.qr-cartaz-url {
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.qr-cartaz-url:empty {
+    display: none;
+}
+
+.qr-grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+    gap: 10px;
+    list-style: none;
+}
+
+.qr-etiqueta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    padding: 14px 10px;
+    border: 1px solid var(--admin-borda);
+    border-radius: 12px;
+    background: var(--cor-superficie);
+    text-align: center;
+}
+
+.qr-etiqueta .qr-imagem,
+.qr-etiqueta .qr-indisponivel {
+    max-width: 150px;
+    margin-bottom: 4px;
+}
+
+.qr-etiqueta-nome {
+    max-width: 100%;
+    color: var(--admin-titulo);
+    font-size: 15px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.qr-etiqueta-preco {
+    color: var(--cor-texto);
+    font-size: 17px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.qr-etiqueta-codigo {
+    color: var(--cor-texto-suave);
+    font-size: 13px;
 }
 
 
@@ -899,6 +1152,26 @@ body.modal-aberto {
     font-variant-numeric: tabular-nums;
 }
 
+/* Caixa "Mostrar senhas" (mesmo desenho das telas de login e cadastro) */
+.opcao-mostrar-senha {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 10px;
+    min-height: 44px;
+    color: var(--cor-texto);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.opcao-mostrar-senha input {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--admin-verde-medio);
+    cursor: pointer;
+}
+
 
 /* ---------- telas menores ---------- */
 
@@ -982,6 +1255,27 @@ body.modal-aberto {
 
     .aba {
         padding: 8px 6px;
+    }
+
+    /* Número ímpar de abas: a última ocupa a linha inteira, sem deixar um vão ao lado. */
+    .aba:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+
+    .qr-cabecalho-secao .botao {
+        flex: 1 1 100%;
+    }
+
+    .qr-aviso-local {
+        padding: 12px;
+    }
+
+    .qr-cartaz {
+        padding: 20px 14px;
+    }
+
+    .qr-grade {
+        gap: 8px;
     }
 
     .modal-overlay {
@@ -1114,8 +1408,115 @@ body.modal-aberto {
         print-color-adjust: exact;
     }
 
-    .aviso-conferencia {
+    .aviso-conferencia,
+    .aviso-limite {
         border: 1px solid #999999;
         background: #ffffff;
+    }
+
+
+    /* ----- QR Codes: cartaz e etiquetas -----
+       Os botões da tela põem uma classe no <body> antes de imprimir:
+       "imprimindo-cartaz" tira as etiquetas do papel e
+       "imprimindo-etiquetas" tira o cartaz. Sem classe (Ctrl+P),
+       saem os dois: cartaz na primeira página e etiquetas depois.
+       As etiquetas escondidas pela busca (atributo hidden) não saem. */
+
+    body.imprimindo-cartaz .qr-secao-etiquetas,
+    body.imprimindo-etiquetas .qr-secao-cartaz {
+        display: none !important;
+    }
+
+    body:not(.imprimindo-cartaz):not(.imprimindo-etiquetas) .qr-grade {
+        break-before: page;
+        page-break-before: always;
+    }
+
+    .qr-secao {
+        margin: 0;
+    }
+
+    /* Cartaz: uma página (retrato), com o QR Code grande e centralizado.
+       A altura mínima cabe em A4 com as margens padrão dos navegadores. */
+    .qr-cartaz {
+        justify-content: center;
+        gap: 10mm;
+        max-width: none;
+        min-height: 235mm;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: #ffffff;
+        box-shadow: none;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .qr-cartaz .qr-imagem,
+    .qr-cartaz .qr-indisponivel {
+        width: 130mm;
+        max-width: 100%;
+    }
+
+    .qr-cartaz-titulo {
+        color: #000000;
+        font-size: 34pt;
+    }
+
+    .qr-cartaz-frase {
+        max-width: 150mm;
+        color: #000000;
+        font-size: 20pt;
+    }
+
+    .qr-cartaz-url {
+        color: #000000;
+        font-size: 11pt;
+    }
+
+    /* Etiquetas: três colunas em A4 (retrato), com linha tracejada para o
+       recorte, QR Code de 4,5 cm e nenhuma etiqueta dividida entre páginas. */
+    .qr-grade {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 2mm;
+    }
+
+    .qr-etiqueta {
+        gap: 1.5mm;
+        padding: 4mm 3mm;
+        border: 1px dashed #333333;
+        border-radius: 0;
+        background: #ffffff;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .qr-etiqueta .qr-imagem,
+    .qr-etiqueta .qr-indisponivel {
+        width: 45mm;
+        max-width: 100%;
+        margin-bottom: 0;
+    }
+
+    .qr-etiqueta-nome {
+        color: #000000;
+        font-size: 12pt;
+    }
+
+    .qr-etiqueta-preco {
+        color: #000000;
+        font-size: 16pt;
+    }
+
+    .qr-etiqueta-codigo {
+        color: #000000;
+        font-size: 9pt;
+    }
+
+    .qr-indisponivel {
+        border-color: #000000;
+        background: #ffffff;
+        color: #000000;
     }
 }

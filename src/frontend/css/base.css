@@ -113,6 +113,87 @@ input {
     color: #dddddd;
 }
 
+/* Links do rodapé: sublinhados (dá para saber que são links sem depender da cor)
+   e com área de toque de 44 px */
+.footer a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    padding: 0 8px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.mapa-site {
+    margin-top: 12px;
+}
+
+.mapa-site ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 6px;
+    list-style: none;
+}
+
+.mapa-site a[aria-current] {
+    font-weight: 700;
+}
+
+/* Siglas e termos: fechado por padrão; abre com clique, Enter ou Espaço */
+.glossario {
+    max-width: 640px;
+    margin: 4px auto 0;
+    font-size: 14px;
+}
+
+.glossario summary {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px;
+    cursor: pointer;
+    list-style: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.glossario summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Seta que mostra se a lista está fechada ou aberta. O estado já é anunciado pelo
+   navegador; a segunda declaração dá texto alternativo vazio à seta (navegadores
+   que não conhecem essa forma ficam com a primeira). */
+.glossario summary::before {
+    content: "▸";
+    content: "▸" / "";
+}
+
+.glossario[open] summary::before {
+    content: "▾";
+    content: "▾" / "";
+}
+
+.glossario dl {
+    display: grid;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 14px 16px;
+    border: 1px solid #777777;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.glossario dt {
+    font-weight: 700;
+}
+
+.glossario dd {
+    color: #dddddd;
+}
+
 /* ADAPTAÇÃO PARA CELULARES */
 
 @media (max-width: 600px) {
@@ -176,7 +257,8 @@ input {
     --cor-texto-suave: #5f6b62;       /* 5,6:1 sobre branco */
     --cor-fundo: #fffaf5;
     --cor-superficie: #ffffff;
-    --cor-borda: #d9ded8;
+    --cor-borda: #d9ded8;             /* só para divisórias e cartões (decorativa) */
+    --cor-contorno: #7d8a80;          /* contorno de campos e botões: 3,6:1 sobre branco */
     --cor-sucesso: #2e7d32;
     --cor-sucesso-clara: #edf7ee;
     --cor-erro: #b3261e;
@@ -217,14 +299,23 @@ input {
     top: 0;
 }
 
-/* Foco sempre visível na navegação por teclado */
+/* Foco sempre visível na navegação por teclado (também em <summary> e em
+   elementos que recebem foco por tabindex: títulos, áreas com rolagem, <main>) */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
     outline: 3px solid var(--cor-primaria);
     outline-offset: 2px;
+}
+
+/* Sobre o fundo escuro do rodapé o laranja teria só 2,6:1; o branco tem 12,6:1 */
+.footer a:focus-visible,
+.footer summary:focus-visible {
+    outline-color: #ffffff;
 }
 
 select,
@@ -233,10 +324,31 @@ textarea {
 }
 
 /* Cabeçalho conforme a sessão */
+.navegacao {
+    flex-wrap: wrap;
+}
+
+/* Área de toque de pelo menos 44 px no logotipo e nos itens do menu */
+.logo {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+}
+
 .navegacao a,
 .navegacao .botao-sair {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
     padding: 8px 10px;
     border-radius: 9px;
+}
+
+/* Página atual no menu: barra embaixo do item e negrito (não depende só da cor).
+   O base.js põe aria-current no link; o leitor de tela anuncia "página atual". */
+.navegacao a[aria-current] {
+    box-shadow: inset 0 -3px 0 currentColor;
+    font-weight: 700;
 }
 
 .navegacao .link-destaque {
@@ -452,6 +564,30 @@ label .obrigatorio,
     padding: 24px;
     color: var(--cor-texto-suave);
     text-align: center;
+}
+
+/* Linhas com até cerca de 80 caracteres, mesmo em telas largas */
+.estado-lista p {
+    max-width: 70ch;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+/* Quem pede menos movimento no sistema operacional não vê transições nem o
+   "salto" dos cartões ao passar o mouse. Vale para todas as telas. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .card-produto:hover {
+        transform: none !important;
+    }
 }
 
 @media print {

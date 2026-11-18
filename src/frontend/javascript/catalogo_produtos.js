@@ -21,7 +21,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const contadorProdutos = document.getElementById("contador-produtos");
     const mensagemApi = document.getElementById("mensagem-api");
     const avisoPagina = document.getElementById("aviso-pagina");
+    const avisoQr = document.getElementById("aviso-qr");
     const tituloProdutos = document.getElementById("titulo-produtos");
+    const carrinho = document.getElementById("carrinho");
     const tituloCarrinho = document.getElementById("titulo-carrinho");
     const itensCarrinho = document.getElementById("itens-carrinho");
     const resumoCarrinho = document.getElementById("resumo-carrinho");
@@ -64,6 +66,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let consultandoSaldo = false;
     let enviando = false;
     let compraPendente = lerCompraPendente();   // {chave, assinatura} da tentativa de compra em aberto
+    // Página aberta pelo QR Code de um produto (?adicionar=<id>): guarda o valor pedido até o
+    // catálogo carregar. null = não há pedido (ou ele já foi atendido).
+    let pedidoDoQrCode = new URLSearchParams(window.location.search).get("adicionar");
 
     // ---------- sacola guardada no dispositivo ----------
 
@@ -211,7 +216,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function criarCard(produto) {
-        const card = elemento("article", "card-produto");
+        // Cada cartão é um item da lista de produtos (o contêiner recebe role="list").
+        const card = elemento("div", "card-produto");
+        card.setAttribute("role", "listitem");
         card.dataset.produtoId = produto.id_produto;
         card.append(criarImagem(produto));
         const conteudo = elemento("div", "conteudo-produto");
@@ -291,6 +298,9 @@ document.addEventListener("DOMContentLoaded", () => {
         lista.replaceChildren();
         contadorProdutos.textContent = plural(produtos.length, "produto", "produtos");
         lista.setAttribute("aria-busy", "false");
+        // Com produtos na tela, o contêiner é anunciado como lista ("lista com N itens").
+        if (produtos.length) lista.setAttribute("role", "list");
+        else lista.removeAttribute("role");
         if (!produtos.length) {
             const vazio = elemento("div", "estado-vazio-catalogo");
             const icone = elemento("span", "icone-vazio", termo ? "⌕" : "🍊");
@@ -335,7 +345,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function criarLinhaDaSacola(produto, quantidade) {
-        const linha = elemento("article", "item-carrinho");
+        // Cada produto é um item da lista da sacola (o contêiner recebe role="list").
+        const linha = elemento("div", "item-carrinho");
+        linha.setAttribute("role", "listitem");
         const info = elemento("div", "informacoes-item");
         info.append(elemento("h3", "", produto.nome));
         info.append(elemento("p", "", `${formatarPreco(produto.preco_venda_centavos)} cada`));
@@ -367,12 +379,24 @@ document.addEventListener("DOMContentLoaded", () => {
         itensCarrinho.replaceChildren();
         itensDaSacola().forEach(({ produto, quantidade }) => itensCarrinho.append(criarLinhaDaSacola(produto, quantidade)));
 
+        // Com itens, a sacola é anunciada como lista; vazia, mostra só o aviso.
+        if (itensCarrinho.childElementCount) {
+            itensCarrinho.setAttribute("role", "list");
+            itensCarrinho.setAttribute("aria-label", "Produtos na sacola");
+        } else {
+            itensCarrinho.removeAttribute("role");
+            itensCarrinho.removeAttribute("aria-label");
+        }
+
         const quantidadeTotal = quantidadeNaSacola();
         contadorSacola.textContent = quantidadeTotal;
         rotuloContadorSacola.textContent = quantidadeTotal === 1 ? "item na sacola" : "itens na sacola";
         totalCarrinho.textContent = formatarPreco(totalDaSacola());
         resumoCarrinho.hidden = quantidadeTotal === 0;
         if (quantidadeTotal === 0) {
+            // Sacola vazia (compra concluída ou itens retirados): o aviso do QR Code
+            // "foi para a sua sacola" deixa de valer.
+            avisoQr.replaceChildren();
             const vazio = elemento("div", "sacola-vazia");
             const icone = elemento("span", "", "🛍️");
             icone.setAttribute("aria-hidden", "true");
@@ -405,6 +429,24 @@ document.addEventListener("DOMContentLoaded", () => {
             ? `Sacola com ${plural(quantidade, "item", "itens")}, total de ${formatarPreco(totalDaSacola())}.`
             : "Sua sacola está vazia.";
         statusSacola.textContent = `${prefixo} ${resumo}`.trim();
+    }
+
+    // Explica por que não cabe mais uma unidade do produto na sacola ("" quando ainda cabe).
+    function motivoDoLimite(produto) {
+        const naSacola = sacola[produto.id_produto] || 0;
+        if (naSacola < limiteDoProduto(produto)) return "";
+        return naSacola >= MAXIMO_POR_PRODUTO
+            ? `Cada compra aceita até ${MAXIMO_POR_PRODUTO} unidades de ${produto.nome}.`
+            : `Você já colocou na sacola todas as unidades disponíveis de ${produto.nome}.`;
+    }
+
+    // Coloca 1 unidade na sacola. Quem chama confere antes o estoque e o limite (motivoDoLimite).
+    // A chave de idempotência não precisa de cuidado aqui: como a sacola mudou, a assinatura
+    // muda e garantirChave() cria outra chave na próxima tentativa de compra.
+    function adicionarUnidade(produto) {
+        sacola[produto.id_produto] = (sacola[produto.id_produto] || 0) + 1;
+        renderizarSacola();
+        atualizarBotoesAdicionar();
     }
 
     // ---------- modal "Finalizar compra" ----------
@@ -463,6 +505,11 @@ document.addEventListener("DOMContentLoaded", () => {
         botaoConfirmar.disabled = consultandoSaldo || insuficiente || muitosProdutos;
         if (insuficiente) botaoConfirmar.setAttribute("aria-describedby", "aviso-saldo-compra");
         else botaoConfirmar.removeAttribute("aria-describedby");
+
+        // Lista longa rola dentro do modal: só então ela entra na ordem do Tab, para
+        // quem usa o teclado conseguir rolar e conferir todos os itens.
+        if (itensCompra.scrollHeight > itensCompra.clientHeight + 1) itensCompra.tabIndex = 0;
+        else itensCompra.removeAttribute("tabindex");
     }
 
     // Busca o saldo atual no servidor (ele pode ter mudado em outra aba ou aparelho).
@@ -639,15 +686,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ---------- avisos vindos de outras telas ----------
 
-    async function mostrarAvisoDaUrl() {
+    // Tira um parâmetro do endereço sem recarregar a página; os outros parâmetros e a âncora ficam.
+    function removerParametroDoEndereco(nome) {
         const parametros = new URLSearchParams(window.location.search);
-        const aviso = parametros.get("aviso");
+        if (!parametros.has(nome)) return;
+        parametros.delete(nome);
+        const consulta = parametros.toString();
+        window.history.replaceState(null, "", window.location.pathname + (consulta ? `?${consulta}` : "") + window.location.hash);
+    }
+
+    async function mostrarAvisoDaUrl() {
+        const aviso = new URLSearchParams(window.location.search).get("aviso");
         if (!aviso) return;
 
         // Tira o aviso do endereço: ele não reaparece ao atualizar a página.
-        parametros.delete("aviso");
-        const consulta = parametros.toString();
-        window.history.replaceState(null, "", window.location.pathname + (consulta ? `?${consulta}` : "") + window.location.hash);
+        removerParametroDoEndereco("aviso");
 
         const avisos = {
             "bem-vindo": {
@@ -680,25 +733,76 @@ document.addEventListener("DOMContentLoaded", () => {
         avisoPagina.hidden = false;
     }
 
+    // ---------- QR Code do produto (?adicionar=<id>) ----------
+    // O QR Code de um produto abre o catálogo com "?adicionar=<id>". Depois que os produtos
+    // carregam, a tela coloca 1 unidade na sacola, avisa e tira o parâmetro do endereço:
+    // recarregar a página não adiciona de novo.
+
+    // O aviso entra em #aviso-qr, que é uma região role="status" (lida pelos leitores de tela).
+    function mostrarAvisoDoQrCode(texto, tipo, comLinkParaSacola) {
+        const caixa = elemento("p", "mensagem-api aviso-pagina");
+        Cantina.mostrarMensagem(caixa, texto, tipo);
+        if (comLinkParaSacola) {
+            const link = elemento("a", "link-acao", "Ir para a sacola");
+            link.href = "#carrinho";
+            caixa.append(" ", link);
+        }
+        avisoQr.replaceChildren(caixa);
+    }
+
+    // Leva a tela até a sacola e põe o foco do teclado no título dela.
+    // No computador o aviso e a sacola cabem juntos na tela: a rolagem para no aviso e os dois
+    // aparecem. No celular a sacola fica depois da lista de produtos: a rolagem vai direto a ela.
+    function rolarAteASacola() {
+        const altura = carrinho.getBoundingClientRect().bottom - avisoQr.getBoundingClientRect().top;
+        const cabemJuntos = altura <= document.documentElement.clientHeight - 32;
+        (cabemJuntos ? avisoQr : carrinho).scrollIntoView();
+        tituloCarrinho.focus({ preventScroll: true });
+    }
+
+    // Chamada a cada carga do catálogo; só age uma vez, na primeira carga que der certo.
+    async function atenderPedidoDoQrCode() {
+        if (pedidoDoQrCode === null) return;
+        const pedido = pedidoDoQrCode;
+        pedidoDoQrCode = null;
+        removerParametroDoEndereco("adicionar");
+
+        // Só vale código formado por dígitos; o produto precisa estar ativo e ter estoque.
+        const produto = /^\d+$/.test(pedido) ? produtoPorId(Number(pedido)) : null;
+        const disponivel = Boolean(produto) && produto.status === "ATIVO" && produto.quantidade_estoque > 0;
+
+        // Respeita o estoque e o máximo por compra, como o botão "Adicionar à sacola".
+        const limite = disponivel ? motivoDoLimite(produto) : "";
+        if (disponivel && !limite) adicionarUnidade(produto);
+
+        // O cabeçalho entra na página depois e muda a altura dela: espera por ele antes de
+        // avisar e rolar a tela.
+        await Cantina.pronta();
+
+        if (!disponivel) {
+            mostrarAvisoDoQrCode("Este produto não está disponível agora.", "erro", false);
+            avisoQr.scrollIntoView({ block: "center" });
+            return;
+        }
+        if (limite) mostrarAvisoDoQrCode(limite, "", true);
+        else mostrarAvisoDoQrCode(`${produto.nome} foi para a sua sacola. Confira e finalize a compra.`, "sucesso", true);
+        rolarAteASacola();
+    }
+
     // ---------- eventos ----------
 
     lista.addEventListener("click", (evento) => {
         const botao = evento.target.closest("button[data-acao='adicionar']");
         if (!botao) return;
-        const id = botao.closest("[data-produto-id]").dataset.produtoId;
-        const produto = produtoPorId(id);
+        const produto = produtoPorId(botao.closest("[data-produto-id]").dataset.produtoId);
         if (!produto || produto.quantidade_estoque <= 0) return;
-        const naSacola = sacola[id] || 0;
-        if (naSacola >= limiteDoProduto(produto)) {
-            mostrarAviso(naSacola >= MAXIMO_POR_PRODUTO
-                ? `Cada compra aceita até ${MAXIMO_POR_PRODUTO} unidades de ${produto.nome}.`
-                : `Você já colocou na sacola todas as unidades disponíveis de ${produto.nome}.`);
+        const limite = motivoDoLimite(produto);
+        if (limite) {
+            mostrarAviso(limite);
             return;
         }
-        sacola[id] = naSacola + 1;
-        renderizarSacola();
-        atualizarBotoesAdicionar();
-        mostrarAviso(`${produto.nome} adicionado à sua sacola (${plural(sacola[id], "unidade", "unidades")}).`);
+        adicionarUnidade(produto);
+        mostrarAviso(`${produto.nome} adicionado à sua sacola (${plural(sacola[produto.id_produto], "unidade", "unidades")}).`);
     });
 
     categorias.addEventListener("click", (evento) => {
@@ -738,7 +842,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("voltar-catalogo").addEventListener("click", fecharCompra);
     document.getElementById("continuar-catalogo").addEventListener("click", fecharCompra);
     botaoConfirmar.addEventListener("click", confirmarCompra);
-    botaoEntrar.addEventListener("click", entrarParaFinalizar);
+    // "Entrar para finalizar" é um link para o login; o clique só acrescenta a volta para o catálogo.
+    botaoEntrar.addEventListener("click", (evento) => {
+        evento.preventDefault();
+        entrarParaFinalizar();
+    });
     modal.addEventListener("click", (evento) => { if (evento.target === modal) fecharCompra(); });
 
     // Modal: Esc fecha e o Tab fica preso dentro dele.
@@ -786,11 +894,14 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!silencioso) {
                 mostrarAviso(sacolaMudou ? "Atualizamos sua sacola: alguns produtos esgotaram ou saíram do catálogo." : "");
             }
+            // Com os produtos na tela, atende o QR Code do produto (se a página foi aberta por ele).
+            atenderPedidoDoQrCode();
         } catch (erro) {
             lista.setAttribute("aria-busy", "false");
             // Numa recarga silenciosa, a lista que já está na tela continua valendo.
             if (silencioso && catalogoCarregado) return;
             lista.replaceChildren();
+            lista.removeAttribute("role");
             const erroBox = elemento("div", "estado-vazio-catalogo erro-catalogo");
             erroBox.append(elemento("strong", "", "Não foi possível abrir o catálogo"));
             erroBox.append(elemento("p", "", erro.message || "Tente novamente em instantes."));

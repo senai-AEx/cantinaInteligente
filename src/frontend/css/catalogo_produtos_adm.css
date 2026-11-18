@@ -1135,8 +1135,9 @@ textarea:focus-visible {
 /* ============================================================
    MENU DO PAINEL (AV05)
    Mesmas regras do menu de css/admin.css, para o menu lateral
-   ficar igual nas quatro telas do painel (Produtos, Usuários,
-   Movimentações e Relatórios). Ao mudar aqui, mude lá também.
+   ficar igual nas cinco telas do painel (Produtos, Usuários,
+   Movimentações, Relatórios e QR Codes). Ao mudar aqui, mude lá
+   também.
    ============================================================ */
 
 .layout-admin {
@@ -1272,6 +1273,7 @@ textarea:focus-visible {
 
 .atalho-menu[aria-pressed="true"]::before {
     content: "✓ ";
+    content: "✓ " / "";
 }
 
 @media (max-width: 900px) {
@@ -1377,4 +1379,89 @@ textarea:focus-visible {
 .modal-fechar {
     width: 44px;
     height: 44px;
+}
+
+
+/* ============================================================
+   AUDITORIA DE ACESSIBILIDADE (ABNT NBR 17225) — 17/11/2026
+   Ajustes registrados em docs/checklist-acessibilidade-nbr17225.md.
+   Não alteram o comportamento da tela.
+   ============================================================ */
+
+/* Contorno dos campos e da busca com pelo menos 3:1 sobre o fundo
+   (o cinza anterior, #dfe5de, tinha 1,3:1). */
+.campo-formulario input,
+.campo-formulario textarea,
+.campo-formulario input[type="file"],
+.busca-produtos {
+    border-color: var(--cor-contorno);
+}
+
+/* Texto de exemplo da busca: sem esta regra valia o cinza padrão do navegador (2,3:1). */
+.busca-produtos input::placeholder {
+    color: var(--cor-texto-suave);
+    opacity: 1;
+}
+
+/* Filtro de situação selecionado: marca de conferido e contorno, além da cor
+   (antes a diferença era só um fundo branco sobre cinza muito claro). */
+.filtro-status.selecionado {
+    box-shadow: inset 0 0 0 2px #3d6545;
+}
+
+/* A segunda declaração dá texto alternativo vazio à marca: o estado já é anunciado
+   por aria-pressed. Navegadores que não conhecem essa forma ficam com a primeira. */
+.filtro-status.selecionado::before {
+    content: "✓ ";
+    content: "✓ " / "";
+}
+
+/* Preço no laranja acessível (4,9:1; o tom anterior, #c9631b, tinha 4,0:1) */
+.preco-produto {
+    color: var(--cor-primaria);
+}
+
+/* Cartões do resumo marcados como lista de descrição (<dl>): mesmo desenho de antes.
+   A contagem "Sem estoque" também usa o laranja acessível. */
+.resumo-card dt {
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+}
+
+.resumo-card dd {
+    color: #2d4333;
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.resumo-card:last-child dd {
+    color: var(--cor-primaria);
+}
+
+/* O <main> recebe foco pelo link "Pular para o conteúdo"; não precisa de contorno. */
+.secao-produtos-admin:focus {
+    outline: none;
+}
+
+/* Entrelinha de 1,5 nos textos de apoio e linhas com até cerca de 80 caracteres */
+.form-secao-titulo p {
+    line-height: 1.5;
+}
+
+.introducao p,
+.texto-modal,
+.texto-confirmacao {
+    max-width: 70ch;
+}
+
+@media (max-width: 640px) {
+    .resumo-card dt {
+        font-size: 11px;
+        line-height: 1.3;
+    }
+
+    .resumo-card dd {
+        font-size: 21px;
+    }
 }

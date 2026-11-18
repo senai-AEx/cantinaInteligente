@@ -293,9 +293,10 @@
     };
 
     // Regra do sistema: o formulário só grava pelo clique no botão; Enter em um campo não envia.
-    // Botões, links e caixas de seleção continuam funcionando com Enter pelo teclado.
+    // Botões e links continuam funcionando com Enter pelo teclado. Caixas de seleção e
+    // opções de rádio entram no bloqueio: nelas o navegador enviaria o formulário com Enter.
     Cantina.bloquearEnvioPorEnter = function (formulario) {
-        const tiposLivres = ["submit", "button", "reset", "file", "checkbox", "radio"];
+        const tiposLivres = ["submit", "button", "reset", "file"];
         formulario.addEventListener("keydown", (evento) => {
             if (evento.key !== "Enter") return;
             const alvo = evento.target;
@@ -345,6 +346,23 @@
         });
     };
 
+    // Marca com aria-current o link da tela aberta, no menu do cabeçalho e no mapa do
+    // site do rodapé: o leitor de tela anuncia "página atual" e o CSS destaca o item.
+    function marcarPaginaAtual() {
+        const atual = window.location.pathname;
+        [".navegacao", ".mapa-site"].forEach((seletor) => {
+            const links = [...document.querySelectorAll(`${seletor} a[href]`)];
+            // Só o primeiro link que leva a esta tela é marcado ("Produtos", e não "Minha sacola").
+            const daPagina = links.find((link) => new URL(link.href, window.location.href).pathname === atual);
+            if (daPagina) daPagina.setAttribute("aria-current", "page");
+        });
+        // Nas outras telas do painel, o item "Administração" do cabeçalho indica a área atual.
+        const linkPainel = document.querySelector(".navegacao .link-administracao");
+        if (linkPainel && !linkPainel.hasAttribute("aria-current") && /_adm\.html$/.test(atual)) {
+            linkPainel.setAttribute("aria-current", "true");
+        }
+    }
+
     async function carregarLayout() {
         const localHeader = document.getElementById("header-container");
         const localFooter = document.getElementById("footer-container");
@@ -366,6 +384,7 @@
                     }
                 }
                 if (footer && localFooter) localFooter.replaceWith(footer);
+                marcarPaginaAtual();
             } catch (erro) {
                 console.error("Erro ao carregar cabeçalho e rodapé:", erro);
             }

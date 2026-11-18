@@ -25,6 +25,7 @@
                 <a href="#creditos">Adicionar crédito</a>
                 <a href="#extrato">Extrato</a>
                 <a href="#compras">Minhas compras</a>
+                <a href="#senha">Alterar senha</a>
             </nav>
 
             <div class="grade-conta">
@@ -171,7 +172,105 @@
                     <p>Carregando compras...</p>
                 </div>
 
-                <ol id="lista-compras" class="lista-compras" hidden></ol>
+                <!-- role="list": mantém a lista anunciada mesmo sem os marcadores (list-style: none). -->
+                <ol id="lista-compras" class="lista-compras" role="list" hidden></ol>
+            </section>
+
+            <!-- ALTERAR SENHA -->
+            <section id="senha" class="cartao-conta" aria-labelledby="titulo-senha">
+                <h2 id="titulo-senha">Alterar senha</h2>
+                <p class="texto-cartao">
+                    Troque sua senha quando quiser. Se a administração criou uma senha provisória para você,
+                    troque-a aqui por uma só sua.
+                </p>
+
+                <form id="form-senha" novalidate>
+                    <p class="legenda-obrigatorio">
+                        <span class="obrigatorio" aria-hidden="true">*</span> Campo obrigatório
+                    </p>
+
+                    <div class="campo-formulario">
+                        <label for="senha-atual">
+                            Senha atual
+                            <span class="obrigatorio" aria-hidden="true">*</span>
+                        </label>
+                        <input
+                            type="password"
+                            id="senha-atual"
+                            name="senha_atual"
+                            autocomplete="current-password"
+                            maxlength="72"
+                            required
+                            aria-required="true"
+                        >
+                        <small class="erro-campo" id="erro-senha-atual" data-error-for="senha_atual"></small>
+                    </div>
+
+                    <div class="campo-formulario">
+                        <label for="nova-senha">
+                            Nova senha
+                            <span class="obrigatorio" aria-hidden="true">*</span>
+                        </label>
+                        <input
+                            type="password"
+                            id="nova-senha"
+                            name="nova_senha"
+                            autocomplete="new-password"
+                            maxlength="72"
+                            required
+                            aria-required="true"
+                            aria-describedby="dica-nova-senha regras-senha"
+                        >
+                        <small class="dica-campo" id="dica-nova-senha">A nova senha precisa ter:</small>
+                        <!-- Cada regra mostra ✓ ou ○ e um texto para leitores de tela: não depende só da cor. -->
+                        <ul class="regras-senha" id="regras-senha" role="list">
+                            <li data-regra="tamanho">
+                                <span class="marca-regra" aria-hidden="true">○</span>
+                                de 8 a 72 caracteres
+                                <span class="somente-leitor" data-estado-regra>(falta cumprir)</span>
+                            </li>
+                            <li data-regra="letra">
+                                <span class="marca-regra" aria-hidden="true">○</span>
+                                pelo menos uma letra
+                                <span class="somente-leitor" data-estado-regra>(falta cumprir)</span>
+                            </li>
+                            <li data-regra="numero">
+                                <span class="marca-regra" aria-hidden="true">○</span>
+                                pelo menos um número
+                                <span class="somente-leitor" data-estado-regra>(falta cumprir)</span>
+                            </li>
+                        </ul>
+                        <small class="erro-campo" id="erro-nova-senha" data-error-for="nova_senha"></small>
+                    </div>
+
+                    <div class="campo-formulario">
+                        <label for="confirmar-nova-senha">
+                            Confirmar nova senha
+                            <span class="obrigatorio" aria-hidden="true">*</span>
+                        </label>
+                        <input
+                            type="password"
+                            id="confirmar-nova-senha"
+                            name="confirmar_senha"
+                            autocomplete="new-password"
+                            maxlength="72"
+                            required
+                            aria-required="true"
+                        >
+                        <small class="erro-campo" id="erro-confirmar-nova-senha" data-error-for="confirmar_senha"></small>
+                        <label class="opcao-mostrar-senha" for="mostrar-senhas-conta">
+                            <input type="checkbox" id="mostrar-senhas-conta">
+                            <span>Mostrar senhas</span>
+                        </label>
+                    </div>
+
+                    <p class="feedback-form" role="alert"></p>
+
+                    <!-- A senha só é trocada pelo clique neste botão (Enter nos campos não envia). -->
+                    <button type="submit" class="botao botao-principal" id="botao-senha">Alterar senha</button>
+                </form>
+
+                <p id="mensagem-senha" class="mensagem-api" role="status"></p>
             </section>
 
         </div>

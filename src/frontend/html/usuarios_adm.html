@@ -22,7 +22,7 @@
 
             <div class="layout-admin">
 
-                <!-- MENU LATERAL (igual nas quatro telas do painel) -->
+                <!-- MENU LATERAL (igual nas cinco telas do painel) -->
                 <aside class="menu-admin nao-imprimir" id="menu-admin">
                     <div class="menu-admin-topo">
                         <div>
@@ -36,11 +36,12 @@
 
                     <div id="navegacao-admin" class="navegacao-admin">
                         <nav aria-label="Painel administrativo">
-                            <ul class="menu-admin-lista">
-                                <li><a href="/html/catalogo_produtos_adm.html">Produtos</a></li>
+                            <ul class="menu-admin-lista" role="list">
+                                <li><a href="/html/catalogo_produtos_adm.html">Produtos<span class="somente-leitor"> do painel</span></a></li>
                                 <li><a href="/html/usuarios_adm.html" aria-current="page">Usuários</a></li>
                                 <li><a href="/html/movimentacoes_adm.html">Movimentações</a></li>
                                 <li><a href="/html/relatorios_adm.html">Relatórios</a></li>
+                                <li><a href="/html/qrcodes_adm.html">QR Codes</a></li>
                                 <li class="menu-admin-separado"><a href="/html/catalogo_produtos.html">Ver catálogo da cantina</a></li>
                             </ul>
                         </nav>
@@ -54,7 +55,7 @@
                         <div>
                             <span class="sobretitulo">Gestão de pessoas</span>
                             <h1>Usuários</h1>
-                            <p>Consulte os cadastros, corrija dados, controle o acesso e ajuste saldos.</p>
+                            <p>Consulte os cadastros, corrija dados, redefina senhas, controle o acesso e ajuste saldos.</p>
                         </div>
                     </div>
 
@@ -93,6 +94,8 @@
                                 </select>
                             </div>
                             <div class="acoes-filtros">
+                                <!-- Todo formulário tem um botão de envio: este busca na hora (nada é gravado). -->
+                                <button type="submit" class="botao botao-principal">Buscar</button>
                                 <button type="button" class="botao botao-secundario" id="limpar-filtros">Limpar filtros</button>
                             </div>
                         </form>
@@ -268,6 +271,57 @@
                 <div class="acoes-modal">
                     <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
                     <button type="submit" class="botao botao-principal">Lançar ajuste</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE REDEFINIÇÃO DE SENHA -->
+    <div class="modal-overlay" id="modal-redefinir-senha" aria-hidden="true">
+        <div class="modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="titulo-redefinir-senha" aria-describedby="texto-redefinir-senha">
+
+            <button type="button" class="modal-fechar" data-fechar-modal aria-label="Fechar">&times;</button>
+
+            <span class="sobretitulo">Acesso do usuário</span>
+            <h2 id="titulo-redefinir-senha">Redefinir senha</h2>
+            <p class="texto-modal" id="texto-redefinir-senha">Defina uma senha provisória e informe ao usuário pessoalmente. Peça para ele trocar em Minha conta.</p>
+            <p class="texto-modal">Campos com <span class="obrigatorio">*</span> são obrigatórios. A senha só é gravada ao clicar em Redefinir senha.</p>
+
+            <!-- novalidate: a validação é feita pelo JavaScript; a senha só é
+                 gravada quando o botão é clicado (Enter não grava). -->
+            <form id="form-redefinir-senha" class="formulario-modal" novalidate>
+
+                <dl class="dados-fixos">
+                    <div>
+                        <dt>Usuário</dt>
+                        <dd id="senha-usuario"></dd>
+                    </div>
+                </dl>
+
+                <div class="campo-formulario">
+                    <label for="senha-nova">Nova senha <span class="obrigatorio" aria-hidden="true">*</span></label>
+                    <input type="password" id="senha-nova" name="nova_senha" required minlength="8" maxlength="72" autocomplete="new-password" autocapitalize="none" spellcheck="false" aria-describedby="senha-nova-ajuda">
+                    <small class="dica-campo" id="senha-nova-ajuda">De 8 a 72 caracteres, com pelo menos uma letra e um número.</small>
+                    <small class="erro-campo" data-error-for="nova_senha"></small>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="senha-confirmar">Confirmar nova senha <span class="obrigatorio" aria-hidden="true">*</span></label>
+                    <input type="password" id="senha-confirmar" name="confirmar_senha" required maxlength="72" autocomplete="new-password" autocapitalize="none" spellcheck="false" aria-describedby="senha-confirmar-ajuda">
+                    <small class="dica-campo" id="senha-confirmar-ajuda">Digite a mesma senha de novo.</small>
+                    <small class="erro-campo" data-error-for="confirmar_senha"></small>
+                </div>
+
+                <label class="opcao-mostrar-senha" for="mostrar-senhas">
+                    <input type="checkbox" id="mostrar-senhas">
+                    <span>Mostrar senhas</span>
+                </label>
+
+                <p class="feedback-form" role="alert"></p>
+
+                <div class="acoes-modal">
+                    <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+                    <button type="submit" class="botao botao-principal">Redefinir senha</button>
                 </div>
             </form>
         </div>

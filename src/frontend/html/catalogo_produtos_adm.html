@@ -22,7 +22,7 @@
 
             <div class="layout-admin">
 
-                <!-- MENU LATERAL (igual nas quatro telas do painel) -->
+                <!-- MENU LATERAL (igual nas cinco telas do painel) -->
                 <aside class="menu-admin" id="menu-admin">
                     <div class="menu-admin-topo">
                         <div>
@@ -36,11 +36,12 @@
 
                     <div id="navegacao-admin" class="navegacao-admin">
                         <nav aria-label="Painel administrativo">
-                            <ul class="menu-admin-lista">
-                                <li><a href="/html/catalogo_produtos_adm.html" aria-current="page">Produtos</a></li>
+                            <ul class="menu-admin-lista" role="list">
+                                <li><a href="/html/catalogo_produtos_adm.html" aria-current="page">Produtos<span class="somente-leitor"> do painel</span></a></li>
                                 <li><a href="/html/usuarios_adm.html">Usuários</a></li>
                                 <li><a href="/html/movimentacoes_adm.html">Movimentações</a></li>
                                 <li><a href="/html/relatorios_adm.html">Relatórios</a></li>
+                                <li><a href="/html/qrcodes_adm.html">QR Codes</a></li>
                                 <li class="menu-admin-separado"><a href="/html/catalogo_produtos.html">Ver catálogo da cantina</a></li>
                             </ul>
                         </nav>
@@ -48,7 +49,7 @@
                         <div class="menu-admin-atalhos" role="group" aria-labelledby="titulo-atalhos-produtos">
                             <p class="menu-admin-subtitulo" id="titulo-atalhos-produtos">Atalhos de produtos</p>
                             <button type="button" class="botao botao-principal" id="abrir-cadastro-produto">
-                                <span aria-hidden="true">＋</span> Novo produto
+                                <span aria-hidden="true">＋</span> Cadastrar produto
                             </button>
                             <button type="button" class="atalho-menu" id="filtrar-sem-estoque" aria-pressed="false">
                                 Produtos sem estoque
@@ -62,38 +63,54 @@
 
                     <div class="introducao">
                         <div>
-                            <span class="sobretitulo">GESTÃO DE ESTOQUE</span>
+                            <span class="sobretitulo">Gestão de estoque</span>
                             <h1>Produtos</h1>
                             <p>Gerencie o catálogo e acompanhe os produtos da cantina.</p>
                         </div>
                         <button type="button" class="botao botao-principal botao-novo-produto" id="abrir-cadastro-produto-topo">
-                            ＋ Cadastrar produto
+                            <span aria-hidden="true">＋</span> Cadastrar produto
                         </button>
                     </div>
 
-                    <section class="resumo-produtos" aria-label="Resumo do catálogo">
-                        <article class="resumo-card"><span>Produtos ativos</span><strong id="total-ativos">—</strong></article>
-                        <article class="resumo-card"><span>Produtos inativos</span><strong id="total-inativos">—</strong></article>
-                        <article class="resumo-card"><span>Sem estoque</span><strong id="total-sem-estoque">—</strong></article>
+                    <!-- Os títulos de nível 2 são só para leitores de tela: organizam a página
+                         (resumo, busca e lista) sem mudar o desenho. -->
+                    <section aria-labelledby="titulo-resumo">
+                        <h2 id="titulo-resumo" class="somente-leitor">Resumo do catálogo</h2>
+                        <dl class="resumo-produtos">
+                            <div class="resumo-card"><dt>Produtos ativos</dt><dd id="total-ativos">—</dd></div>
+                            <div class="resumo-card"><dt>Produtos inativos</dt><dd id="total-inativos">—</dd></div>
+                            <div class="resumo-card"><dt>Sem estoque</dt><dd id="total-sem-estoque">—</dd></div>
+                        </dl>
                     </section>
 
-                    <section class="controles-catalogo" aria-label="Buscar e filtrar produtos">
-                        <label class="busca-produtos" for="busca-produtos">
-                            <span aria-hidden="true">⌕</span>
-                            <input type="search" id="busca-produtos" placeholder="Buscar por nome, categoria ou código" autocomplete="off">
-                        </label>
-                        <div class="filtros-status" role="group" aria-label="Filtrar situação dos produtos">
-                            <button type="button" class="filtro-status selecionado" data-filtro-status="TODOS" aria-pressed="true">Todos</button>
-                            <button type="button" class="filtro-status" data-filtro-status="ATIVO" aria-pressed="false">Ativos</button>
-                            <button type="button" class="filtro-status" data-filtro-status="INATIVO" aria-pressed="false">Inativos</button>
+                    <section aria-labelledby="titulo-filtros">
+                        <h2 id="titulo-filtros" class="somente-leitor">Buscar e filtrar produtos</h2>
+                        <div class="controles-catalogo">
+                            <!-- O rótulo do campo existe para leitores de tela; na tela, o ícone e o texto de exemplo mostram o propósito. -->
+                            <label class="busca-produtos" for="busca-produtos">
+                                <span aria-hidden="true">⌕</span>
+                                <span class="somente-leitor">Buscar por nome, categoria ou código</span>
+                                <input type="search" id="busca-produtos" placeholder="Buscar por nome, categoria ou código" autocomplete="off">
+                            </label>
+                            <div class="filtros-status" role="group" aria-label="Filtrar situação dos produtos">
+                                <button type="button" class="filtro-status selecionado" data-filtro-status="TODOS" aria-pressed="true">Todos</button>
+                                <button type="button" class="filtro-status" data-filtro-status="ATIVO" aria-pressed="false">Ativos</button>
+                                <button type="button" class="filtro-status" data-filtro-status="INATIVO" aria-pressed="false">Inativos</button>
+                            </div>
                         </div>
                     </section>
-                    <p class="contador-produtos" id="contador-produtos" aria-live="polite"></p>
 
-                    <p id="mensagem-api" class="mensagem-api" role="status" aria-live="polite"></p>
-                    <div class="lista-produtos" id="lista-produtos" aria-live="polite">
-                        <p class="estado-lista">Carregando produtos...</p>
-                    </div>
+                    <section aria-labelledby="titulo-lista">
+                        <h2 id="titulo-lista" class="somente-leitor">Produtos cadastrados</h2>
+                        <p class="contador-produtos" id="contador-produtos" aria-live="polite"></p>
+
+                        <p id="mensagem-api" class="mensagem-api" role="status" aria-live="polite"></p>
+                        <!-- Sem aria-live na lista: o contador acima já anuncia o resultado da busca
+                             e dos filtros, sem o leitor de tela reler todos os cartões. -->
+                        <div class="lista-produtos" id="lista-produtos">
+                            <p class="estado-lista">Carregando produtos...</p>
+                        </div>
+                    </section>
 
                 </main>
 
@@ -109,7 +126,7 @@
 
             <button type="button" class="modal-fechar" id="fechar-cadastro-produto" aria-label="Fechar">&times;</button>
 
-            <span class="sobretitulo">NOVO ITEM DO CATÁLOGO</span>
+            <span class="sobretitulo">Novo item do catálogo</span>
             <h2 id="titulo-cadastro-produto">Cadastrar produto</h2>
             <p class="texto-modal">Campos com * são obrigatórios. O produto só é gravado ao clicar em Salvar produto.</p>
 
@@ -117,9 +134,9 @@
                  gravado quando o botão de salvar é clicado (Enter não grava). -->
             <form id="form-cadastro-produto" novalidate>
 
-                <section class="form-secao" aria-labelledby="cadastro-secao-01">
+                <section class="form-secao" role="group" aria-labelledby="cadastro-secao-01">
                     <div class="form-secao-titulo">
-                        <span>01</span>
+                        <span aria-hidden="true">01</span>
                         <div><h3 id="cadastro-secao-01">Identificação</h3><p>Nome e categoria do produto. O código é gerado automaticamente pelo sistema.</p></div>
                     </div>
                     <div class="form-grade">
@@ -136,9 +153,9 @@
                     </div>
                 </section>
 
-                <section class="form-secao" aria-labelledby="cadastro-secao-02">
+                <section class="form-secao" role="group" aria-labelledby="cadastro-secao-02">
                     <div class="form-secao-titulo">
-                        <span>02</span>
+                        <span aria-hidden="true">02</span>
                         <div><h3 id="cadastro-secao-02">Preços e estoque</h3><p>Valores em reais. O preço de venda não pode ser menor que o de compra.</p></div>
                     </div>
                     <div class="form-grade form-grade-tres">
@@ -160,9 +177,9 @@
                     </div>
                 </section>
 
-                <section class="form-secao" aria-labelledby="cadastro-secao-03">
+                <section class="form-secao" role="group" aria-labelledby="cadastro-secao-03">
                     <div class="form-secao-titulo">
-                        <span>03</span>
+                        <span aria-hidden="true">03</span>
                         <div><h3 id="cadastro-secao-03">Detalhes</h3><p>Essas informações ajudam a apresentar o produto no catálogo.</p></div>
                     </div>
                     <div class="form-grade">
@@ -183,7 +200,7 @@
                     </div>
                 </section>
 
-                <p class="feedback-form" role="alert" aria-live="polite"></p>
+                <p class="feedback-form" role="alert"></p>
                 <button type="submit" class="botao botao-principal">Salvar produto</button>
             </form>
         </div>
@@ -195,7 +212,7 @@
 
             <button type="button" class="modal-fechar" id="fechar-editar-produto" aria-label="Fechar">&times;</button>
 
-            <span class="sobretitulo">ATUALIZAÇÃO DO CATÁLOGO</span>
+            <span class="sobretitulo">Atualização do catálogo</span>
             <h2 id="titulo-editar-produto">Editar produto</h2>
             <p class="texto-modal">Campos com * são obrigatórios. As alterações só são gravadas ao clicar em Salvar alterações.</p>
 
@@ -203,9 +220,9 @@
                  gravado quando o botão de salvar é clicado (Enter não grava). -->
             <form id="form-editar-produto" novalidate>
 
-                <section class="form-secao" aria-labelledby="editar-secao-01">
+                <section class="form-secao" role="group" aria-labelledby="editar-secao-01">
                     <div class="form-secao-titulo">
-                        <span>01</span>
+                        <span aria-hidden="true">01</span>
                         <div><h3 id="editar-secao-01">Identificação</h3><p>Nome e categoria do produto. O código é gerado automaticamente pelo sistema.</p></div>
                     </div>
                     <div class="form-grade">
@@ -222,9 +239,9 @@
                     </div>
                 </section>
 
-                <section class="form-secao" aria-labelledby="editar-secao-02">
+                <section class="form-secao" role="group" aria-labelledby="editar-secao-02">
                     <div class="form-secao-titulo">
-                        <span>02</span>
+                        <span aria-hidden="true">02</span>
                         <div><h3 id="editar-secao-02">Preços e estoque</h3><p>Valores em reais. O preço de venda não pode ser menor que o de compra.</p></div>
                     </div>
                     <div class="form-grade form-grade-tres">
@@ -246,9 +263,9 @@
                     </div>
                 </section>
 
-                <section class="form-secao" aria-labelledby="editar-secao-03">
+                <section class="form-secao" role="group" aria-labelledby="editar-secao-03">
                     <div class="form-secao-titulo">
-                        <span>03</span>
+                        <span aria-hidden="true">03</span>
                         <div><h3 id="editar-secao-03">Detalhes</h3><p>Essas informações ajudam a apresentar o produto no catálogo.</p></div>
                     </div>
                     <div class="form-grade">
@@ -269,7 +286,7 @@
                     </div>
                 </section>
 
-                <p class="feedback-form" role="alert" aria-live="polite"></p>
+                <p class="feedback-form" role="alert"></p>
                 <button type="submit" class="botao botao-principal">Salvar alterações</button>
             </form>
         </div>
@@ -301,6 +318,9 @@
             <h2 id="titulo-confirmacao-produto">Excluir produto</h2>
 
             <p id="texto-confirmacao-exclusao" class="texto-confirmacao">Deseja excluir este produto? Ele ficará inativo e continuará salvo no banco.</p>
+
+            <!-- Erro da exclusão: aparece aqui dentro, onde a pessoa está olhando (não atrás do modal). -->
+            <p class="feedback-form" id="erro-excluir-produto" role="alert"></p>
 
             <div class="acoes-confirmacao">
                 <button type="button" class="botao botao-secundario" id="botao-cancelar-exclusao">Cancelar</button>

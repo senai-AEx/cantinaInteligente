@@ -22,7 +22,7 @@
 
             <div class="layout-admin">
 
-                <!-- MENU LATERAL (igual nas quatro telas do painel) -->
+                <!-- MENU LATERAL (igual nas cinco telas do painel) -->
                 <aside class="menu-admin nao-imprimir" id="menu-admin">
                     <div class="menu-admin-topo">
                         <div>
@@ -36,11 +36,12 @@
 
                     <div id="navegacao-admin" class="navegacao-admin">
                         <nav aria-label="Painel administrativo">
-                            <ul class="menu-admin-lista">
-                                <li><a href="/html/catalogo_produtos_adm.html">Produtos</a></li>
+                            <ul class="menu-admin-lista" role="list">
+                                <li><a href="/html/catalogo_produtos_adm.html">Produtos<span class="somente-leitor"> do painel</span></a></li>
                                 <li><a href="/html/usuarios_adm.html">Usuários</a></li>
                                 <li><a href="/html/movimentacoes_adm.html">Movimentações</a></li>
                                 <li><a href="/html/relatorios_adm.html" aria-current="page">Relatórios</a></li>
+                                <li><a href="/html/qrcodes_adm.html">QR Codes</a></li>
                                 <li class="menu-admin-separado"><a href="/html/catalogo_produtos.html">Ver catálogo da cantina</a></li>
                             </ul>
                         </nav>
@@ -56,7 +57,7 @@
                         <div>
                             <span class="sobretitulo">Acompanhamento</span>
                             <h1>Relatórios</h1>
-                            <p class="nao-imprimir">Vendas, saldos das carteiras, estoque e depósitos declarados.</p>
+                            <p class="nao-imprimir">Vendas, compras registradas, saldos das carteiras, estoque e depósitos declarados.</p>
                         </div>
                         <button type="button" class="botao botao-secundario nao-imprimir" id="botao-imprimir">Imprimir</button>
                     </div>
@@ -66,6 +67,7 @@
                         <h2 id="titulo-periodo" class="somente-leitor">Período dos relatórios</h2>
                         <!-- novalidate: as datas são validadas pelo JavaScript, com a mensagem junto ao campo. -->
                         <form id="form-periodo" class="filtros-admin" novalidate>
+                            <p class="texto-apoio">Campos com <span class="obrigatorio">*</span> são obrigatórios.</p>
                             <div class="campo-formulario">
                                 <label for="periodo-de">Data inicial <span class="obrigatorio" aria-hidden="true">*</span></label>
                                 <input type="date" id="periodo-de" name="de" required>
@@ -84,7 +86,7 @@
                                     <button type="button" class="botao-atalho" data-atalho-dias="30" aria-pressed="false">30 dias</button>
                                 </div>
                             </div>
-                            <p class="texto-apoio">O período vale para Vendas e Depósitos declarados. Saldos e Estoque mostram a situação atual.</p>
+                            <p class="texto-apoio">O período vale para Vendas, Compras e Depósitos declarados. Saldos e Estoque mostram a situação atual.</p>
                             <p class="feedback-form" role="alert"></p>
                             <div class="acoes-filtros">
                                 <button type="submit" class="botao botao-principal">Atualizar relatório</button>
@@ -95,6 +97,7 @@
                     <!-- ABAS: setas esquerda/direita, Home e End trocam de relatório -->
                     <div class="abas nao-imprimir" role="tablist" aria-label="Relatórios disponíveis" id="abas-relatorios">
                         <button type="button" class="aba" role="tab" id="aba-vendas" data-relatorio="vendas" aria-controls="painel-vendas" aria-selected="true">Vendas</button>
+                        <button type="button" class="aba" role="tab" id="aba-compras" data-relatorio="compras" aria-controls="painel-compras" aria-selected="false" tabindex="-1">Compras</button>
                         <button type="button" class="aba" role="tab" id="aba-saldos" data-relatorio="saldos" aria-controls="painel-saldos" aria-selected="false" tabindex="-1">Saldos</button>
                         <button type="button" class="aba" role="tab" id="aba-estoque" data-relatorio="estoque" aria-controls="painel-estoque" aria-selected="false" tabindex="-1">Estoque</button>
                         <button type="button" class="aba" role="tab" id="aba-depositos" data-relatorio="depositos" aria-controls="painel-depositos" aria-selected="false" tabindex="-1">Depósitos declarados</button>
@@ -117,7 +120,7 @@
                                 <div class="resumo-card"><dt>Total vendido</dt><dd id="vendas-total">—</dd></div>
                                 <div class="resumo-card"><dt>Custo dos produtos</dt><dd id="vendas-custo">—</dd></div>
                                 <div class="resumo-card"><dt>Lucro</dt><dd id="vendas-lucro">—</dd></div>
-                                <div class="resumo-card"><dt>Ticket médio</dt><dd id="vendas-ticket">—</dd></div>
+                                <div class="resumo-card"><dt>Ticket médio (valor médio por compra)</dt><dd id="vendas-ticket">—</dd></div>
                             </dl>
 
                             <h3 id="titulo-vendas-produto">Vendas por produto</h3>
@@ -134,6 +137,23 @@
                                         </tr>
                                     </thead>
                                     <tbody id="vendas-por-produto"></tbody>
+                                </table>
+                            </div>
+
+                            <h3 id="titulo-vendas-usuario">Consumo por usuário</h3>
+                            <div class="tabela-rolagem" tabindex="0" role="region" aria-labelledby="titulo-vendas-usuario">
+                                <table class="tabela-dados tabela-media">
+                                    <caption>Quanto cada usuário comprou no período, do maior para o menor total.</caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Usuário</th>
+                                            <th scope="col">Matrícula</th>
+                                            <th scope="col" class="numero">Compras</th>
+                                            <th scope="col" class="numero">Itens</th>
+                                            <th scope="col" class="numero">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vendas-por-usuario"></tbody>
                                 </table>
                             </div>
 
@@ -154,7 +174,59 @@
                         </div>
                     </section>
 
-                    <!-- 2. SALDOS -->
+                    <!-- 2. COMPRAS REGISTRADAS (quem comprou o quê) -->
+                    <section class="painel-relatorio" id="painel-compras" role="tabpanel" aria-labelledby="aba-compras" tabindex="0" hidden>
+                        <header class="cabecalho-relatorio">
+                            <h2>Compras registradas</h2>
+                            <p class="periodo-relatorio" data-periodo></p>
+                            <p class="somente-impressao" data-emissao></p>
+                        </header>
+
+                        <!-- Filtro opcional: só consulta; a lista é refeita ao escolher o usuário. -->
+                        <form id="form-compras" class="filtros-admin nao-imprimir" novalidate>
+                            <div class="campo-formulario campo-largo">
+                                <label for="compras-usuario">Usuário</label>
+                                <select id="compras-usuario" name="id_usuario" aria-describedby="compras-usuario-ajuda">
+                                    <option value="">Todos os usuários</option>
+                                </select>
+                                <small class="dica-campo" id="compras-usuario-ajuda">Opcional. A lista de compras é atualizada ao escolher.</small>
+                                <small class="erro-campo" data-error-for="id_usuario"></small>
+                            </div>
+                            <!-- Todo formulário tem um botão de envio: este refaz a consulta (nada é gravado). -->
+                            <div class="acoes-filtros">
+                                <button type="submit" class="botao botao-secundario">Atualizar lista</button>
+                            </div>
+                        </form>
+
+                        <div class="estado-lista" data-estado role="status">Carregando relatório…</div>
+
+                        <div data-conteudo hidden>
+                            <dl class="resumo-cartoes colunas-2">
+                                <div class="resumo-card"><dt>Compras no período</dt><dd id="compras-total">—</dd></div>
+                                <div class="resumo-card"><dt>Compras na lista</dt><dd id="compras-quantidade">—</dd></div>
+                            </dl>
+
+                            <h3 id="titulo-compras-lista">Quem comprou o quê</h3>
+                            <p class="aviso-limite" id="compras-aviso-limite" hidden></p>
+                            <div class="tabela-rolagem" tabindex="0" role="region" aria-labelledby="titulo-compras-lista">
+                                <table class="tabela-dados tabela-compras">
+                                    <caption>Compras do período, da mais recente para a mais antiga, com os produtos de cada uma.</caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Data e hora</th>
+                                            <th scope="col">Compra</th>
+                                            <th scope="col">Usuário</th>
+                                            <th scope="col">Itens</th>
+                                            <th scope="col" class="numero">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="compras-lista"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 3. SALDOS -->
                     <section class="painel-relatorio" id="painel-saldos" role="tabpanel" aria-labelledby="aba-saldos" tabindex="0" hidden>
                         <header class="cabecalho-relatorio">
                             <h2>Relatório de saldos</h2>
@@ -188,7 +260,7 @@
                         </div>
                     </section>
 
-                    <!-- 3. ESTOQUE -->
+                    <!-- 4. ESTOQUE -->
                     <section class="painel-relatorio" id="painel-estoque" role="tabpanel" aria-labelledby="aba-estoque" tabindex="0" hidden>
                         <header class="cabecalho-relatorio">
                             <h2>Relatório de estoque</h2>
@@ -227,7 +299,7 @@
                         </div>
                     </section>
 
-                    <!-- 4. DEPÓSITOS DECLARADOS -->
+                    <!-- 5. DEPÓSITOS DECLARADOS -->
                     <section class="painel-relatorio" id="painel-depositos" role="tabpanel" aria-labelledby="aba-depositos" tabindex="0" hidden>
                         <header class="cabecalho-relatorio">
                             <h2>Relatório de depósitos declarados</h2>
@@ -246,7 +318,7 @@
                             <p class="aviso-conferencia">Compare este total com o dinheiro contado na caixa.</p>
 
                             <h3 id="titulo-depositos-lista">Depósitos do período</h3>
-                            <p class="texto-apoio" id="depositos-aviso-limite" hidden></p>
+                            <p class="aviso-limite" id="depositos-aviso-limite" hidden></p>
                             <div class="tabela-rolagem" tabindex="0" role="region" aria-labelledby="titulo-depositos-lista">
                                 <table class="tabela-dados tabela-media">
                                     <caption>Créditos que os usuários declararam ter depositado na caixa da cantina.</caption>

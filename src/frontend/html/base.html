@@ -26,9 +26,10 @@
             <nav class="navegacao" aria-label="Menu principal">
                 <a href="/html/catalogo_produtos.html#produtos" data-visivel="sempre">Produtos</a>
                 <a href="/html/catalogo_produtos.html#carrinho" data-visivel="sempre">Minha sacola</a>
+                <!-- O saldo faz parte do nome do link: o leitor de tela ouve "Minha conta, saldo disponível: R$ 10,00". -->
                 <a href="/html/minha_conta.html" class="link-conta" data-visivel="logado" hidden>
-                    Minha conta
-                    <span class="saldo-cabecalho" data-usuario-saldo aria-label="Saldo disponível"></span>
+                    Minha conta<span class="somente-leitor">, saldo disponível:</span>
+                    <span class="saldo-cabecalho" data-usuario-saldo></span>
                 </a>
                 <a href="/html/catalogo_produtos_adm.html" class="link-administracao" data-visivel="admin" hidden>Administração</a>
                 <a href="/html/login.html" data-visivel="anonimo" hidden>Entrar</a>
@@ -52,10 +53,43 @@
                 na honestidade e na solidariedade.
             </p>
 
+            <!-- Segunda forma de chegar a cada tela, além do menu do cabeçalho.
+                 Os itens seguem a sessão (data-visivel), como no menu principal. -->
+            <nav class="mapa-site" aria-label="Mapa do site">
+                <ul role="list">
+                    <li><a href="/">Início</a></li>
+                    <li><a href="/html/catalogo_produtos.html#produtos">Produtos</a></li>
+                    <li data-visivel="logado" hidden><a href="/html/minha_conta.html">Minha conta</a></li>
+                    <li data-visivel="anonimo" hidden><a href="/html/login.html">Entrar</a></li>
+                    <li data-visivel="anonimo" hidden><a href="/html/cadastro.html">Criar conta</a></li>
+                    <li data-visivel="admin" hidden><a href="/html/catalogo_produtos_adm.html">Painel: produtos</a></li>
+                    <li data-visivel="admin" hidden><a href="/html/usuarios_adm.html">Painel: usuários</a></li>
+                    <li data-visivel="admin" hidden><a href="/html/movimentacoes_adm.html">Painel: movimentações</a></li>
+                    <li data-visivel="admin" hidden><a href="/html/relatorios_adm.html">Painel: relatórios</a></li>
+                    <li data-visivel="admin" hidden><a href="/html/qrcodes_adm.html">Painel: QR Codes</a></li>
+                </ul>
+            </nav>
+
+            <!-- Forma expandida das siglas e explicação dos termos que aparecem nas telas. -->
+            <details class="glossario">
+                <summary>Siglas e termos usados no sistema</summary>
+                <dl>
+                    <div><dt>CPF</dt><dd>Cadastro de Pessoas Físicas.</dd></div>
+                    <div><dt>SENAI</dt><dd>Serviço Nacional de Aprendizagem Industrial.</dd></div>
+                    <div><dt>QR Code</dt><dd>Código quadrado que a câmera do celular lê para abrir um endereço. A sigla vem de “resposta rápida”, em inglês.</dd></div>
+                    <div><dt>URL</dt><dd>Endereço de uma página na internet ou na rede da escola.</dd></div>
+                    <div><dt>Nº</dt><dd>Número.</dd></div>
+                    <div><dt>MB</dt><dd>Megabyte, medida do tamanho de um arquivo.</dd></div>
+                    <div><dt>JPG, PNG e WebP</dt><dd>Formatos de arquivo de imagem.</dd></div>
+                    <div><dt>Crédito</dt><dd>Valor que você declara ter depositado na caixa da cantina e que entra no seu saldo.</dd></div>
+                    <div><dt>Extrato</dt><dd>Lista das entradas e saídas do seu saldo.</dd></div>
+                    <div><dt>Ticket médio</dt><dd>Valor médio de cada compra no período.</dd></div>
+                </dl>
+            </details>
+
             <p class="texto-copyright">
                 © 2026 Cantina da Honestidade — SENAI Fraiburgo
             </p>
-            <p><a href="/">Voltar ao início</a></p>
 
         </div>
 

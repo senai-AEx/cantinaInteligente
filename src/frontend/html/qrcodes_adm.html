@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>QR Codes - Administração</title>
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div id="header-container"></div>
+
+    <div class="pagina-admin">
+
+        <div class="container">
+
+            <div class="layout-admin">
+
+                <!-- MENU LATERAL (igual nas cinco telas do painel) -->
+                <aside class="menu-admin nao-imprimir" id="menu-admin">
+                    <div class="menu-admin-topo">
+                        <div>
+                            <span class="sobretitulo">Painel da cantina</span>
+                            <p class="menu-admin-titulo">Administração</p>
+                        </div>
+                        <button type="button" class="botao-menu" id="alternar-menu" aria-expanded="true" aria-controls="navegacao-admin">
+                            Recolher menu
+                        </button>
+                    </div>
+
+                    <div id="navegacao-admin" class="navegacao-admin">
+                        <nav aria-label="Painel administrativo">
+                            <ul class="menu-admin-lista" role="list">
+                                <li><a href="/html/catalogo_produtos_adm.html">Produtos<span class="somente-leitor"> do painel</span></a></li>
+                                <li><a href="/html/usuarios_adm.html">Usuários</a></li>
+                                <li><a href="/html/movimentacoes_adm.html">Movimentações</a></li>
+                                <li><a href="/html/relatorios_adm.html">Relatórios</a></li>
+                                <li><a href="/html/qrcodes_adm.html" aria-current="page">QR Codes</a></li>
+                                <li class="menu-admin-separado"><a href="/html/catalogo_produtos.html">Ver catálogo da cantina</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- CONTEÚDO -->
+                <main id="conteudo-principal" class="conteudo-admin" tabindex="-1">
+
+                    <div class="introducao nao-imprimir">
+                        <div>
+                            <span class="sobretitulo">Compra pelo celular</span>
+                            <h1>QR Codes</h1>
+                            <p>Imprima e cole na cantina. O cliente aponta a câmera do celular e o catálogo abre já com o produto na sacola.</p>
+                        </div>
+                    </div>
+
+                    <!-- ENDEREÇO GRAVADO NOS QR CODES -->
+                    <section class="nao-imprimir" aria-labelledby="titulo-endereco">
+                        <h2 id="titulo-endereco" class="somente-leitor">Endereço usado nos QR Codes</h2>
+
+                        <!-- A região fica sempre na página; o aviso aparece dentro dela quando o
+                             endereço é local, para os leitores de tela anunciarem. O aviso tem
+                             moldura, símbolo e a palavra "Atenção": não depende só da cor. -->
+                        <div role="status" aria-live="polite">
+                            <div class="qr-aviso-local" id="aviso-somente-local" hidden>
+                                <span class="qr-aviso-icone" aria-hidden="true">⚠</span>
+                                <div>
+                                    <strong>Atenção: estes QR Codes só funcionam neste computador</strong>
+                                    <p>Estes QR Codes apontam para este computador (endereço local) e não abrem no celular. Para usar na cantina, informe o endereço do sistema em URL_PUBLICA no arquivo .env e reinicie.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- tabindex="-1": recebe o foco pelo JavaScript depois de "Tentar novamente". -->
+                        <div class="qr-endereco" id="endereco-qr" role="status" aria-live="polite" tabindex="-1">
+                            <p>Consultando o endereço dos QR Codes…</p>
+                        </div>
+                    </section>
+
+                    <p id="mensagem-api" class="mensagem-api nao-imprimir" role="status" aria-live="polite"></p>
+
+                    <!-- 1. CARTAZ DA CANTINA -->
+                    <section class="qr-secao qr-secao-cartaz" aria-labelledby="titulo-cartaz">
+                        <div class="qr-cabecalho-secao nao-imprimir">
+                            <div>
+                                <h2 id="titulo-cartaz" class="titulo-secao">Cartaz da cantina</h2>
+                                <p class="texto-apoio">Um QR Code que abre o catálogo completo. Cole na entrada ou no balcão da cantina.</p>
+                            </div>
+                            <button type="button" class="botao botao-principal" id="imprimir-cartaz">Imprimir cartaz da cantina</button>
+                        </div>
+
+                        <div class="qr-cartaz" id="cartaz-cantina">
+                            <h3 class="qr-cartaz-titulo">Cantina da Honestidade</h3>
+                            <img class="qr-imagem" id="imagem-cartaz" src="/api/qrcode/cantina.svg" alt="QR Code que abre o catálogo da Cantina da Honestidade" width="320" height="320">
+                            <p class="qr-cartaz-frase">Aponte a câmera para ver os produtos e registrar sua compra</p>
+                            <p class="qr-cartaz-url" id="url-cantina"></p>
+                        </div>
+                    </section>
+
+                    <!-- 2. ETIQUETAS DOS PRODUTOS -->
+                    <section class="qr-secao qr-secao-etiquetas" aria-labelledby="titulo-etiquetas">
+                        <div class="qr-cabecalho-secao nao-imprimir">
+                            <div>
+                                <h2 id="titulo-etiquetas" class="titulo-secao">Etiquetas dos produtos</h2>
+                                <p class="texto-apoio">Uma etiqueta para cada produto ativo. O QR Code abre o catálogo com o produto já na sacola. Recorte na linha tracejada e cole perto do produto.</p>
+                            </div>
+                            <button type="button" class="botao botao-principal" id="imprimir-etiquetas">Imprimir etiquetas dos produtos</button>
+                        </div>
+
+                        <!-- A busca só filtra a lista na tela (nada é gravado) e define o que sai na impressão. -->
+                        <form id="form-busca-etiquetas" class="filtros-admin nao-imprimir" role="search" novalidate>
+                            <div class="campo-formulario campo-largo">
+                                <label for="busca-etiquetas">Buscar produto por nome</label>
+                                <input type="search" id="busca-etiquetas" name="q" maxlength="100" autocomplete="off" aria-describedby="busca-etiquetas-ajuda">
+                                <small class="dica-campo" id="busca-etiquetas-ajuda">A lista é filtrada enquanto você digita. Só as etiquetas que aparecem na lista são impressas.</small>
+                            </div>
+                            <div class="acoes-filtros">
+                                <!-- Todo formulário tem um botão de envio: este filtra a lista (nada é gravado). -->
+                                <button type="submit" class="botao botao-principal">Buscar</button>
+                                <button type="button" class="botao botao-secundario" id="limpar-busca">Limpar busca</button>
+                            </div>
+                        </form>
+
+                        <p class="contador-lista nao-imprimir" id="contador-etiquetas" aria-live="polite"></p>
+
+                        <div class="estado-lista nao-imprimir" id="estado-etiquetas" role="status">Carregando produtos…</div>
+
+                        <!-- role="list": mantém a lista anunciada mesmo sem os marcadores (list-style: none). -->
+                        <ul class="qr-grade" id="lista-etiquetas" role="list" hidden></ul>
+                    </section>
+
+                </main>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div id="footer-container"></div>
+
+    <script src="/javascript/base.js"></script>
+    <script src="/javascript/qrcodes_adm.js"></script>
+
+</body>
+
+</html>

@@ -15,7 +15,7 @@
         <section class="hero-catalogo" aria-labelledby="titulo-catalogo">
             <div class="container hero-conteudo">
                 <div class="hero-texto">
-                    <span class="eyebrow">CANTINA DA HONESTIDADE</span>
+                    <span class="eyebrow">Cantina da Honestidade</span>
                     <h1 id="titulo-catalogo">Escolha com carinho.<br><span>Contribua com confiança.</span></h1>
                     <p>Confira o que está disponível hoje, monte sua sacola e registre sua compra com o saldo da sua conta.</p>
                     <a class="botao botao-principal" href="#produtos">Ver produtos <span aria-hidden="true">↓</span></a>
@@ -30,12 +30,14 @@
         <div class="container pagina-catalogo">
             <!-- Aviso vindo de outra tela (?aviso=bem-vindo ou ?aviso=sem-permissao) -->
             <div id="aviso-pagina" class="mensagem-api aviso-pagina" role="status" hidden></div>
+            <!-- Aviso do QR Code de um produto (?adicionar=<id>): o catalogo_produtos.js escreve o texto aqui -->
+            <div id="aviso-qr" role="status"></div>
 
             <div class="layout-catalogo">
                 <section class="secao-produtos" id="produtos" aria-labelledby="titulo-produtos">
                     <div class="cabecalho-secao">
                         <div>
-                            <span class="eyebrow">FEITO PARA VOCÊ</span>
+                            <span class="eyebrow">Feito para você</span>
                             <h2 id="titulo-produtos" tabindex="-1">Produtos da cantina</h2>
                             <p>Encontre seu lanche e confira os ingredientes importantes.</p>
                         </div>
@@ -62,7 +64,7 @@
                 <aside class="carrinho" id="carrinho" aria-labelledby="titulo-carrinho">
                     <div class="cabecalho-carrinho">
                         <div>
-                            <span class="eyebrow">SUA ESCOLHA</span>
+                            <span class="eyebrow">Sua escolha</span>
                             <h2 id="titulo-carrinho" tabindex="-1">Minha sacola</h2>
                         </div>
                         <p class="contador-sacola">
@@ -108,10 +110,11 @@
 
             <!-- Etapa 1: conferir a sacola e o saldo -->
             <div id="etapa-revisao">
-                <span class="eyebrow">SUA ESCOLHA</span>
+                <span class="eyebrow">Sua escolha</span>
                 <h2 id="titulo-compra">Finalizar compra</h2>
 
-                <ul id="itens-compra" class="resumo-revisao" aria-label="Itens da compra"></ul>
+                <!-- role="list": mantém a lista anunciada mesmo sem os marcadores (list-style: none). -->
+                <ul id="itens-compra" class="resumo-revisao" role="list" aria-label="Itens da compra"></ul>
 
                 <dl class="valores-compra">
                     <div class="linha-total">
@@ -153,7 +156,9 @@
 
                 <div class="acoes-modal">
                     <button type="button" class="botao botao-principal" id="confirmar-compra" hidden>Confirmar compra</button>
-                    <button type="button" class="botao botao-principal" id="entrar-para-finalizar" hidden>Entrar para finalizar</button>
+                    <!-- Leva a outra tela (login): por isso é um link, não um botão. O catalogo_produtos.js
+                         acrescenta ao endereço a volta para o catálogo. -->
+                    <a class="botao botao-principal" id="entrar-para-finalizar" href="/html/login.html" hidden>Entrar para finalizar</a>
                     <button type="button" class="botao botao-secundario" id="voltar-catalogo">Voltar ao catálogo</button>
                 </div>
             </div>
