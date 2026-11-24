@@ -147,7 +147,7 @@ Banco conectado (MySQL 8.x.x).
 Sistema ligado!
   Início:          http://127.0.0.1:5000/
   Catálogo:        http://127.0.0.1:5000/html/catalogo_produtos.html
-  Administração:   http://127.0.0.1:5000/html/catalogo_produtos_adm.html
+  Administração:   http://127.0.0.1:5000/html/painel_adm.html
 
 Para parar, aperte Ctrl+C.
 ```
@@ -182,7 +182,8 @@ Abra o navegador e acesse:
 | http://127.0.0.1:5000/html/login.html | Entrar |
 | http://127.0.0.1:5000/html/catalogo_produtos.html | Catálogo e sacola (área do cliente) |
 | http://127.0.0.1:5000/html/minha_conta.html | Saldo, crédito, extrato e compras (precisa estar logado) |
-| http://127.0.0.1:5000/html/catalogo_produtos_adm.html | Painel administrativo (precisa ser administrador) |
+| http://127.0.0.1:5000/html/painel_adm.html | Painel administrativo, início (precisa ser administrador) |
+| http://127.0.0.1:5000/html/catalogo_produtos_adm.html | Produtos no painel (precisa ser administrador) |
 
 Use **127.0.0.1**, não `localhost`. Os dois funcionam, mas o login de um não vale para o outro.
 

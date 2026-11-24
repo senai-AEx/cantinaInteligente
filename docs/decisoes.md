@@ -37,7 +37,7 @@ Decisões levantadas no [plano de execução](plano-de-execucao.md) e adotadas p
 
 ## Organização do código
 
-Backend em camadas `routes → controller → service → repository`, um pacote por módulo de negócio (`usuarios`, `produtos`, `carteira`, `compras` e `admin`). Detalhes em [arquitetura.md](arquitetura.md). A divisão em camadas foi iniciada na branch do Luan e unificada na `develop`, substituindo o arquivo único `produtos.py` da AV04.
+Backend em camadas `routes → service → repository`, um pacote por módulo de negócio. O `controller` foi removido em uma simplificação posterior: as funções que recebem a requisição passaram para `routes.py`, para que cada módulo tenha menos arquivos (`usuarios`, `produtos`, `carteira`, `compras` e `admin`). Detalhes em [arquitetura.md](arquitetura.md). A divisão em camadas foi iniciada na branch do Luan e unificada na `develop`, substituindo o arquivo único `produtos.py` da AV04.
 
 ## Produto
 

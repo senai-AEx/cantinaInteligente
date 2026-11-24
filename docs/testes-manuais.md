@@ -87,7 +87,7 @@ Tela: `http://127.0.0.1:5000/html/cadastro.html` e `http://127.0.0.1:5000/html/l
 
 ## 3. Produtos (RF03, RF04)
 
-Entre como **administrador** e abra `http://127.0.0.1:5000/html/catalogo_produtos_adm.html`.
+Entre como **administrador**: o sistema abre o painel (**Início**). Clique em **Produtos** no menu lateral (ou abra `http://127.0.0.1:5000/html/catalogo_produtos_adm.html`).
 
 ### Devolutivas da AV04
 

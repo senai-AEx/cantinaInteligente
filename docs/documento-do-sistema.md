@@ -451,7 +451,7 @@ sequenceDiagram
     autonumber
     actor C as Cliente
     participant T as Tela do catálogo (navegador)
-    participant A as API Flask (routes e controller)
+    participant A as API Flask (routes)
     participant S as Serviço de compras (service)
     participant R as Repositórios (compras e carteira)
     participant B as MySQL
@@ -515,7 +515,7 @@ sequenceDiagram
     autonumber
     actor C as Cliente
     participant T as Tela Minha conta (navegador)
-    participant A as API Flask (routes e controller)
+    participant A as API Flask (routes)
     participant S as Serviço da carteira (service)
     participant R as Repositório da carteira (repository)
     participant B as MySQL
@@ -821,7 +821,7 @@ flowchart LR
     subgraph servidor["Aplicação Flask (src/backend) na porta 5000"]
         app["app.py<br/>registra os módulos, entrega as telas<br/>e padroniza os erros"]
         seg["seguranca.py<br/>sessão por cookie e perfis"]
-        subgraph modulos["Módulos de negócio em camadas: routes, controller, service e repository"]
+        subgraph modulos["Módulos de negócio em camadas: routes, service e repository"]
             usuarios["usuarios<br/>/api/auth"]
             produtos["produtos<br/>/api/produtos"]
             carteira["carteira<br/>/api/carteira"]
@@ -925,12 +925,11 @@ A Cantina Inteligente é uma aplicação web cliente/servidor: o navegador mostr
 
 | Camada | Arquivo | Responsabilidade |
 | --- | --- | --- |
-| Rotas | `routes.py` | Declara os endereços da API e os métodos aceitos. Não tem regra de negócio. |
-| Controle | `controller.py` | Confere o login e o perfil, lê os dados da requisição, chama o serviço e monta a resposta. |
+| Rotas | `routes.py` | Recebe a requisição, confere o login e o perfil, chama o serviço e monta a resposta. No fim do arquivo fica a tabela de endereços da API. |
 | Serviço | `service.py` | Aplica as regras de negócio e controla a transação. |
 | Repositório | `repository.py` | Executa os comandos SQL. É a única camada que acessa o banco. |
 
-O caminho de uma requisição é sempre rotas → controle → serviço → repositório. Essa divisão permite alterar uma regra sem mexer nas telas e incluir um módulo novo sem alterar os que já existem (RNF09).
+O caminho de uma requisição é sempre rotas → serviço → repositório. Essa divisão permite alterar uma regra sem mexer nas telas e incluir um módulo novo sem alterar os que já existem (RNF09).
 
 **Sessão e perfis de acesso.** Depois do login, o servidor grava um cookie de sessão assinado, marcado como `HttpOnly` (o JavaScript da página não consegue ler) e `SameSite=Lax` (não acompanha envios de formulário nem chamadas disparadas por outros sites). O cookie guarda apenas o identificador do usuário e vale por 8 horas. A cada requisição o usuário é relido do banco; por isso, quem é inativado ou perde o perfil de administrador perde o acesso na hora. Como as telas e a API saem do mesmo servidor e da mesma porta, o cookie funciona sem configuração adicional. As rotas restritas respondem com erro 401 para quem não fez login e 403 para quem não tem permissão.
 

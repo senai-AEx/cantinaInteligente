@@ -50,13 +50,12 @@ Cada módulo de negócio segue a mesma divisão. Um módulo novo é adicionado s
 
 | Arquivo | Responsabilidade |
 | --- | --- |
-| `routes.py` | Declara as URLs e os métodos HTTP. Não tem lógica. |
-| `controller.py` | Exige login ou perfil (decoradores de `seguranca.py`), lê a requisição, chama o serviço e monta a resposta. |
+| `routes.py` | As funções que recebem a requisição (decoradas com `@login_obrigatorio` ou `@somente_administrador`, de `seguranca.py`), chamam o serviço e devolvem o JSON. No fim do arquivo, a tabela de URLs. |
 | `service.py` | Regras de negócio e controle da transação. |
 | `validacao.py` | Regras de cada campo (quando o módulo tem formulário). |
 | `repository.py` | Todo o SQL. Nenhuma outra camada fala com o banco. |
 
-Caminho de uma requisição: `routes → controller → service → repository → MySQL`. Os serviços lançam os erros de `erros.py` e o `app.py` os converte em JSON; os controllers não precisam de `try/except`.
+Caminho de uma requisição: `routes → service → repository → MySQL`. Os serviços lançam os erros de `erros.py` e o `app.py` os converte em JSON; as rotas não precisam de `try/except`.
 
 Para criar um módulo novo, copie a estrutura de um existente e registre o blueprint em `app.py`.
 
@@ -87,7 +86,7 @@ Cada módulo usa o próprio `repository`. As exceções, combinadas no contrato,
 - O login grava um cookie de sessão assinado (`cantina_sessao`), `HttpOnly` e `SameSite=Lax`, válido por 8 horas. A chave que assina o cookie é a `SECRET_KEY` do `.env`.
 - O cookie guarda só o `id_usuario`. A cada requisição o usuário é relido do banco: quem é inativado ou perde o perfil de administrador perde o acesso na hora.
 - Perfis: `CLIENTE` (todo cadastro feito pela tela) e `ADMINISTRADOR` (o primeiro é criado pelo `python instalar.py` ou por `python scripts/criar_admin.py`, com os dados `ADMIN_*` do `.env`).
-- Nos controllers, `@login_obrigatorio` responde `401` para quem não está logado e `@somente_administrador` responde `403` para quem não é administrador.
+- Nas rotas, `@login_obrigatorio` responde `401` para quem não está logado e `@somente_administrador` responde `403` para quem não é administrador.
 - A senha é guardada apenas como hash (`werkzeug.security`). A API nunca devolve a senha e devolve o CPF mascarado.
 - Nas telas, `Cantina.exigirLogin()` e `Cantina.exigirAdministrador()` redirecionam quem não tem acesso. Isso é só conveniência: a proteção de verdade está no servidor.
 
@@ -120,6 +119,7 @@ HTML, CSS e JavaScript puros, sem etapa de build. Cada tela tem seu par `css/<te
 | Criar conta | `html/cadastro.html` | Público |
 | Entrar | `html/login.html` | Público |
 | Minha conta (saldo, crédito, extrato e compras) | `html/minha_conta.html` | Login |
+| Painel — início (resumo e atalhos) | `html/painel_adm.html` | Administrador |
 | Painel — produtos | `html/catalogo_produtos_adm.html` | Administrador |
 | Painel — usuários | `html/usuarios_adm.html` | Administrador |
 | Painel — movimentações | `html/movimentacoes_adm.html` | Administrador |

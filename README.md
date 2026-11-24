@@ -71,7 +71,8 @@ python scripts/credenciais.py
 | http://127.0.0.1:5000/html/cadastro.html | Criar conta |
 | http://127.0.0.1:5000/html/login.html | Entrar |
 | http://127.0.0.1:5000/html/minha_conta.html | Saldo, créditos, extrato e compras |
-| http://127.0.0.1:5000/html/catalogo_produtos_adm.html | Painel administrativo |
+| http://127.0.0.1:5000/html/painel_adm.html | Painel administrativo (início) |
+| http://127.0.0.1:5000/html/catalogo_produtos_adm.html | Produtos no painel |
 | http://127.0.0.1:5000/api/health/db | Teste da conexão com o banco |
 
 ### Comandos
@@ -118,7 +119,7 @@ scripts/           banco.py (instalar, migrar, semear, testar, backup, restaurar
                    criar_demo.py, criar_admin.py, credenciais.py, testes.py e
                    _ambiente.py (ajudas comuns: .venv e .env)
 src/backend/       API Flask: usuarios, produtos, carteira, compras, admin e qr,
-                   cada módulo em camadas routes → controller → service → repository
+                   cada módulo em camadas routes → service → repository
 src/frontend/      telas HTML, CSS e JavaScript (servidas pelo próprio Flask)
 tests/             testes automatizados
 ```
