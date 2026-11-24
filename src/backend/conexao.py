@@ -6,8 +6,9 @@ import mysql.connector
 from dotenv import find_dotenv, load_dotenv
 
 # Procura o .env subindo a partir desta pasta (src/backend → src → raiz do projeto).
-# Variáveis já definidas no ambiente têm prioridade sobre o arquivo.
-load_dotenv(find_dotenv())
+# O .env é a fonte da verdade, como nos scripts: um valor antigo que ficou no terminal
+# (ex.: MYSQL_PORT=3307) não pode fazer o app falar com outro banco.
+load_dotenv(find_dotenv(), override=True)
 
 def conectar():
     """Abre conexão do request e configura timestamps da sessão em UTC."""
