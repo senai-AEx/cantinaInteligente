@@ -116,6 +116,7 @@ def run(command, *, check=True, capture=False, input_text=None, env=None):
         cwd=ROOT,
         check=check,
         text=True,
+        encoding="utf-8",
         input=input_text,
         capture_output=capture,
         env=env,
