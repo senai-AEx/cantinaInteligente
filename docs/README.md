@@ -4,7 +4,7 @@
 
 | Documento | Para que serve |
 | --- | --- |
-| [**Como rodar o projeto**](como-rodar.md) | Passo a passo para iniciantes: instalação no Windows, primeira execução, roteiro de 5 minutos e problemas comuns. |
+| [**Como rodar o projeto**](como-rodar.md) | Passo a passo para iniciantes: instalação do MySQL e do projeto (Windows, macOS e Linux), primeira execução, roteiro de 5 minutos e problemas comuns. |
 | [**Documento do Sistema**](documento-do-sistema.md) | Versão final, completa, para copiar ao template e gerar o PDF da AV05. Começa com o bloco "Como usar este arquivo" e a lista de itens a confirmar. |
 | [Diagramas](diagramas/README.md) | Um arquivo `.mmd` por diagrama (MER, UML e topologia) e as instruções para exportar em PNG. |
 | [Roteiro de testes manuais](testes-manuais.md) | Casos numerados do sistema completo: cadastro e login, produtos, carteira, compra, histórico, painel, relatórios, segurança e layout. |
@@ -17,7 +17,7 @@
 | Documento | Para que serve |
 | --- | --- |
 | [Arquitetura e pastas](arquitetura.md) | Organização do repositório, módulos, camadas, sessão, transações e telas. |
-| [Decisões](decisoes.md) | Stack escolhida, decisões D1 a D9, regras de negócio e a numeração final dos requisitos. |
+| [Decisões](decisoes.md) | Stack escolhida, decisões D1 a D10, regras de negócio e a numeração final dos requisitos. |
 | [Contrato da API](contrato-api.md) | Login, carteira, compras e administração: rotas, corpos JSON e erros. |
 | [API de produtos](contrato-api-produtos.md) | Rotas, corpo JSON e erros do cadastro de produtos. |
 | [Modelo de produto](modelo-produto.md) | Campos, regras e mudanças em relação à AV04. |

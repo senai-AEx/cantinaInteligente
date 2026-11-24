@@ -83,7 +83,7 @@ O vídeo completo tem cerca de 7 min 45 s. Os tempos acima consideram a versão 
 - Tudo gratuito: atende ao baixo custo
 - Um servidor entrega as telas e a API na mesma porta
 - Camadas: rotas → controle → serviço → repositório, um módulo por assunto: atende à expansão futura
-- Git e GitHub para o trabalho em equipe; Docker para o banco igual em todos os computadores
+- Git e GitHub para o trabalho em equipe; MySQL 8 instalado no computador e scripts Python (`instalar.py`, `iniciar.py`) para preparar e ligar o sistema
 - Diagrama: **componentes** (`componentes.mmd`) ou **topologia** (`topologia.mmd`)
 
 ### Slide 9 — Consistência e segurança (Integrante 3)
@@ -174,7 +174,7 @@ Publicar o sistema em um servidor com HTTPS para uso real na unidade; crédito a
 Em um computador ligado à rede da unidade, rodando o Flask e o MySQL. Os usuários acessam pelo navegador do celular. Antes disso, é preciso trocar as senhas de demonstração e usar HTTPS.
 
 **13. Como vocês testaram?**
-Com testes automatizados do servidor, executados com `make test`, e com um roteiro de testes manuais que cobre cadastro, login, crédito, compra, relatórios, segurança e layout em 360 × 800 px. **[CONFIRMAR: informar quantos testes automatizados existem e se o roteiro manual foi executado por completo.]**
+Com testes automatizados do servidor, executados com `python scripts/testes.py`, e com um roteiro de testes manuais que cobre cadastro, login, crédito, compra, relatórios, segurança e layout em 360 × 800 px. **[CONFIRMAR: informar quantos testes automatizados existem e se o roteiro manual foi executado por completo.]**
 
 **14. Como atenderam à norma de acessibilidade?**
 Aplicamos o checklist da ABNT NBR 17225:2025 nas telas e registramos o resultado. Os pontos principais são a navegação por teclado, os rótulos dos campos, as mensagens de erro em texto junto ao campo e o contraste das cores. **[CONFIRMAR com o resultado do checklist.]**

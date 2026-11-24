@@ -37,7 +37,7 @@ git push -u origin feat/11-usuarios
 
 ## Abrir e revisar o PR
 
-Abra um pull request da sua branch para `develop`. Antes, rode `make test` e resolva conflitos com a `develop` na sua branch. Na descrição, informe:
+Abra um pull request da sua branch para `develop`. Antes, rode `python scripts/testes.py` e resolva conflitos com a `develop` na sua branch. Na descrição, informe:
 
 - O que mudou e qual issue atende.
 - Como conferir a mudança e quais testes foram executados.

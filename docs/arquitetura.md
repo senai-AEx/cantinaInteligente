@@ -4,13 +4,19 @@ A Cantina Inteligente é uma aplicação web cliente/servidor. Um único servido
 
 ```
 cantinaInteligente/
+├── instalar.py             instalação completa (rode uma vez)
+├── iniciar.py              liga o sistema
+├── requirements.txt        bibliotecas Python instaladas pelo instalar.py
+├── Makefile                atalhos opcionais (make); não é obrigatório
 ├── assets/produtos/        fotos enviadas pela tela (não versionadas)
 ├── database/
-│   ├── migrations/         alterações incrementais (002 a 006), aplicadas pelo `make migrate`
-│   ├── seeds/              produtos de exemplo (`make seed`)
+│   ├── migrations/         alterações incrementais (002 a 006), aplicadas por `python scripts/banco.py migrar` e pelo `iniciar.py`
+│   ├── seeds/              produtos de exemplo (`python scripts/banco.py semear`)
 │   └── schema.sql          esquema completo atual, para criar o banco do zero
 ├── docs/                   documentação do projeto (índice em docs/README.md)
-├── scripts/                dev.py (atalhos do Makefile) e criar_admin.py (`make admin`)
+├── scripts/                banco.py (instalar, migrar, semear, testar, backup, restaurar),
+│                           criar_demo.py, criar_admin.py, credenciais.py, testes.py
+│                           e _ambiente.py (ajudas comuns: .venv e .env)
 ├── src/
 │   ├── backend/            aplicação Flask
 │   │   ├── app.py          cria a aplicação, registra os módulos, entrega as telas e padroniza os erros
@@ -26,7 +32,7 @@ cantinaInteligente/
 │   │   ├── admin/          usuários, movimentações, compras e relatórios (/api/admin)
 │   │   └── qr/             QR Codes da cantina e dos produtos (/api/qrcode)
 │   └── frontend/           telas HTML, CSS e JavaScript, servidas pelo próprio Flask
-└── tests/                  testes automatizados (`make test`)
+└── tests/                  testes automatizados (`python scripts/testes.py`)
 ```
 
 ## Um servidor, uma porta
@@ -80,7 +86,7 @@ Cada módulo usa o próprio `repository`. As exceções, combinadas no contrato,
 
 - O login grava um cookie de sessão assinado (`cantina_sessao`), `HttpOnly` e `SameSite=Lax`, válido por 8 horas. A chave que assina o cookie é a `SECRET_KEY` do `.env`.
 - O cookie guarda só o `id_usuario`. A cada requisição o usuário é relido do banco: quem é inativado ou perde o perfil de administrador perde o acesso na hora.
-- Perfis: `CLIENTE` (todo cadastro feito pela tela) e `ADMINISTRADOR` (o primeiro é criado por `make admin`, com os dados `ADMIN_*` do `.env`).
+- Perfis: `CLIENTE` (todo cadastro feito pela tela) e `ADMINISTRADOR` (o primeiro é criado pelo `python instalar.py` ou por `python scripts/criar_admin.py`, com os dados `ADMIN_*` do `.env`).
 - Nos controllers, `@login_obrigatorio` responde `401` para quem não está logado e `@somente_administrador` responde `403` para quem não é administrador.
 - A senha é guardada apenas como hash (`werkzeug.security`). A API nunca devolve a senha e devolve o CPF mascarado.
 - Nas telas, `Cantina.exigirLogin()` e `Cantina.exigirAdministrador()` redirecionam quem não tem acesso. Isso é só conveniência: a proteção de verdade está no servidor.
@@ -123,7 +129,7 @@ Padrão dos formulários: validação no JavaScript antes de enviar, mensagem de
 
 ## Banco de dados
 
-MySQL 8 (contêiner Docker `cantina-mysql` pelo `make up`, ou instalação local). O modelo completo está na seção 6 do [Documento do Sistema](documento-do-sistema.md) e em [diagramas/mer.mmd](diagramas/mer.mmd).
+MySQL 8 instalado direto no computador, sem contêiner. O `python iniciar.py` confere a conexão e aplica as migrações que faltam. O modelo completo está na seção 6 do [Documento do Sistema](documento-do-sistema.md) e em [diagramas/mer.mmd](diagramas/mer.mmd).
 
 | Tabela | Conteúdo |
 | --- | --- |
@@ -137,10 +143,12 @@ MySQL 8 (contêiner Docker `cantina-mysql` pelo `make up`, ou instalação local
 
 Dinheiro é sempre guardado em centavos inteiros e as datas em UTC.
 
+Os comandos do banco ficam em `scripts/banco.py`: `instalar` (chamado pelo `python instalar.py`; cria o banco, o usuário do sistema e as tabelas), `migrar`, `semear` (produtos de exemplo, só se a tabela estiver vazia), `testar`, `backup` e `restaurar`.
+
 Duas formas de preparar o banco:
 
-1. **`make migrate`** (recomendado; o `make up` já faz): aplica as migrações `002` a `006` em ordem, conferindo o que já foi aplicado. Atualiza bancos antigos sem perder dados.
-2. **`database/schema.sql`**: cria o banco já no formato atual, para quem usa o MySQL Workbench sem Docker.
+1. **`python scripts/banco.py migrar`** (o `python iniciar.py` já faz isso): aplica as migrações `002` a `006` em ordem, conferindo o que já foi aplicado. Pode rodar sempre e atualiza bancos antigos sem perder dados.
+2. **`database/schema.sql`**: cria o banco já no formato atual, para quem prefere criar o banco pelo MySQL Workbench.
 
 Toda mudança no banco entra como uma migração nova e também no `schema.sql`.
 
@@ -150,13 +158,12 @@ Tudo o que o projeto usa, com o motivo de cada item. Não há serviço pago nem 
 
 | Dependência | Onde é usada | Para que serve | Como é instalada |
 | --- | --- | --- | --- |
-| Python 3 | Servidor e scripts | Executa a aplicação e os atalhos do `make`. | Instalado no computador (python.org). |
-| Flask 3 (inclui Werkzeug) | `src/backend/app.py` | Servidor web, rotas, sessão por cookie e senhas em hash (`werkzeug.security`). | `requirements.txt`, via `make setup`. |
+| Python 3 | Servidor e scripts | Executa a aplicação, os scripts de instalação (`instalar.py`, `iniciar.py`) e a pasta `scripts/`. | Instalado no computador (python.org). |
+| Flask 3 (inclui Werkzeug) | `src/backend/app.py` | Servidor web, rotas, sessão por cookie e senhas em hash (`werkzeug.security`). | `requirements.txt`, via `python instalar.py`. |
 | mysql-connector-python | `src/backend/conexao.py` | Conexão com o MySQL. | `requirements.txt`. |
 | python-dotenv | `src/backend/conexao.py`, `scripts/` | Lê as configurações do arquivo `.env`. | `requirements.txt`. |
 | segno | `src/backend/qr/` | Gera os QR Codes em SVG para impressão. | `requirements.txt`. |
-| Docker Desktop | `make up`, `make backup`, `make restore` | Executa o MySQL em contêiner. | Instalado no computador (docker.com). |
-| MySQL 8.4 (imagem `mysql:8.4`) | Contêiner `cantina-mysql` | Banco de dados; traz o `mysqldump` usado pelo backup. | Baixada pelo `make up`. |
-| GNU Make | `Makefile` | Atalhos dos comandos do projeto. | Instalado no computador. |
+| MySQL 8 | Servidor de banco de dados, na porta 3306 | Guarda os dados. O backup e a restauração são feitos pelo `scripts/banco.py`, sem o `mysqldump`. | Instalado uma vez no computador (dev.mysql.com, Homebrew ou `apt`). Veja [como-rodar.md](como-rodar.md). |
+| GNU Make (opcional) | `Makefile` | Atalhos opcionais dos comandos do projeto (`make up`, `make test`...). | Instalado no computador, só se quiser usar os atalhos. |
 
-Para atualizar as bibliotecas Python, mude a versão em `requirements.txt` e rode `make setup`. Para o banco, a versão da imagem fica em `scripts/dev.py` (`DB_IMAGE`).
+Para atualizar as bibliotecas Python, mude a versão em `requirements.txt` e rode `python instalar.py` de novo. O MySQL é o que estiver instalado no computador (MySQL 8, versão 8.0.16 ou mais nova, como indicado em [decisões](decisoes.md)).

@@ -194,7 +194,7 @@ Requisitos retirados: o antigo **RF04** (fornecedores) e o antigo **RF10** (caus
 
 Observações para o grupo (retirar do PDF depois de resolver):
 
-- **RNF04:** o projeto traz os comandos `make backup` (grava uma cópia completa do banco na pasta `backups/`) e `make restore` (restaura uma cópia). Os dois foram executados no ambiente local. O agendamento diário é configurado na implantação, no servidor da unidade.
+- **RNF04:** o projeto traz os comandos `python scripts/banco.py backup` (grava uma cópia completa do banco na pasta `backups/`) e `python scripts/banco.py restaurar` (restaura uma cópia). Os dois foram executados no ambiente local. O agendamento diário é configurado na implantação, no servidor da unidade.
 - **RNF05:** medido em 17/11/2026 no ambiente local, com 20 consultas seguidas de cada tipo: o percentil 95 ficou abaixo de 0,1 s para catálogo, saldo, extrato, histórico e relatório de vendas. A medição não simula vários usuários ao mesmo tempo.
 - **[CONFIRMAR RNF12: requisito novo, sugerido para ligar o documento ao checklist da norma cobrado na AV06. O grupo decide se mantém.]**
 
@@ -862,7 +862,7 @@ Fonte: Elaborado pela equipe do Projeto Aplicado II (2026).
 
 ### 7.6 Diagrama de Implantação
 
-O diagrama de implantação mostra onde cada parte do sistema é executada. No ambiente de desenvolvimento e de demonstração, um único computador executa a aplicação Flask (telas e API na porta 5000) e o banco MySQL, que roda em um contêiner Docker com um volume para os dados não se perderem. O usuário acessa o sistema pelo navegador. As credenciais do banco e a chave da sessão ficam no arquivo `.env`, que não é enviado ao repositório.
+O diagrama de implantação mostra onde cada parte do sistema é executada. No ambiente de desenvolvimento e de demonstração, um único computador executa a aplicação Flask (telas e API na porta 5000) e o banco MySQL 8, instalado diretamente no computador (porta 3306), sem contêiner. O comando `python iniciar.py` liga o sistema e confere a conexão com o banco. O usuário acessa o sistema pelo navegador. As credenciais do banco e a chave da sessão ficam no arquivo `.env`, que não é enviado ao repositório.
 
 **Imagem 8: Diagrama de implantação.**
 
@@ -876,17 +876,13 @@ flowchart LR
         subgraph python["Python 3 com ambiente virtual .venv"]
             flask["Aplicação Flask<br/>telas e API na porta 5000"]
         end
-        subgraph docker["Docker"]
-            mysql[("Contêiner cantina-mysql<br/>MySQL 8.4 na porta 3306")]
-            volume[("Volume cantina-mysql-data<br/>dados persistentes")]
-        end
+        mysql[("MySQL 8 instalado no computador<br/>porta 3306, banco cantina_inteligente")]
         env["Arquivo .env<br/>credenciais do banco e SECRET_KEY"]
         fotos["Pasta assets/produtos<br/>fotos enviadas pelo painel"]
     end
 
     navegador -->|"HTTP: páginas, CSS, JavaScript e JSON"| flask
     flask -->|"TCP 3306 com MySQL Connector/Python"| mysql
-    mysql --- volume
     flask -.->|"lê a configuração"| env
     flask -->|"grava e lê as fotos"| fotos
 ```
@@ -911,8 +907,8 @@ A Cantina Inteligente é uma aplicação web cliente/servidor: o navegador mostr
 | **MySQL Connector/Python** | Liga o Python ao MySQL. | É o conector oficial do MySQL. As consultas usam parâmetros, o que protege contra injeção de SQL. |
 | **HTML5, CSS3 e JavaScript** | Telas do cliente e do administrador, máscaras e validações dos campos. | Funcionam em qualquer navegador atual, no celular e no computador, sem instalar aplicativo. Não dependem de ferramentas pagas nem de etapa de compilação. |
 | **Git e GitHub** | Controle de versões do código e da documentação, revisão por pull request e quadro de tarefas. | São gratuitos, registram o que cada integrante fez e permitem o trabalho em paralelo com branches (`develop` para integração e `main` para as entregas). |
-| **Docker** | Executa o MySQL em um contêiner igual em todos os computadores da equipe. | Evita diferenças de instalação entre os integrantes: o banco sobe com um comando e os dados ficam em um volume que não se perde ao desligar. |
-| **Make e scripts em Python** | Atalhos de execução: `make setup`, `make up`, `make migrate`, `make seed`, `make admin` e `make test`. | Deixam a execução do projeto igual para todos e simples de explicar no README. |
+| **MySQL 8 instalado no computador** | Banco de dados relacional, instalado uma vez direto no computador, sem contêiner. | Um passo a menos para quem vai rodar o projeto: sem Docker, o integrante instala o MySQL e roda dois comandos Python (`python instalar.py` e `python iniciar.py`). |
+| **Scripts em Python** (`instalar.py`, `iniciar.py`) | Atalhos de execução: instalam o ambiente e o banco, ligam o sistema, e `scripts/banco.py` faz backup e restauração. | Deixam a execução do projeto igual para todos e simples de explicar no README, sem exigir o programa Make (que continua opcional). |
 | **unittest** | Testes automatizados do servidor. | Já faz parte do Python, sem custo e sem instalação extra. |
 
 **Como a solução atende às restrições da demanda**
