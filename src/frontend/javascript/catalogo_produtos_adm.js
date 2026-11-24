@@ -155,8 +155,8 @@ document.addEventListener("DOMContentLoaded", () => {
         conteudo.append(criarElemento("p", "detalhe-produto", "Estoque: " + produto.quantidade_estoque));
 
         const selos = criarElemento("div", "selos-produto");
-        if (produto.zero_lactose) selos.append(criarElemento("span", "selo", "Zero lactose"));
-        if (produto.zero_acucar) selos.append(criarElemento("span", "selo", "Zero açúcar"));
+      //  if (produto.zero_lactose) selos.append(criarElemento("span", "selo", "Zero lactose"));
+        //if (produto.zero_acucar) selos.append(criarElemento("span", "selo", "Zero açúcar"));
         if (selos.childElementCount) conteudo.append(selos);
 
         if (produto.descricao) {

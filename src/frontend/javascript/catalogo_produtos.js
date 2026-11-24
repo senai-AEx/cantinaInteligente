@@ -232,8 +232,8 @@ document.addEventListener("DOMContentLoaded", () => {
         conteudo.append(elemento("p", "preco-produto", formatarPreco(produto.preco_venda_centavos)));
         if (produto.descricao) conteudo.append(elemento("p", "descricao-produto", produto.descricao));
         const selos = elemento("div", "selos-produto");
-        if (produto.zero_lactose) selos.append(elemento("span", "selo", "Zero lactose"));
-        if (produto.zero_acucar) selos.append(elemento("span", "selo", "Zero açúcar"));
+       // if (produto.zero_lactose) selos.append(elemento("span", "selo", "Zero lactose"));
+        //if (produto.zero_acucar) selos.append(elemento("span", "selo", "Zero açúcar"));
         if (selos.childElementCount) conteudo.append(selos);
 
         const rodape = elemento("div", "rodape-card-produto");
