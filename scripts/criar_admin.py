@@ -17,7 +17,9 @@ garantir_venv()
 
 from dotenv import load_dotenv  # noqa: E402
 
-load_dotenv(RAIZ / ".env")
+# O .env é a fonte da verdade: vale mesmo que o terminal já tenha uma variável
+# com o mesmo nome (um valor antigo exportado antes de editar o .env não pode ganhar).
+load_dotenv(RAIZ / ".env", override=True)
 
 from src.backend.erros import ErroValidacao  # noqa: E402
 from src.backend.usuarios import service as usuario_service  # noqa: E402
