@@ -1,4 +1,4 @@
-"""Módulo de produtos organizado em camadas: routes → controller → service → repository."""
+"""Módulo de produtos. Rotas em routes.py, regras em service.py, SQL em repository.py."""
 from .routes import produtos_api
 
 __all__ = ["produtos_api"]

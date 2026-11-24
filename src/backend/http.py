@@ -1,4 +1,4 @@
-"""Funções de apoio usadas pelos controllers."""
+"""Funções de apoio usadas pelas rotas (leitura do JSON, limites e datas)."""
 from datetime import date, datetime, timezone
 import re
 
