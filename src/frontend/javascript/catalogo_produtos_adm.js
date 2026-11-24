@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const acoes = criarElemento("div", "acoes-produto");
         acoes.append(criarBotao("Editar", "editar", "botao botao-principal", produto));
         if (produto.status === "ATIVO") {
-            acoes.append(criarBotao("Excluir", "excluir", "botao botao-excluir", produto));
+            acoes.append(criarBotao("Inativar", "excluir", "botao botao-excluir", produto));
         } else {
             acoes.append(criarBotao("Reativar", "reativar", "botao botao-principal", produto));
         }
@@ -575,7 +575,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (botao.dataset.acao === "excluir") {
             produtoSelecionado = produto;
-            textoConfirmacao.textContent = `Deseja excluir "${produto.nome}"? Ele sairá do catálogo, mas continuará salvo no banco como inativo e poderá ser reativado.`;
+            textoConfirmacao.textContent = `Deseja inativar "${produto.nome}"? Ele sairá do catálogo, mas continuará salvo no banco como inativo e poderá ser reativado.`;
             erroExclusao.textContent = "";
             abrirModal(modalExclusao, document.getElementById("botao-cancelar-exclusao"));
             return;
@@ -596,7 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // "Excluir" é uma exclusão lógica: o produto fica INATIVO e continua no banco.
+    // "Inativar" é uma exclusão lógica: o produto fica INATIVO e continua no banco.
     botaoConfirmarExclusao.addEventListener("click", async () => {
         if (!produtoSelecionado) return;
         botaoConfirmarExclusao.disabled = true;
@@ -607,7 +607,7 @@ document.addEventListener("DOMContentLoaded", () => {
             produtoSelecionado = null;
             await carregarProdutos();
             buscaProdutos.focus({ preventScroll: true });
-            mostrarMensagem(mensagemApi, "Produto excluído (inativado). Ele continua salvo e pode ser reativado.", "sucesso");
+            mostrarMensagem(mensagemApi, "Produto inativado. Ele continua salvo e pode ser reativado.", "sucesso");
         } catch (erro) {
             // O modal continua aberto: a mensagem aparece dentro dele (e é anunciada por role="alert").
             erroExclusao.textContent = erro.message;

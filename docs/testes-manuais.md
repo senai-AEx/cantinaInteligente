@@ -97,7 +97,7 @@ Entre como **administrador** e abra `http://127.0.0.1:5000/html/catalogo_produto
 - [ ] **D04 — Sem rótulos de zero lactose:** o formulário não tem as caixas de zero lactose/zero açúcar. Um produto da categoria *Frutas* aparece com os dois selos; um de *Bebidas*, sem selos.
 - [ ] **D05 — Enter não grava:** preencha o cadastro e pressione Enter em vários campos. O modal continua aberto e nada é salvo (confira a lista e o banco).
 - [ ] **D06 — Grava só no botão:** clique em **Salvar produto**. O produto aparece na lista e no banco.
-- [ ] **D07 — Excluir não apaga:** clique em **Excluir** e confirme. O produto aparece como *Inativo*, some do catálogo do cliente e continua na tabela `produtos` com `status = 'INATIVO'`. Não existe opção de exclusão definitiva.
+- [ ] **D07 — Inativar não apaga:** clique em **Inativar** e confirme. O produto aparece como *Inativo*, some do catálogo do cliente e continua na tabela `produtos` com `status = 'INATIVO'`. Não existe opção de exclusão definitiva.
 - [ ] **D08 — Reativar:** clique em **Reativar**; o produto volta aos ativos com o mesmo código.
 
 ### Validação e máscaras

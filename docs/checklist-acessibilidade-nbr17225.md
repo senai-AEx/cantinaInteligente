@@ -185,7 +185,7 @@ Nas tabelas, cada caminho de arquivo é relativo a `src/frontend/`.
 | 5.11.1 Uso de cores | Requisito | A cor não é o único jeito de passar uma informação. | Atende após correção | Valores com sinal além da cor ("+ R$ 5,00", "− R$ 2,00", e "entrada de" ou "saída de" para leitor de tela, em `criarLinhaDoExtrato`); situações em texto ("Ativo", "Inativo", "Sem estoque", "Últimas unidades"); campo com erro tem mensagem em texto; regras da senha com "✓" ou "○"; página atual do menu com barra e negrito; aba aberta com borda. Correções C26 e C02: o filtro selecionado do painel de produtos era só um fundo branco sobre cinza muito claro (1,07:1) e ganhou contorno e "✓"; os links do rodapé não tinham sublinhado. |
 | 5.11.2 Contraste para texto (aprimorado) | Recomendação | Texto com 7:1 (4,5:1 se for grande). | **Não atende** | O texto principal passa (#2b2b2b sobre branco: 14,16:1), mas os textos de apoio e as cores da identidade ficam entre 4,5:1 e 7:1: laranja #b8520b (4,94:1), texto suave #5f6b62 (5,58:1), verde de sucesso #2e7d32 (5,13:1), vermelho de erro #b3261e (6,54:1). Ver seção 5.1. |
 | 5.11.3 Contraste para texto (mínimo) | Requisito | Texto com 4,5:1 (3:1 se for grande). | Atende após correção | Calculados mais de 110 pares texto/fundo usados nos 7 CSS (os principais estão na seção 4). Menor valor em texto normal: 4,60:1; em texto grande: 4,26:1. Correção C26: o texto de exemplo da busca do painel de produtos usava o cinza padrão do navegador (cerca de 2,3:1) e passou a `var(--cor-texto-suave)` (5,58:1); o preço dos cartões do painel foi de #c9631b (3,97:1, só passava como texto grande) para `var(--cor-primaria)` (4,94:1). |
-| 5.11.4 Contraste para componentes | Requisito | Bordas de campos e estados de componentes com 3:1. | Atende após correção | Bordas dos campos: #7f8a82 (3,58:1) e #7d8a80 (3,61:1). Correção C26: no painel de produtos as bordas dos campos (#dfe5de, 1,24:1) e da busca (#e0e6df, 1,27:1) passaram a `var(--cor-contorno)` (#7d8a80). Botões com borda clara ("Sair", "Excluir") são identificados pelo texto, que tem contraste; controles desabilitados ficam de fora do item. |
+| 5.11.4 Contraste para componentes | Requisito | Bordas de campos e estados de componentes com 3:1. | Atende após correção | Bordas dos campos: #7f8a82 (3,58:1) e #7d8a80 (3,61:1). Correção C26: no painel de produtos as bordas dos campos (#dfe5de, 1,24:1) e da busca (#e0e6df, 1,27:1) passaram a `var(--cor-contorno)` (#7d8a80). Botões com borda clara ("Sair", "Inativar") são identificados pelo texto, que tem contraste; controles desabilitados ficam de fora do item. |
 | 5.11.5 Contraste para objetos gráficos | Requisito | Partes de gráficos com 3:1. | Atende | Barra dos relatórios #3d6545 sobre o trilho #e3e9e2: 5,41:1 (e o valor está em texto). Marcas "✓" e "○" na cor do texto. QR Codes em preto sobre branco (`.qr-imagem` com `background: #ffffff`). |
 | 5.11.6 Contraste para indicador de foco visível | Requisito | Contorno de foco com 3:1 em relação ao fundo. | Atende após correção | Laranja #b8520b: 4,94:1 sobre branco, 4,76:1 sobre o creme, 4,64:1 sobre o fundo do painel, 4,32:1 sobre o fundo de erro. Correção C05: sobre o rodapé escuro (#333333) o laranja tinha 2,56:1; ali o contorno agora é branco (12,63:1), em `.footer a:focus-visible`. |
 
@@ -364,7 +364,7 @@ Mínimos: **4,5:1** para texto normal; **3:1** para texto grande (24 px, ou 18,6
 | #28743a | #e8f5e9 | Selos no painel | 5,12 |
 | #a94b12 | #fff1e3 | "Sem estoque" no cartão do painel (11 px) | 5,12 |
 | #8a3b12 | #fff0e4 | "Inativo" no cartão do painel | 6,94 |
-| #a94b32 | #ffffff | Botão "Excluir" | 5,62 |
+| #a94b32 | #ffffff | Botão "Inativar" | 5,62 |
 | #555555 | #fff4e0 | Aviso padrão do painel de produtos | 6,84 |
 | #666666 | #fbfcfa | Dica de campo no painel de produtos | 5,58 |
 | #3a4a3f | #ffffff | Itens do menu lateral | 9,41 |
@@ -410,7 +410,7 @@ Mínimos: **4,5:1** para texto normal; **3:1** para texto grande (24 px, ou 18,6
 | Filtro de situação selecionado (painel de produtos) | fundo #ffffff sobre #f7f8f6: 1,07, sem outra marca | contorno #3d6545: 6,27, mais a marca "✓" | 3 |
 | Contorno de foco no rodapé | #b8520b sobre #333333: 2,56 | #ffffff: 12,63 | 3 |
 
-**Fora da exigência, mas registrado:** a borda do botão "Sair" (#d9ded8, 1,36:1) e a do botão "Excluir" (#e8c8b7, 1,57:1) são claras; esses botões são identificados pelo texto, que tem contraste. Botões desabilitados ficam com 60% de opacidade (o texto branco sobre o laranja cai para cerca de 2,5:1); controles desabilitados ficam de fora dos itens 5.11.3 e 5.11.4.
+**Fora da exigência, mas registrado:** a borda do botão "Sair" (#d9ded8, 1,36:1) e a do botão "Inativar" (#e8c8b7, 1,57:1) são claras; esses botões são identificados pelo texto, que tem contraste. Botões desabilitados ficam com 60% de opacidade (o texto branco sobre o laranja cai para cerca de 2,5:1); controles desabilitados ficam de fora dos itens 5.11.3 e 5.11.4.
 
 ---
 
