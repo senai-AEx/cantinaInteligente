@@ -368,7 +368,8 @@ Mínimos: **4,5:1** para texto normal; **3:1** para texto grande (24 px, ou 18,6
 | #555555 | #fff4e0 | Aviso padrão do painel de produtos | 6,84 |
 | #666666 | #fbfcfa | Dica de campo no painel de produtos | 5,58 |
 | #3a4a3f | #ffffff | Itens do menu lateral | 9,41 |
-| #2d5637 | #edf4e9 | Item atual do menu lateral, atalho ligado, etiqueta "Administrador" | 7,49 |
+| #2d5637 | #edf4e9 | Item atual do menu lateral, etiqueta "Administrador" | 7,49 |
+| #2d5637 | #ffffff | Filtro ligado na lista de produtos (Ativos, Inativos, Sem estoque) | 8,41 |
 | #445248 | #f7f8f6 | Abas dos relatórios | 7,74 |
 | #39483d | #fbfcfa | Rótulos dos campos do painel | 9,41 |
 
