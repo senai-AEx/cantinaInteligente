@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Catálogo de Produtos - Administração</title>
+    <title>Produtos · Administração | Cantina da Honestidade</title>
 
     <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="/css/catalogo_produtos_adm.css">
@@ -37,6 +37,7 @@
                     <div id="navegacao-admin" class="navegacao-admin">
                         <nav aria-label="Painel administrativo">
                             <ul class="menu-admin-lista" role="list">
+                                <li><a href="/html/painel_adm.html">Início</a></li>
                                 <li><a href="/html/catalogo_produtos_adm.html" aria-current="page">Produtos<span class="somente-leitor"> do painel</span></a></li>
                                 <li><a href="/html/usuarios_adm.html">Usuários</a></li>
                                 <li><a href="/html/movimentacoes_adm.html">Movimentações</a></li>
@@ -45,16 +46,6 @@
                                 <li class="menu-admin-separado"><a href="/html/catalogo_produtos.html">Ver catálogo da cantina</a></li>
                             </ul>
                         </nav>
-
-                        <div class="menu-admin-atalhos" role="group" aria-labelledby="titulo-atalhos-produtos">
-                            <p class="menu-admin-subtitulo" id="titulo-atalhos-produtos">Atalhos de produtos</p>
-                            <button type="button" class="botao botao-principal" id="abrir-cadastro-produto">
-                                <span aria-hidden="true">＋</span> Cadastrar produto
-                            </button>
-                            <button type="button" class="atalho-menu" id="filtrar-sem-estoque" aria-pressed="false">
-                                Produtos sem estoque
-                            </button>
-                        </div>
                     </div>
                 </aside>
 
@@ -96,6 +87,7 @@
                                 <button type="button" class="filtro-status selecionado" data-filtro-status="TODOS" aria-pressed="true">Todos</button>
                                 <button type="button" class="filtro-status" data-filtro-status="ATIVO" aria-pressed="false">Ativos</button>
                                 <button type="button" class="filtro-status" data-filtro-status="INATIVO" aria-pressed="false">Inativos</button>
+                                <button type="button" class="filtro-status" id="filtrar-sem-estoque" aria-pressed="false">Sem estoque</button>
                             </div>
                         </div>
                     </section>

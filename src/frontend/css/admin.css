@@ -363,6 +363,43 @@
 }
 
 
+/* ---------- atalhos da tela inicial ---------- */
+
+.grade-atalhos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+    gap: 12px;
+    margin: 14px 0 0;
+}
+
+.cartao-atalho {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px;
+    border: 1px solid #e5e9e4;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #2d4333;
+    text-decoration: none;
+}
+
+.cartao-atalho strong {
+    font-size: 16px;
+}
+
+.cartao-atalho span {
+    color: var(--cor-texto-suave);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.cartao-atalho:hover,
+.cartao-atalho:focus-visible {
+    border-color: var(--cor-primaria);
+    background: var(--admin-suave);
+}
+
 /* ---------- campos e filtros ---------- */
 
 .campo-formulario {

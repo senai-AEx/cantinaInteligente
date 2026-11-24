@@ -27,22 +27,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ---------- utilitários ----------
 
-    function mostrarMensagem(elemento, mensagem, tipo = "") {
-        elemento.textContent = mensagem;
-        elemento.classList.toggle("mensagem-erro", tipo === "erro");
-        elemento.classList.toggle("mensagem-sucesso", tipo === "sucesso");
-    }
-
-    function criarElemento(tag, classe, texto) {
-        const elemento = document.createElement(tag);
-        if (classe) elemento.className = classe;
-        if (texto !== undefined) elemento.textContent = texto;
-        return elemento;
-    }
-
-    function formatarPreco(centavos) {
-        return (centavos / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    }
+    // Funções de apoio compartilhadas (base.js): as mesmas usadas em todas as telas.
+    const mostrarMensagem = Cantina.mostrarMensagem;
+    const criarElemento = Cantina.criarElemento;
+    const formatarPreco = Cantina.formatarPreco;
 
     // Máscara de moeda: o usuário digita só números e o campo mostra "1.234,56".
     function centavosParaTexto(centavos) {
@@ -190,6 +178,20 @@ document.addEventListener("DOMContentLoaded", () => {
             todosProdutos.filter(semEstoque).length;
     }
 
+    // Sugestões no campo Categoria dos formulários: as categorias que já existem na cantina,
+    // para evitar "Doce" e "Doces" como duas categorias diferentes.
+    function atualizarSugestoesDeCategoria() {
+        const datalist = document.getElementById("categorias-cantina");
+        const categorias = [...new Set(todosProdutos.map((produto) => (produto.categoria || "").trim()))]
+            .filter(Boolean)
+            .sort((a, b) => a.localeCompare(b, "pt-BR"));
+        datalist.replaceChildren(...categorias.map((categoria) => {
+            const opcao = document.createElement("option");
+            opcao.value = categoria;
+            return opcao;
+        }));
+    }
+
     function renderizarProdutos() {
         produtosPorId.clear();
         lista.replaceChildren();
@@ -237,6 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
         lista.replaceChildren(criarElemento("p", "estado-lista", "Carregando produtos..."));
         try {
             todosProdutos = await requisitar(API_URL + "?status=TODOS");
+            atualizarSugestoesDeCategoria();
             renderizarProdutos();
         } catch (erro) {
             lista.replaceChildren(criarElemento("p", "estado-lista", "Não foi possível carregar os produtos."));
@@ -481,7 +484,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ---------- filtros e menu ----------
 
-    document.getElementById("abrir-cadastro-produto").addEventListener("click", abrirCadastro);
     document.getElementById("abrir-cadastro-produto-topo").addEventListener("click", abrirCadastro);
 
     function selecionarFiltroStatus(status) {
@@ -497,7 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
         botao.addEventListener("click", () => {
             semEstoqueAtivo = false;
             filtroSemEstoque.setAttribute("aria-pressed", "false");
-            filtroSemEstoque.classList.remove("ativo");
+            filtroSemEstoque.classList.remove("selecionado");
             selecionarFiltroStatus(botao.dataset.filtroStatus);
             renderizarProdutos();
         });
@@ -508,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
     filtroSemEstoque.addEventListener("click", () => {
         semEstoqueAtivo = !semEstoqueAtivo;
         filtroSemEstoque.setAttribute("aria-pressed", String(semEstoqueAtivo));
-        filtroSemEstoque.classList.toggle("ativo", semEstoqueAtivo);
+        filtroSemEstoque.classList.toggle("selecionado", semEstoqueAtivo);
         if (semEstoqueAtivo) selecionarFiltroStatus("ATIVO");
         renderizarProdutos();
     });
@@ -618,5 +620,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Só administradores usam esta tela: quem não está logado vai para o login e
     // quem não é administrador volta ao catálogo (Cantina.exigirAdministrador).
-    Cantina.exigirAdministrador().then(carregarProdutos);
+    Cantina.exigirAdministrador().then(() => {
+        carregarProdutos();
+        // Atalho da tela inicial: ?novo=1 abre direto o formulário de cadastro.
+        if (new URLSearchParams(window.location.search).has("novo")) abrirCadastro();
+    });
 });

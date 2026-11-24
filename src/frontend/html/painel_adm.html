@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Início · Administração | Cantina da Honestidade</title>
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div id="header-container"></div>
+
+    <div class="pagina-admin">
+
+        <div class="container">
+
+            <div class="layout-admin">
+
+                <!-- MENU LATERAL (igual nas cinco telas do painel) -->
+                <aside class="menu-admin nao-imprimir" id="menu-admin">
+                    <div class="menu-admin-topo">
+                        <div>
+                            <span class="sobretitulo">Painel da cantina</span>
+                            <p class="menu-admin-titulo">Administração</p>
+                        </div>
+                        <button type="button" class="botao-menu" id="alternar-menu" aria-expanded="true" aria-controls="navegacao-admin">
+                            Recolher menu
+                        </button>
+                    </div>
+
+                    <div id="navegacao-admin" class="navegacao-admin">
+                        <nav aria-label="Painel administrativo">
+                            <ul class="menu-admin-lista" role="list">
+                                <li><a href="/html/painel_adm.html" aria-current="page">Início</a></li>
+                                <li><a href="/html/catalogo_produtos_adm.html">Produtos<span class="somente-leitor"> do painel</span></a></li>
+                                <li><a href="/html/usuarios_adm.html">Usuários</a></li>
+                                <li><a href="/html/movimentacoes_adm.html">Movimentações</a></li>
+                                <li><a href="/html/relatorios_adm.html">Relatórios</a></li>
+                                <li><a href="/html/qrcodes_adm.html">QR Codes</a></li>
+                                <li class="menu-admin-separado"><a href="/html/catalogo_produtos.html">Ver catálogo da cantina</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- CONTEÚDO -->
+                <main id="conteudo-principal" class="conteudo-admin" tabindex="-1">
+
+                    <div class="introducao">
+                        <div>
+                            <span class="sobretitulo">Painel da cantina</span>
+                            <h1>Início</h1>
+                            <p>Veja como está a cantina e escolha o que fazer.</p>
+                        </div>
+                    </div>
+
+                    <section aria-labelledby="titulo-resumo">
+                        <h2 id="titulo-resumo" class="somente-leitor">Resumo</h2>
+                        <dl class="resumo-cartoes colunas-4">
+                            <div class="resumo-card"><dt>Produtos à venda</dt><dd id="total-produtos-ativos">—</dd></div>
+                            <div class="resumo-card"><dt>Sem estoque</dt><dd id="total-sem-estoque">—</dd></div>
+                            <div class="resumo-card"><dt>Produtos inativos</dt><dd id="total-produtos-inativos">—</dd></div>
+                            <div class="resumo-card"><dt>Usuários ativos</dt><dd id="total-usuarios-ativos">—</dd></div>
+                        </dl>
+                        <p id="mensagem-painel" class="mensagem-api" role="status" aria-live="polite"></p>
+                    </section>
+
+                    <section aria-labelledby="titulo-atalhos">
+                        <h2 id="titulo-atalhos">O que você quer fazer?</h2>
+                        <div class="grade-atalhos">
+                            <a class="cartao-atalho" href="/html/catalogo_produtos_adm.html?novo=1"><strong>Cadastrar produto</strong><span>Adicionar um item novo ao catálogo.</span></a>
+                            <a class="cartao-atalho" href="/html/catalogo_produtos_adm.html"><strong>Produtos</strong><span>Alterar, inativar e reativar produtos.</span></a>
+                            <a class="cartao-atalho" href="/html/usuarios_adm.html"><strong>Usuários</strong><span>Buscar cadastros, redefinir senhas e ajustar saldos.</span></a>
+                            <a class="cartao-atalho" href="/html/movimentacoes_adm.html"><strong>Movimentações</strong><span>Conferir compras, depósitos e ajustes.</span></a>
+                            <a class="cartao-atalho" href="/html/relatorios_adm.html"><strong>Relatórios</strong><span>Vendas e depósitos por período.</span></a>
+                            <a class="cartao-atalho" href="/html/qrcodes_adm.html"><strong>QR Codes</strong><span>Gerar as etiquetas da caixa e dos produtos.</span></a>
+                        </div>
+                    </section>
+
+                </main>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div id="footer-container"></div>
+
+    <script src="/javascript/base.js"></script>
+    <script src="/javascript/painel_adm.js"></script>
+
+</body>
+
+</html>

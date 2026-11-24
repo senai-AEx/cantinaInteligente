@@ -192,6 +192,13 @@
         </section>
     </div>
 
+    <!-- Só aparece no celular, onde a sacola fica no fim da página: leva até ela e mostra o total.
+         O catalogo_produtos.js mostra ou esconde esta barra conforme a sacola. -->
+    <a class="barra-sacola" id="barra-sacola" href="#carrinho" hidden>
+        <span id="texto-barra-sacola"></span>
+        <span class="barra-sacola-total" id="total-barra-sacola"></span>
+    </a>
+
     <div id="footer-container"></div>
     <script src="/javascript/base.js"></script>
     <script src="/javascript/catalogo_produtos.js"></script>
