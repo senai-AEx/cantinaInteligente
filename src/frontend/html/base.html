@@ -24,14 +24,16 @@
             </a>
 
             <nav class="navegacao" aria-label="Menu principal">
-                <a href="/html/catalogo_produtos.html#produtos" data-visivel="sempre">Produtos</a>
-                <a href="/html/catalogo_produtos.html#carrinho" data-visivel="sempre">Minha sacola</a>
+                <!-- "Produtos" some para o administrador: o painel já tem o link "Ver catálogo da cantina". -->
+                <a href="/html/catalogo_produtos.html#produtos" data-visivel="naoadmin">Produtos</a>
+                <!-- O contador é preenchido pelo base.js com a quantidade de itens guardados na sacola. -->
+                <a href="/html/catalogo_produtos.html#carrinho" class="link-sacola" data-visivel="sempre">Minha sacola<span class="contador-cabecalho" data-contador-sacola aria-hidden="true" hidden></span></a>
                 <!-- O saldo faz parte do nome do link: o leitor de tela ouve "Minha conta, saldo disponível: R$ 10,00". -->
                 <a href="/html/minha_conta.html" class="link-conta" data-visivel="logado" hidden>
                     Minha conta<span class="somente-leitor">, saldo disponível:</span>
                     <span class="saldo-cabecalho" data-usuario-saldo></span>
                 </a>
-                <a href="/html/catalogo_produtos_adm.html" class="link-administracao" data-visivel="admin" hidden>Administração</a>
+                <a href="/html/painel_adm.html" class="link-administracao" data-visivel="admin" hidden>Administração</a>
                 <a href="/html/login.html" data-visivel="anonimo" hidden>Entrar</a>
                 <a href="/html/cadastro.html" class="link-destaque" data-visivel="anonimo" hidden>Criar conta</a>
                 <span class="saudacao-usuario" data-visivel="logado" hidden>Olá, <strong data-usuario-nome></strong></span>
@@ -58,10 +60,11 @@
             <nav class="mapa-site" aria-label="Mapa do site">
                 <ul role="list">
                     <li><a href="/">Início</a></li>
-                    <li><a href="/html/catalogo_produtos.html#produtos">Produtos</a></li>
+                    <li data-visivel="naoadmin" hidden><a href="/html/catalogo_produtos.html#produtos">Produtos</a></li>
                     <li data-visivel="logado" hidden><a href="/html/minha_conta.html">Minha conta</a></li>
                     <li data-visivel="anonimo" hidden><a href="/html/login.html">Entrar</a></li>
                     <li data-visivel="anonimo" hidden><a href="/html/cadastro.html">Criar conta</a></li>
+                    <li data-visivel="admin" hidden><a href="/html/painel_adm.html">Painel: início</a></li>
                     <li data-visivel="admin" hidden><a href="/html/catalogo_produtos_adm.html">Painel: produtos</a></li>
                     <li data-visivel="admin" hidden><a href="/html/usuarios_adm.html">Painel: usuários</a></li>
                     <li data-visivel="admin" hidden><a href="/html/movimentacoes_adm.html">Painel: movimentações</a></li>

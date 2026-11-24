@@ -456,8 +456,7 @@
     display: none;
 }
 
-.menu-admin a,
-.atalho-menu {
+.menu-admin a {
     display: block;
     width: 100%;
     padding: 11px 12px;
@@ -471,9 +470,7 @@
     text-decoration: none;
 }
 
-.menu-admin a:hover,
-.atalho-menu:hover,
-.atalho-menu.ativo {
+.menu-admin a:hover {
     background: #f2f5ef;
     color: #376b45;
 }
@@ -1237,43 +1234,6 @@ textarea:focus-visible {
     margin-top: 6px;
     padding-top: 8px;
     border-top: 1px solid var(--cor-borda);
-}
-
-/* Atalhos que só existem na tela de produtos */
-.menu-admin-atalhos {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding-top: 14px;
-    border-top: 1px solid var(--cor-borda);
-}
-
-.menu-admin-subtitulo {
-    color: var(--cor-texto-suave);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-}
-
-.atalho-menu {
-    min-height: 44px;
-    border: 1px solid transparent;
-    color: #3a4a3f;
-    font-weight: 600;
-}
-
-/* Filtro ligado: marca de conferido, borda e negrito (não depende só da cor). */
-.atalho-menu[aria-pressed="true"] {
-    border-color: #3d6545;
-    background: #edf4e9;
-    color: #2d5637;
-    font-weight: 700;
-}
-
-.atalho-menu[aria-pressed="true"]::before {
-    content: "✓ ";
-    content: "✓ " / "";
 }
 
 @media (max-width: 900px) {

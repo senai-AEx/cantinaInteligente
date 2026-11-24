@@ -35,7 +35,7 @@ Resposta de sucesso: `{"produto": {...}}` com todos os campos do [modelo](modelo
 | `GET /api/produtos/{id}` | Consultar um produto | `200`; não existe: `404` |
 | `POST /api/produtos` | Cadastrar | `201` + cabeçalho `Location` |
 | `PUT /api/produtos/{id}` | Alterar | `200`; não existe: `404` |
-| `PATCH /api/produtos/{id}/inativar` | **Excluir** (exclusão lógica: fica `INATIVO`) | `200` |
+| `PATCH /api/produtos/{id}/inativar` | **Inativar** (exclusão lógica: fica `INATIVO`) | `200` |
 | `PATCH /api/produtos/{id}/reativar` | Reativar | `200` |
 | `GET /api/produtos/{id}/auditoria` | Últimas 100 ações do produto | `200` com `{"auditorias": [...]}` |
 | `POST /api/uploads/produtos` | Enviar foto (`multipart/form-data`, campo `imagem`; JPG/PNG/WebP até 5 MB) | `201` com `{"foto_caminho": "assets/produtos/..."}` |

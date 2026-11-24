@@ -4,7 +4,7 @@ A sessão fica em um cookie assinado pelo Flask (HttpOnly) e guarda apenas o
 id do usuário. A cada requisição o usuário é relido do banco, de modo que um
 usuário inativado ou que perdeu o perfil de administrador perde o acesso na hora.
 
-Uso nos controllers:
+Uso nas rotas:
 
     @login_obrigatorio
     def minha_rota():

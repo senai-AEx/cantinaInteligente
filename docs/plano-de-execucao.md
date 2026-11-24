@@ -75,7 +75,7 @@ Cada uma tem uma recomendação; sem resposta, o plano segue com a recomendada.
 | D3 | Perfis | **Cliente e Administrador.** Repositor e Gateway Pix saem do escopo (ficam como evolução futura no documento). |
 | D4 | Valor da compra | **Debita o total dos produtos.** Sai o "valor livre" do antigo RF06, que contradiz o desconto automático da demanda. |
 | D5 | Como servir as telas | **Pelo próprio Flask** (uma porta só). Permite sessão por cookie sem CORS e simplifica execução e publicação. |
-| D6 | Primeiro administrador | Criado por comando (`make admin`) com credenciais de demonstração; clientes se cadastram sozinhos. |
+| D6 | Primeiro administrador | Criado por comando (`python scripts/criar_admin.py`) com credenciais de demonstração; clientes se cadastram sozinhos. |
 | D7 | QR Code | Um QR da cantina que abre o catálogo, e QR por produto que já coloca o item na sacola. Só depois das fases 1 a 5. |
 | D8 | Publicar o sistema online | Opcional (o roteiro sugere). Só se sobrar tempo; a banca aceita vídeo. |
 | D9 | Ferramenta de planejamento no documento | O documento cita Trello, mas o grupo usa o Kanban do GitHub. Escolher uma e citar a que está atualizada. |
@@ -91,7 +91,7 @@ Prioridade: **P0** = sem isso a AV05 não fecha · **P1** = pontua diretamente �
 - Liberar acesso ao repositório (público, ou professora como colaboradora).
 - Atualizar o Kanban com as fases deste plano.
 
-Pronto quando: `main` atualizada, `make test` verde e o link do repositório abrir para a professora.
+Pronto quando: `main` atualizada, `python scripts/testes.py` verde e o link do repositório abrir para a professora.
 
 ### Fase 1 — Usuários e login (P0)
 
@@ -183,7 +183,7 @@ Pronto quando: PDF gerado, revisado por dois integrantes, sem seção vazia e ba
 ### Fase 8 — Entrega da AV05 (P0, sábado 21/11)
 
 - Congelar o código na sexta à noite; `main` atualizada com tag `av05`.
-- README conferido em um computador limpo (clonar, `make setup`, `make up`).
+- README conferido em um computador limpo (clonar, `python instalar.py`, `python iniciar.py`).
 - Vídeo de demonstração **sem áudio** seguindo o roteiro: cadastro → login → crédito → compra → histórico → painel admin → relatórios → validações.
 - Enviar no AVA: PDF do documento, link do repositório, link do vídeo.
 
@@ -247,8 +247,8 @@ Baseada no que cada um já fez no repositório; ajustem como preferirem. Cada um
 | Não dar tempo de tudo | Cortar nesta ordem: publicação online → QR Code → CSV → edição de usuário pelo admin. **Não cortar**: login, crédito, compra com débito, histórico, um relatório de vendas e um de saldos, documento e vídeo. |
 | Documento atrasar (30% da nota) | Começa hoje, em paralelo ao código; diagramas feitos a partir do modelo da seção 6, não do código pronto |
 | Conflitos de merge na reta final | PRs pequenos e diários para a `develop`; ninguém trabalha direto nela |
-| Banco diferente em cada computador | Só mexer no banco por migração; `make migrate` antes de testar |
-| Demonstração falhar ao vivo | A banca aceita vídeo gravado; gravar no sábado com dados de exemplo (`make seed`) |
+| Banco diferente em cada computador | Só mexer no banco por migração; `python scripts/banco.py migrar` antes de testar |
+| Demonstração falhar ao vivo | A banca aceita vídeo gravado; gravar no sábado com dados de exemplo (`python scripts/banco.py semear`) |
 | Repositório sem acesso para a professora | Resolver hoje, na fase 0 |
 
 ## 11. Não verificado

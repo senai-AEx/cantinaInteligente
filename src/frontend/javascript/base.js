@@ -116,6 +116,11 @@
 
     // ---------- formatação ----------
 
+    // "1 unidade" ou "3 unidades", conforme a quantidade.
+    Cantina.plural = function (quantidade, singular, variasUnidades) {
+        return `${quantidade} ${quantidade === 1 ? singular : variasUnidades}`;
+    };
+
     Cantina.formatarPreco = function (centavos) {
         return (Number(centavos || 0) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     };
@@ -328,6 +333,7 @@
             const mostrar = regra === "sempre"
                 || (regra === "anonimo" && !usuario)
                 || (regra === "logado" && Boolean(usuario))
+                || (regra === "naoadmin" && !admin)
                 || (regra === "admin" && admin);
             item.hidden = !mostrar;
         });
@@ -335,6 +341,7 @@
             item.textContent = usuario ? usuario.nome.trim().split(/\s+/)[0] : "";
         });
         Cantina.atualizarSaldoCabecalho(usuario ? usuario.saldo_centavos : null);
+        Cantina.atualizarContadorSacola(Cantina.quantidadeSalvaNaSacola());
     }
 
     // Atualiza o saldo mostrado no cabeçalho sem nova consulta ao servidor.
@@ -345,6 +352,42 @@
                 : Cantina.formatarPreco(saldoCentavos);
         });
     };
+
+    // ---------- sacola no cabeçalho ----------
+
+    // Mesma chave usada pelo catalogo_produtos.js. O valor é {id_produto: quantidade}.
+    const CHAVE_SACOLA = "cantina-sacola-v1";
+
+    // Quantos itens estão guardados na sacola deste navegador (0 se não houver ou se o dado estiver danificado).
+    Cantina.quantidadeSalvaNaSacola = function () {
+        try {
+            const sacola = JSON.parse(localStorage.getItem(CHAVE_SACOLA) || "{}");
+            return Object.values(sacola).reduce(
+                (soma, quantidade) => soma + (Number.isInteger(quantidade) && quantidade > 0 ? quantidade : 0),
+                0
+            );
+        } catch {
+            return 0;
+        }
+    };
+
+    // Mostra o contador ao lado de "Minha sacola" e informa a quantidade no nome do link para leitores de tela.
+    Cantina.atualizarContadorSacola = function (quantidade) {
+        document.querySelectorAll("[data-contador-sacola]").forEach((contador) => {
+            contador.textContent = quantidade;
+            contador.hidden = quantidade === 0;
+        });
+        document.querySelectorAll(".link-sacola").forEach((link) => {
+            link.setAttribute("aria-label", quantidade === 0
+                ? "Minha sacola, vazia"
+                : `Minha sacola, ${quantidade} ${quantidade === 1 ? "item" : "itens"}`);
+        });
+    };
+
+    // Se outra aba mudar a sacola, o contador acompanha.
+    window.addEventListener("storage", (evento) => {
+        if (evento.key === CHAVE_SACOLA) Cantina.atualizarContadorSacola(Cantina.quantidadeSalvaNaSacola());
+    });
 
     // Marca com aria-current o link da tela aberta, no menu do cabeçalho e no mapa do
     // site do rodapé: o leitor de tela anuncia "página atual" e o CSS destaca o item.
@@ -410,6 +453,20 @@
         if (!promessaLayout) promessaLayout = carregarLayout();
         return promessaLayout;
     };
+
+    // No celular, o menu do painel começa recolhido: a lista de produtos aparece logo abaixo do título.
+    // O botão continua funcionando como antes (cada tela do painel trata o clique).
+    function recolherMenuNoCelular() {
+        const menu = document.getElementById("menu-admin");
+        const layout = document.querySelector(".layout-admin");
+        const botao = document.getElementById("alternar-menu");
+        if (!menu || !layout || !botao || !window.matchMedia("(max-width: 640px)").matches) return;
+        menu.classList.add("recolhido");
+        layout.classList.add("menu-recolhido");
+        botao.textContent = "Expandir menu";
+        botao.setAttribute("aria-expanded", "false");
+    }
+    recolherMenuNoCelular();
 
     window.Cantina = Cantina;
 

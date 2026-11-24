@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Cantina.sessao().then((usuario) => {
         if (!usuario) return;
         window.location.replace(usuario.perfil === "ADMINISTRADOR"
-            ? "/html/catalogo_produtos_adm.html"
+            ? "/html/painel_adm.html"
             : "/html/catalogo_produtos.html");
     });
 });

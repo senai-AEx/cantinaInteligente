@@ -7,18 +7,18 @@ Registro das escolhas do grupo e dos motivos. A justificativa completa das tecno
 | Camada | Escolha | Motivo |
 | --- | --- | --- |
 | Backend | Python 3 + Flask | Simples, gratuito e conhecido pela equipe (baixo custo). |
-| Banco | MySQL 8.0.16+ | Relacional, com transações, bloqueio de linha e restrições CHECK; roda em Docker ou instalação local. |
+| Banco | MySQL 8.0.16+ | Relacional, com transações, bloqueio de linha e restrições CHECK; instalado direto no computador, sem contêiner (ver D10). |
 | Conector | MySQL Connector/Python | Driver oficial; consultas com parâmetros; credenciais em `.env` (fora do Git). |
 | Frontend | HTML, CSS e JavaScript puros | Sem etapa de build; roda em qualquer navegador atual, no celular e no computador. |
 | Sessão | Cookie assinado do Flask | Já vem no framework; `HttpOnly` e `SameSite=Lax`; não exige token no navegador. |
 | Senha | Hash com `werkzeug.security` | Já vem com o Flask; a senha nunca é gravada em texto puro. |
 | QR Code | Biblioteca `segno` | Só Python, sem dependências extras; gera SVG nítido para impressão, sem arquivos de imagem guardados no servidor. |
-| Backup | `mysqldump` dentro do contêiner MySQL | Cópia completa e restauração com um comando (`make backup` e `make restore`), sem programa extra no computador. |
+| Backup | Scripts Python (`scripts/banco.py backup` e `restaurar`), que gravam e leem o banco pela biblioteca `mysql-connector-python` | Cópia completa e restauração com um comando, sem Docker e sem depender do `mysqldump` (ver D10). |
 | Dinheiro | Inteiros em centavos | Evita erros de arredondamento. |
 | Datas | Sessão MySQL em UTC | Registros consistentes; a tela mostra no horário local e os relatórios usam datas de Brasília. |
-| Ambiente | Docker (MySQL) + Make | Mesmo banco e mesmos comandos em todos os computadores. |
+| Ambiente | MySQL instalado no computador + scripts Python (`instalar.py`, `iniciar.py`) | Um passo a menos para o aluno: sem Docker e sem Make obrigatório (ver D10). |
 
-## Decisões de negócio e de arquitetura (D1 a D9)
+## Decisões de negócio e de arquitetura (D1 a D10)
 
 Decisões levantadas no [plano de execução](plano-de-execucao.md) e adotadas pelo grupo.
 
@@ -29,14 +29,15 @@ Decisões levantadas no [plano de execução](plano-de-execucao.md) e adotadas p
 | D3 | Perfis | **Cliente e Administrador.** | Repositor e Gateway Pix saem do escopo e ficam como evolução futura no documento. |
 | D4 | Valor da compra | **Debita o total dos produtos.** | Sai o "valor livre" do antigo RF06, que contradizia o desconto automático pedido na demanda. |
 | D5 | Como servir as telas | **Pelo próprio Flask**, na mesma porta da API (5000). | Permite a sessão por cookie sem CORS e simplifica a execução: um servidor só. |
-| D6 | Primeiro administrador | **Criado por comando** (`make admin`), com os dados `ADMIN_*` do `.env`. Clientes se cadastram sozinhos. | Não existe tela pública para criar administrador. Depois, um administrador pode mudar o perfil de outro usuário. |
+| D6 | Primeiro administrador | **Criado por comando** (`python scripts/criar_admin.py`, também feito pelo `python instalar.py`), com os dados `ADMIN_*` do `.env`. Clientes se cadastram sozinhos. | Não existe tela pública para criar administrador. Depois, um administrador pode mudar o perfil de outro usuário. |
 | D7 | QR Code | **Um QR Code da cantina** (abre o catálogo) **e um por produto** (coloca o item na sacola), feito só depois das demais fases. | A demanda trata o QR Code como possibilidade; fica como RF13, marcado como previsto até ser implementado. |
 | D8 | Publicar o sistema online | **Opcional**, só se sobrar tempo. | A banca aceita vídeo; o ambiente oficial da entrega é o local. |
 | D9 | Ferramenta de planejamento | **Kanban do GitHub Projects** (no lugar do Trello citado na versão antiga do documento). | É a ferramenta que o grupo realmente usa; fica junto do código, das issues e dos pull requests. |
+| D10 | Ambiente de execução | **Docker removido.** O MySQL 8 é instalado uma vez direto no computador. Os scripts `instalar.py` e `iniciar.py` fazem o resto, e o `make` passou a ser atalho opcional. Substitui a linha "Ambiente" da tabela de stack. | Docker Desktop (que pode exigir WSL 2 no Windows), a imagem do MySQL e o Make eram um passo a mais para cada integrante instalar. Com os scripts, o aluno instala o MySQL e roda dois comandos Python. Consequência: cada computador tem o seu MySQL, e o backup (`scripts/banco.py backup`) é a forma de levar uma cópia do banco para outro computador. |
 
 ## Organização do código
 
-Backend em camadas `routes → controller → service → repository`, um pacote por módulo de negócio (`usuarios`, `produtos`, `carteira`, `compras` e `admin`). Detalhes em [arquitetura.md](arquitetura.md). A divisão em camadas foi iniciada na branch do Luan e unificada na `develop`, substituindo o arquivo único `produtos.py` da AV04.
+Backend em camadas `routes → service → repository`, um pacote por módulo de negócio. O `controller` foi removido em uma simplificação posterior: as funções que recebem a requisição passaram para `routes.py`, para que cada módulo tenha menos arquivos (`usuarios`, `produtos`, `carteira`, `compras` e `admin`). Detalhes em [arquitetura.md](arquitetura.md). A divisão em camadas foi iniciada na branch do Luan e unificada na `develop`, substituindo o arquivo único `produtos.py` da AV04.
 
 ## Produto
 

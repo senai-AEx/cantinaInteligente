@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Para onde ir depois de entrar: o destino pedido (se for interno) ou a área do perfil.
     function paginaInicial(usuario) {
         const padrao = usuario.perfil === "ADMINISTRADOR"
-            ? "/html/catalogo_produtos_adm.html"
+            ? "/html/painel_adm.html"
             : "/html/catalogo_produtos.html";
         return Cantina.destinoSeguro(destinoPedido, padrao);
     }

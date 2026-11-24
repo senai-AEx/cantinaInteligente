@@ -194,7 +194,7 @@ Requisitos retirados: o antigo **RF04** (fornecedores) e o antigo **RF10** (caus
 
 Observações para o grupo (retirar do PDF depois de resolver):
 
-- **RNF04:** o projeto traz os comandos `make backup` (grava uma cópia completa do banco na pasta `backups/`) e `make restore` (restaura uma cópia). Os dois foram executados no ambiente local. O agendamento diário é configurado na implantação, no servidor da unidade.
+- **RNF04:** o projeto traz os comandos `python scripts/banco.py backup` (grava uma cópia completa do banco na pasta `backups/`) e `python scripts/banco.py restaurar` (restaura uma cópia). Os dois foram executados no ambiente local. O agendamento diário é configurado na implantação, no servidor da unidade.
 - **RNF05:** medido em 17/11/2026 no ambiente local, com 20 consultas seguidas de cada tipo: o percentil 95 ficou abaixo de 0,1 s para catálogo, saldo, extrato, histórico e relatório de vendas. A medição não simula vários usuários ao mesmo tempo.
 - **[CONFIRMAR RNF12: requisito novo, sugerido para ligar o documento ao checklist da norma cobrado na AV06. O grupo decide se mantém.]**
 
@@ -451,7 +451,7 @@ sequenceDiagram
     autonumber
     actor C as Cliente
     participant T as Tela do catálogo (navegador)
-    participant A as API Flask (routes e controller)
+    participant A as API Flask (routes)
     participant S as Serviço de compras (service)
     participant R as Repositórios (compras e carteira)
     participant B as MySQL
@@ -515,7 +515,7 @@ sequenceDiagram
     autonumber
     actor C as Cliente
     participant T as Tela Minha conta (navegador)
-    participant A as API Flask (routes e controller)
+    participant A as API Flask (routes)
     participant S as Serviço da carteira (service)
     participant R as Repositório da carteira (repository)
     participant B as MySQL
@@ -821,7 +821,7 @@ flowchart LR
     subgraph servidor["Aplicação Flask (src/backend) na porta 5000"]
         app["app.py<br/>registra os módulos, entrega as telas<br/>e padroniza os erros"]
         seg["seguranca.py<br/>sessão por cookie e perfis"]
-        subgraph modulos["Módulos de negócio em camadas: routes, controller, service e repository"]
+        subgraph modulos["Módulos de negócio em camadas: routes, service e repository"]
             usuarios["usuarios<br/>/api/auth"]
             produtos["produtos<br/>/api/produtos"]
             carteira["carteira<br/>/api/carteira"]
@@ -862,7 +862,7 @@ Fonte: Elaborado pela equipe do Projeto Aplicado II (2026).
 
 ### 7.6 Diagrama de Implantação
 
-O diagrama de implantação mostra onde cada parte do sistema é executada. No ambiente de desenvolvimento e de demonstração, um único computador executa a aplicação Flask (telas e API na porta 5000) e o banco MySQL, que roda em um contêiner Docker com um volume para os dados não se perderem. O usuário acessa o sistema pelo navegador. As credenciais do banco e a chave da sessão ficam no arquivo `.env`, que não é enviado ao repositório.
+O diagrama de implantação mostra onde cada parte do sistema é executada. No ambiente de desenvolvimento e de demonstração, um único computador executa a aplicação Flask (telas e API na porta 5000) e o banco MySQL 8, instalado diretamente no computador (porta 3306), sem contêiner. O comando `python iniciar.py` liga o sistema e confere a conexão com o banco. O usuário acessa o sistema pelo navegador. As credenciais do banco e a chave da sessão ficam no arquivo `.env`, que não é enviado ao repositório.
 
 **Imagem 8: Diagrama de implantação.**
 
@@ -876,17 +876,13 @@ flowchart LR
         subgraph python["Python 3 com ambiente virtual .venv"]
             flask["Aplicação Flask<br/>telas e API na porta 5000"]
         end
-        subgraph docker["Docker"]
-            mysql[("Contêiner cantina-mysql<br/>MySQL 8.4 na porta 3306")]
-            volume[("Volume cantina-mysql-data<br/>dados persistentes")]
-        end
+        mysql[("MySQL 8 instalado no computador<br/>porta 3306, banco cantina_inteligente")]
         env["Arquivo .env<br/>credenciais do banco e SECRET_KEY"]
         fotos["Pasta assets/produtos<br/>fotos enviadas pelo painel"]
     end
 
     navegador -->|"HTTP: páginas, CSS, JavaScript e JSON"| flask
     flask -->|"TCP 3306 com MySQL Connector/Python"| mysql
-    mysql --- volume
     flask -.->|"lê a configuração"| env
     flask -->|"grava e lê as fotos"| fotos
 ```
@@ -911,8 +907,8 @@ A Cantina Inteligente é uma aplicação web cliente/servidor: o navegador mostr
 | **MySQL Connector/Python** | Liga o Python ao MySQL. | É o conector oficial do MySQL. As consultas usam parâmetros, o que protege contra injeção de SQL. |
 | **HTML5, CSS3 e JavaScript** | Telas do cliente e do administrador, máscaras e validações dos campos. | Funcionam em qualquer navegador atual, no celular e no computador, sem instalar aplicativo. Não dependem de ferramentas pagas nem de etapa de compilação. |
 | **Git e GitHub** | Controle de versões do código e da documentação, revisão por pull request e quadro de tarefas. | São gratuitos, registram o que cada integrante fez e permitem o trabalho em paralelo com branches (`develop` para integração e `main` para as entregas). |
-| **Docker** | Executa o MySQL em um contêiner igual em todos os computadores da equipe. | Evita diferenças de instalação entre os integrantes: o banco sobe com um comando e os dados ficam em um volume que não se perde ao desligar. |
-| **Make e scripts em Python** | Atalhos de execução: `make setup`, `make up`, `make migrate`, `make seed`, `make admin` e `make test`. | Deixam a execução do projeto igual para todos e simples de explicar no README. |
+| **MySQL 8 instalado no computador** | Banco de dados relacional, instalado uma vez direto no computador, sem contêiner. | Um passo a menos para quem vai rodar o projeto: sem Docker, o integrante instala o MySQL e roda dois comandos Python (`python instalar.py` e `python iniciar.py`). |
+| **Scripts em Python** (`instalar.py`, `iniciar.py`) | Atalhos de execução: instalam o ambiente e o banco, ligam o sistema, e `scripts/banco.py` faz backup e restauração. | Deixam a execução do projeto igual para todos e simples de explicar no README, sem exigir o programa Make (que continua opcional). |
 | **unittest** | Testes automatizados do servidor. | Já faz parte do Python, sem custo e sem instalação extra. |
 
 **Como a solução atende às restrições da demanda**
@@ -929,12 +925,11 @@ A Cantina Inteligente é uma aplicação web cliente/servidor: o navegador mostr
 
 | Camada | Arquivo | Responsabilidade |
 | --- | --- | --- |
-| Rotas | `routes.py` | Declara os endereços da API e os métodos aceitos. Não tem regra de negócio. |
-| Controle | `controller.py` | Confere o login e o perfil, lê os dados da requisição, chama o serviço e monta a resposta. |
+| Rotas | `routes.py` | Recebe a requisição, confere o login e o perfil, chama o serviço e monta a resposta. No fim do arquivo fica a tabela de endereços da API. |
 | Serviço | `service.py` | Aplica as regras de negócio e controla a transação. |
 | Repositório | `repository.py` | Executa os comandos SQL. É a única camada que acessa o banco. |
 
-O caminho de uma requisição é sempre rotas → controle → serviço → repositório. Essa divisão permite alterar uma regra sem mexer nas telas e incluir um módulo novo sem alterar os que já existem (RNF09).
+O caminho de uma requisição é sempre rotas → serviço → repositório. Essa divisão permite alterar uma regra sem mexer nas telas e incluir um módulo novo sem alterar os que já existem (RNF09).
 
 **Sessão e perfis de acesso.** Depois do login, o servidor grava um cookie de sessão assinado, marcado como `HttpOnly` (o JavaScript da página não consegue ler) e `SameSite=Lax` (não acompanha envios de formulário nem chamadas disparadas por outros sites). O cookie guarda apenas o identificador do usuário e vale por 8 horas. A cada requisição o usuário é relido do banco; por isso, quem é inativado ou perde o perfil de administrador perde o acesso na hora. Como as telas e a API saem do mesmo servidor e da mesma porta, o cookie funciona sem configuração adicional. As rotas restritas respondem com erro 401 para quem não fez login e 403 para quem não tem permissão.
 

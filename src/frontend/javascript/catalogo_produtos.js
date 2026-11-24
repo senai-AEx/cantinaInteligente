@@ -33,6 +33,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const statusSacola = document.getElementById("status-sacola");
     const linhaSaldoSacola = document.getElementById("linha-saldo-sacola");
     const saldoSacola = document.getElementById("saldo-sacola");
+    const barraSacola = document.getElementById("barra-sacola");
+    const textoBarraSacola = document.getElementById("texto-barra-sacola");
+    const totalBarraSacola = document.getElementById("total-barra-sacola");
 
     // Modal "Finalizar compra"
     const modal = document.getElementById("modal-compra");
@@ -172,9 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return Object.values(sacola).reduce((soma, quantidade) => soma + quantidade, 0);
     }
 
-    function plural(quantidade, singular, variasUnidades) {
-        return `${quantidade} ${quantidade === 1 ? singular : variasUnidades}`;
-    }
+    const plural = Cantina.plural;
 
     // A API devolve "assets/produtos/arquivo.png"; o servidor entrega em "/assets/produtos/...".
     function caminhoFoto(caminho) {
@@ -232,8 +233,8 @@ document.addEventListener("DOMContentLoaded", () => {
         conteudo.append(elemento("p", "preco-produto", formatarPreco(produto.preco_venda_centavos)));
         if (produto.descricao) conteudo.append(elemento("p", "descricao-produto", produto.descricao));
         const selos = elemento("div", "selos-produto");
-        if (produto.zero_lactose) selos.append(elemento("span", "selo", "Zero lactose"));
-        if (produto.zero_acucar) selos.append(elemento("span", "selo", "Zero açúcar"));
+       // if (produto.zero_lactose) selos.append(elemento("span", "selo", "Zero lactose"));
+        //if (produto.zero_acucar) selos.append(elemento("span", "selo", "Zero açúcar"));
         if (selos.childElementCount) conteudo.append(selos);
 
         const rodape = elemento("div", "rodape-card-produto");
@@ -373,6 +374,14 @@ document.addEventListener("DOMContentLoaded", () => {
         saldoSacola.textContent = conhecido ? formatarPreco(saldoCentavos) : "";
     }
 
+    // Barra fixa do celular: diz quantos itens há na sacola e o total, e leva até ela.
+    function atualizarBarraSacola(quantidadeTotal) {
+        barraSacola.hidden = quantidadeTotal === 0;
+        if (quantidadeTotal === 0) return;
+        textoBarraSacola.textContent = `Ver sacola · ${quantidadeTotal} ${quantidadeTotal === 1 ? "item" : "itens"}`;
+        totalBarraSacola.textContent = formatarPreco(totalDaSacola());
+    }
+
     // Redesenha a sacola. Devolve true se ela precisou ser ajustada ao estoque.
     function renderizarSacola() {
         const mudou = ajustarSacolaAoEstoque();
@@ -393,6 +402,8 @@ document.addEventListener("DOMContentLoaded", () => {
         rotuloContadorSacola.textContent = quantidadeTotal === 1 ? "item na sacola" : "itens na sacola";
         totalCarrinho.textContent = formatarPreco(totalDaSacola());
         resumoCarrinho.hidden = quantidadeTotal === 0;
+        atualizarBarraSacola(quantidadeTotal);
+        Cantina.atualizarContadorSacola(quantidadeTotal);
         if (quantidadeTotal === 0) {
             // Sacola vazia (compra concluída ou itens retirados): o aviso do QR Code
             // "foi para a sua sacola" deixa de valer.
@@ -802,7 +813,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         adicionarUnidade(produto);
-        mostrarAviso(`${produto.nome} adicionado à sua sacola (${plural(sacola[produto.id_produto], "unidade", "unidades")}).`);
+        mostrarAviso(`${produto.nome} foi para a sua sacola (${plural(sacola[produto.id_produto], "unidade", "unidades")}).`);
     });
 
     categorias.addEventListener("click", (evento) => {

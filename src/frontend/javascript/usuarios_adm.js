@@ -66,9 +66,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return (centavos < 0 ? "− " : "+ ") + Cantina.formatarPreco(Math.abs(centavos));
     }
 
-    function plural(quantidade, singular, variosTexto) {
-        return `${quantidade} ${quantidade === 1 ? singular : variosTexto}`;
-    }
+    const plural = Cantina.plural;
 
     // Traduz o erro da API em um texto claro. Sessão encerrada leva ao login.
     function tratarErro(erro) {

@@ -1,9 +1,11 @@
 """Prepara os usuários de demonstração com os dados do .env.
 
-Uso: `make demo`. Cria (ou redefine) o administrador (ADMIN_*) e um cliente
+Uso: python scripts/criar_demo.py
+
+Cria (ou redefine) o administrador (ADMIN_*) e um cliente
 (CLIENTE_*) e dá ao cliente um crédito inicial de R$ 50,00 para ele já poder
 comprar na apresentação. Pode rodar mais de uma vez: o crédito não é repetido.
-As senhas nunca são mostradas aqui; use `make credenciais`.
+As senhas nunca são mostradas aqui; use python scripts/credenciais.py.
 """
 import os
 from pathlib import Path
@@ -12,10 +14,16 @@ import uuid
 
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ))
+sys.path.insert(0, str(RAIZ / "scripts"))
+from _ambiente import garantir_venv  # noqa: E402
+
+garantir_venv()
 
 from dotenv import load_dotenv  # noqa: E402
 
-load_dotenv(RAIZ / ".env")
+# O .env é a fonte da verdade: vale mesmo que o terminal já tenha uma variável
+# com o mesmo nome (um valor antigo exportado antes de editar o .env não pode ganhar).
+load_dotenv(RAIZ / ".env", override=True)
 
 from src.backend.carteira import service as carteira_service  # noqa: E402
 from src.backend.erros import ErroValidacao  # noqa: E402
@@ -29,7 +37,7 @@ def ler(prefixo):
     dados = {campo: os.getenv(f"{prefixo}_{campo.upper()}", "").strip() for campo in CAMPOS}
     faltando = [f"{prefixo}_{campo.upper()}" for campo, valor in dados.items() if not valor]
     if faltando:
-        raise SystemExit("Preencha no .env (ou rode make setup): " + ", ".join(faltando))
+        raise SystemExit("Preencha no .env (ou rode python instalar.py): " + ", ".join(faltando))
     return dados
 
 
@@ -56,7 +64,7 @@ def main():
     if criado:
         print("Crédito inicial de R$ 50,00 lançado para o cliente de demonstração.")
     print(f"Saldo do cliente: R$ {carteira['saldo_centavos'] / 100:.2f}".replace(".", ","))
-    print("Para ver matrícula e senha de cada um: make credenciais")
+    print("Para ver matrícula e senha de cada um: python scripts/credenciais.py")
     return 0
 
 

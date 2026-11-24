@@ -1,52 +1,47 @@
+.PHONY: help setup up demo admin credenciais migrate seed backup restore test
+
+# Atalhos opcionais. Os comandos de verdade são: python instalar.py e python iniciar.py
 PYTHON ?= python
 
-.DEFAULT_GOAL := help
-.PHONY: help setup up down db-up db-down migrate seed admin demo credenciais backup restore api test status
-
 help:
-	@$(PYTHON) scripts/dev.py help
+	@echo Comandos (todos rodam tambem direto com python):
+	@echo   make setup        python instalar.py
+	@echo   make up           python iniciar.py
+	@echo   make demo         produtos de exemplo e usuarios de demonstracao
+	@echo   make admin        recria o administrador com os dados do .env
+	@echo   make credenciais  mostra os dados de acesso de demonstracao
+	@echo   make migrate      aplica as migracoes que faltam
+	@echo   make backup       grava uma copia do banco em backups/
+	@echo   make restore ARQUIVO=backups/arquivo.sql
+	@echo   make test         roda os testes automatizados
 
 setup:
-	@$(PYTHON) scripts/dev.py setup
+	$(PYTHON) instalar.py
 
 up:
-	@$(PYTHON) scripts/dev.py up
-
-down:
-	@$(PYTHON) scripts/dev.py db-down
-
-db-up:
-	@$(PYTHON) scripts/dev.py db-up
-
-db-down:
-	@$(PYTHON) scripts/dev.py db-down
-
-migrate:
-	@$(PYTHON) scripts/dev.py migrate
-
-seed:
-	@$(PYTHON) scripts/dev.py seed
-
-api:
-	@$(PYTHON) scripts/dev.py api
-
-admin:
-	@$(PYTHON) scripts/dev.py admin
+	$(PYTHON) iniciar.py
 
 demo:
-	@$(PYTHON) scripts/dev.py demo
+	$(PYTHON) scripts/banco.py semear
+	$(PYTHON) scripts/criar_demo.py
+
+admin:
+	$(PYTHON) scripts/criar_admin.py
 
 credenciais:
-	@$(PYTHON) scripts/dev.py credenciais
+	$(PYTHON) scripts/credenciais.py
+
+migrate:
+	$(PYTHON) scripts/banco.py migrar
+
+seed:
+	$(PYTHON) scripts/banco.py semear
 
 backup:
-	@$(PYTHON) scripts/dev.py backup
+	$(PYTHON) scripts/banco.py backup
 
 restore:
-	@$(PYTHON) scripts/dev.py restore $(ARQUIVO)
+	$(PYTHON) scripts/banco.py restaurar $(ARQUIVO)
 
 test:
-	@$(PYTHON) scripts/dev.py test
-
-status:
-	@$(PYTHON) scripts/dev.py status
+	$(PYTHON) scripts/testes.py

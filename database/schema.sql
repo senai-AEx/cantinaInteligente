@@ -1,6 +1,6 @@
 -- Esquema completo e atual do banco (equivale às migrações 002 a 006 aplicadas).
 -- Use para criar o banco do zero manualmente (MySQL Workbench, por exemplo).
--- Quem usa `make up` não precisa deste arquivo: o Make aplica as migrações.
+-- Quem usa `python iniciar.py` não precisa deste arquivo: o próprio sistema aplica as migrações.
 -- Requer MySQL 8.0.16+ (restrições CHECK).
 CREATE DATABASE IF NOT EXISTS cantina_inteligente
     CHARACTER SET utf8mb4

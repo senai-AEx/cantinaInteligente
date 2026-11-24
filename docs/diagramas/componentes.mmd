@@ -8,7 +8,7 @@ flowchart LR
     subgraph servidor["Aplicação Flask (src/backend) na porta 5000"]
         app["app.py<br/>registra os módulos, entrega as telas<br/>e padroniza os erros"]
         seg["seguranca.py<br/>sessão por cookie e perfis"]
-        subgraph modulos["Módulos de negócio em camadas: routes, controller, service e repository"]
+        subgraph modulos["Módulos de negócio em camadas: routes, service e repository"]
             usuarios["usuarios<br/>/api/auth"]
             produtos["produtos<br/>/api/produtos"]
             carteira["carteira<br/>/api/carteira"]

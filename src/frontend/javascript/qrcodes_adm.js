@@ -35,9 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // ---------- utilitários ----------
 
-    function plural(quantidade, singular, variosTexto) {
-        return `${quantidade} ${quantidade === 1 ? singular : variosTexto}`;
-    }
+    const plural = Cantina.plural;
 
     // Busca sem diferença entre maiúsculas, minúsculas e acentos ("pao" encontra "Pão").
     function normalizar(texto) {

@@ -18,7 +18,7 @@ O Documento do Sistema (30% da AV05) não aparece no vídeo; ele é enviado em P
 
 ## Antes de gravar
 
-- [ ] Banco limpo, só com os produtos de exemplo: `make up`, `make seed` e `make admin`. Sem compras, créditos ou clientes antigos, para os valores do roteiro baterem.
+- [ ] Banco limpo, só com os produtos de exemplo: `python iniciar.py`, `python scripts/banco.py semear` e `python scripts/criar_admin.py`. Sem compras, créditos ou clientes antigos, para os valores do roteiro baterem. **[CONFIRMAR: o `python instalar.py` também cria o cliente de demonstração, com R$ 50,00 de crédito. Decidir se esse cliente deve sair do banco antes da gravação ou se os valores do roteiro precisam ser ajustados.]**
 - [ ] Ter rodado o [roteiro de testes manuais](testes-manuais.md) sem falhas que apareçam no vídeo.
 - [ ] Duas janelas do navegador: uma normal para o **cliente** e uma anônima para o **administrador**. Assim não é preciso sair e entrar a cada troca.
 - [ ] Janela do navegador em 1280 × 720, zoom 100% (ou 110% se o texto ficar pequeno), sem barra de favoritos e sem outras abas.

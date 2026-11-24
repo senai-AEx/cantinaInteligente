@@ -5,7 +5,7 @@ porta. Assim a sessão de login funciona por cookie, sem CORS.
 
 Executar a partir da raiz do repositório:
     python -m flask --app src.backend.app run --debug
-(ou simplesmente `make up`).
+(ou simplesmente `python iniciar.py`).
 """
 from datetime import timedelta
 import os

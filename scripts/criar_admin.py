@@ -1,6 +1,6 @@
 """Cria (ou redefine) o administrador de demonstração com os dados do .env.
 
-Uso: `make admin`. Lê ADMIN_NOME, ADMIN_MATRICULA, ADMIN_CPF, ADMIN_EMAIL e
+Uso: python scripts/criar_admin.py Lê ADMIN_NOME, ADMIN_MATRICULA, ADMIN_CPF, ADMIN_EMAIL e
 ADMIN_SENHA. Se a matrícula já existir, a senha é redefinida e o usuário volta
 a ser administrador ativo. A senha nunca é mostrada na tela.
 """
@@ -10,10 +10,16 @@ import sys
 
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ))
+sys.path.insert(0, str(RAIZ / "scripts"))
+from _ambiente import garantir_venv  # noqa: E402
+
+garantir_venv()
 
 from dotenv import load_dotenv  # noqa: E402
 
-load_dotenv(RAIZ / ".env")
+# O .env é a fonte da verdade: vale mesmo que o terminal já tenha uma variável
+# com o mesmo nome (um valor antigo exportado antes de editar o .env não pode ganhar).
+load_dotenv(RAIZ / ".env", override=True)
 
 from src.backend.erros import ErroValidacao  # noqa: E402
 from src.backend.usuarios import service as usuario_service  # noqa: E402

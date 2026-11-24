@@ -11,12 +11,12 @@ Roteiro para conferir o sistema completo com o MySQL ligado, antes da entrega da
 
 ## 1. Preparação
 
-1. Abra o Docker Desktop e, no terminal, dentro da pasta do repositório, rode `make setup` (só na primeira vez) e `make up`.
-2. Em outro terminal, rode `make seed` (produtos de exemplo) e `make admin` (administrador de demonstração).
+1. Confira se o MySQL está ligado (veja [como-rodar.md](como-rodar.md)). No terminal, dentro da pasta do repositório, rode `python instalar.py` (só na primeira vez) e depois `python iniciar.py`.
+2. Em outro terminal, rode `python scripts/banco.py semear` (produtos de exemplo) e `python scripts/criar_admin.py` (administrador de demonstração).
 3. Abra `http://127.0.0.1:5000/api/health/db`: deve responder `"banco": "conectado"`.
 4. Abra `http://127.0.0.1:5000/`.
 
-Para os testes de valores baterem com este roteiro, comece com o banco sem compras nem créditos. Os produtos do `make seed` são:
+Para os testes de valores baterem com este roteiro, comece com o banco sem compras nem créditos. Os produtos do `python scripts/banco.py semear` são:
 
 | Produto | Categoria | Preço de compra | Preço de venda | Estoque |
 | --- | --- | --- | --- | --- |
@@ -29,7 +29,7 @@ Para os testes de valores baterem com este roteiro, comece com o banco sem compr
 
 | Usuário | Como é criado | Onde estão os dados de acesso |
 | --- | --- | --- |
-| Administrador | `make admin` | No arquivo `.env` do seu computador: `ADMIN_MATRICULA`, `ADMIN_EMAIL`, `ADMIN_CPF` e `ADMIN_SENHA`. |
+| Administrador | `python scripts/criar_admin.py` | No arquivo `.env` do seu computador: `ADMIN_MATRICULA`, `ADMIN_EMAIL`, `ADMIN_CPF` e `ADMIN_SENHA`. |
 | Cliente de teste (Maria Souza) | No caso A01 deste roteiro | Matrícula `202612345`, e-mail `maria@exemplo.com`, CPF `111.444.777-35`. A senha é escolhida por quem testa. |
 | Segundo cliente (João Lima) | No caso A09 | Matrícula `202654321`, e-mail `joao@exemplo.com`, CPF `390.533.447-05`. |
 
@@ -87,7 +87,7 @@ Tela: `http://127.0.0.1:5000/html/cadastro.html` e `http://127.0.0.1:5000/html/l
 
 ## 3. Produtos (RF03, RF04)
 
-Entre como **administrador** e abra `http://127.0.0.1:5000/html/catalogo_produtos_adm.html`.
+Entre como **administrador**: o sistema abre o painel (**Início**). Clique em **Produtos** no menu lateral (ou abra `http://127.0.0.1:5000/html/catalogo_produtos_adm.html`).
 
 ### Devolutivas da AV04
 
@@ -97,7 +97,7 @@ Entre como **administrador** e abra `http://127.0.0.1:5000/html/catalogo_produto
 - [ ] **D04 — Sem rótulos de zero lactose:** o formulário não tem as caixas de zero lactose/zero açúcar. Um produto da categoria *Frutas* aparece com os dois selos; um de *Bebidas*, sem selos.
 - [ ] **D05 — Enter não grava:** preencha o cadastro e pressione Enter em vários campos. O modal continua aberto e nada é salvo (confira a lista e o banco).
 - [ ] **D06 — Grava só no botão:** clique em **Salvar produto**. O produto aparece na lista e no banco.
-- [ ] **D07 — Excluir não apaga:** clique em **Excluir** e confirme. O produto aparece como *Inativo*, some do catálogo do cliente e continua na tabela `produtos` com `status = 'INATIVO'`. Não existe opção de exclusão definitiva.
+- [ ] **D07 — Inativar não apaga:** clique em **Inativar** e confirme. O produto aparece como *Inativo*, some do catálogo do cliente e continua na tabela `produtos` com `status = 'INATIVO'`. Não existe opção de exclusão definitiva.
 - [ ] **D08 — Reativar:** clique em **Reativar**; o produto volta aos ativos com o mesmo código.
 
 ### Validação e máscaras
@@ -254,7 +254,7 @@ Abra `http://127.0.0.1:5000/html/relatorios_adm.html`. Antes, anote em um papel 
 - [ ] **S07 — Não existe exclusão física.** Como administrador: `fetch("/api/produtos/1", { method: "DELETE" }).then((r) => console.log(r.status))`. *Esperado:* `405`.
 - [ ] **S08 — Cookie de sessão.** Com F12, aba **Application** (ou **Armazenamento**), em Cookies. *Esperado:* existe o cookie `cantina_sessao` com `HttpOnly` marcado e `SameSite` igual a `Lax`. No Console, `document.cookie` não mostra esse cookie.
 - [ ] **S09 — Senha no banco.** `SELECT senha_hash FROM usuarios;` *Esperado:* só aparecem hashes; nenhuma senha legível.
-- [ ] **S10 — Sessão sobrevive ao reinício.** Com um usuário logado, pare o servidor (`Ctrl+C`) e rode `make up` de novo. *Esperado:* o usuário continua logado e os dados continuam os mesmos.
+- [ ] **S10 — Sessão sobrevive ao reinício.** Com um usuário logado, pare o servidor (`Ctrl+C`) e rode `python iniciar.py` de novo. *Esperado:* o usuário continua logado e os dados continuam os mesmos.
 
 ## 11. Layout e acessibilidade (RNF06, RNF12)
 
@@ -283,12 +283,12 @@ O checklist completo da ABNT NBR 17225:2025 é registrado em `docs/checklist-ace
 ## Itens a confirmar neste roteiro
 
 - **[CONFIRMAR: nomes dos botões e das abas]** Os textos em negrito foram conferidos com as telas em 17/11/2026, quando elas ainda estavam sendo finalizadas. Se algum botão ou aba mudar de nome, ajuste o caso correspondente.
-- **[CONFIRMAR: códigos dos produtos]** Os exemplos de API usam `id_produto` 2 (Sanduíche Natural) e 4 (Maçã), que são os códigos em um banco criado do zero com `make seed`. Confira os códigos no painel antes de usar.
+- **[CONFIRMAR: códigos dos produtos]** Os exemplos de API usam `id_produto` 2 (Sanduíche Natural) e 4 (Maçã), que são os códigos em um banco criado do zero com `python scripts/banco.py semear`. Confira os códigos no painel antes de usar.
 - **[CONFIRMAR: mensagens exatas]** As mensagens de erro citadas entre aspas vêm do código de 17/11/2026; se o texto mudar, o que vale é o comportamento descrito.
 
 ## Senha, QR Code e compras por usuário
 
-Casos acrescentados em 17/11/2026. Para os usuários de demonstração, rode `make demo` e veja os dados de acesso com `make credenciais`.
+Casos acrescentados em 17/11/2026. Para os usuários de demonstração, rode `python scripts/criar_demo.py` e veja os dados de acesso com `python scripts/credenciais.py`.
 
 ### Senha (RF02 e RF11)
 
@@ -317,4 +317,4 @@ Casos acrescentados em 17/11/2026. Para os usuários de demonstração, rode `ma
 
 ### Backup (RNF04)
 
-- [ ] **B01 — Cópia e restauração.** Rode `make backup`, faça uma compra de teste e rode `make restore ARQUIVO=backups/<arquivo gerado>`. *Esperado:* o arquivo aparece em `backups/`; depois da restauração, a compra de teste não existe mais.
+- [ ] **B01 — Cópia e restauração.** Rode `python scripts/banco.py backup`, faça uma compra de teste e rode `python scripts/banco.py restaurar backups/<arquivo gerado>`. *Esperado:* o arquivo aparece em `backups/`; depois da restauração, a compra de teste não existe mais.

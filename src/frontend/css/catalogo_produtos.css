@@ -1062,6 +1062,11 @@ a:focus-visible,
     border-bottom: 0;
 }
 
+/* A barra da sacola só existe no celular (ver o bloco de 1000px abaixo). */
+.barra-sacola {
+    display: none;
+}
+
 @media (max-width: 1000px) {
     .layout-catalogo {
         grid-template-columns: minmax(0, 1fr);
@@ -1074,6 +1079,48 @@ a:focus-visible,
 
     .itens-carrinho {
         max-height: 420px;
+    }
+
+    /* Barra fixa no celular: a sacola fica no fim da página, então a barra leva até ela. */
+    .barra-sacola {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 56px;
+        padding: 12px 18px;
+        background: var(--cor-primaria);
+        color: #ffffff;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 -6px 18px #00000026;
+    }
+
+    .barra-sacola[hidden] {
+        display: none;
+    }
+
+    .barra-sacola:hover {
+        background: var(--cor-primaria-escura);
+    }
+
+    .barra-sacola:focus-visible {
+        outline: 3px solid #ffffff;
+        outline-offset: -7px;
+    }
+
+    .barra-sacola-total {
+        font-size: 1.05rem;
+    }
+
+    /* Espaço para a barra não cobrir o fim da lista de produtos. */
+    .layout-catalogo {
+        padding-bottom: 72px;
     }
 }
 

@@ -2,7 +2,7 @@
 
 Os serviços lançam estas exceções e o `app.py` as converte em respostas JSON
 no formato {"erro": "...", "campos": {...}, "codigo": "...", "detalhes": {...}}.
-Nenhum controller precisa de try/except para elas.
+Nenhuma rota precisa de try/except para elas.
 """
 
 

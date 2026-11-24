@@ -18,40 +18,50 @@ Projeto Aplicado II — Centro Universitário SENAI Santa Catarina. Stack: **Pyt
 
 Nada é apagado do banco: excluir um produto ou um usuário apenas o deixa inativo.
 
-## Dependências
+## Pré-requisitos
 
-O `make setup` instala o que está em `requirements.txt`: Flask (com Werkzeug, que guarda as senhas em hash), mysql-connector-python, python-dotenv e segno (gera os QR Codes). O banco roda em Docker. O backup usa o `mysqldump` que já vem na imagem do MySQL, então não há nada a instalar além de Python, Docker e Make. A lista completa, com o motivo de cada item, está em [docs/arquitetura.md](docs/arquitetura.md#dependências).
+- **Python 3.10** ou mais novo.
+- **MySQL 8** (8.0.16 ou mais nova) instalado e ligado no computador.
+- **Git**, para baixar o projeto.
+
+Não é preciso Docker nem Make. O `instalar.py` cria o ambiente Python (`.venv`) e instala as bibliotecas do `requirements.txt` (Flask, mysql-connector-python, python-dotenv e segno). A lista completa, com o motivo de cada item, está em [docs/arquitetura.md](docs/arquitetura.md#dependências).
 
 ## Executar localmente
 
-Pré-requisitos: **Python 3** (3.10 ou mais nova), **Docker Desktop** (aberto) e **GNU Make**.
+> Primeira vez? Siga o passo a passo completo, com a instalação do MySQL no Windows, macOS e Linux e os problemas comuns, em **[docs/como-rodar.md](docs/como-rodar.md)**.
 
-> Primeira vez? Siga o passo a passo completo, com a instalação no Windows, a primeira execução e os problemas comuns, em **[docs/como-rodar.md](docs/como-rodar.md)**.
+Com o MySQL instalado e ligado, são três passos. Rode os comandos dentro da pasta do projeto.
 
-No terminal, dentro da pasta do repositório:
+**1. Baixar o projeto**
 
 ```sh
-make setup
+git clone https://github.com/senai-AEx/cantinaInteligente.git
+cd cantinaInteligente
+git switch develop
 ```
 
-Cria o `.env` a partir do `.env.example` (ou completa o seu com as chaves novas), gera a chave de sessão e a senha do administrador de demonstração, e instala as dependências em `.venv`. O `.env` é só seu e não vai para o GitHub.
+**2. Instalar (só na primeira vez)**
 
 ```sh
-make up
+python instalar.py
 ```
 
-Inicia o MySQL (container `cantina-mysql`, dados no volume `cantina-mysql-data`), aplica as migrações pendentes e sobe o sistema em **http://127.0.0.1:5000**. `Ctrl+C` para o servidor; o MySQL continua ligado até `make down`.
+Cria o `.env` (gerando as senhas e a chave que faltam), o ambiente `.venv` com as bibliotecas, o banco `cantina_inteligente` com as tabelas, os produtos de exemplo e os usuários de demonstração. Pede a senha do usuário `root` do MySQL, que você definiu ao instalar o MySQL. Pode ser rodado de novo sem problema. O `.env` é só seu e não vai para o GitHub.
 
-Na primeira vez, em outro terminal:
+**3. Ligar o sistema**
 
 ```sh
-make demo
+python iniciar.py
 ```
 
-Insere produtos de exemplo e cria dois usuários de demonstração: um administrador e um cliente com R$ 50,00 de crédito. Para ver a matrícula e a senha de cada um (ficam só no seu `.env`):
+Confere a conexão com o MySQL, aplica as migrações que faltam e liga o sistema em **http://127.0.0.1:5000**, abrindo o navegador. `Ctrl+C` desliga o sistema; o MySQL continua ligado. Use `python iniciar.py --sem-navegador` para não abrir o navegador.
+
+No Windows, se `python` abrir a Microsoft Store, use `py -3` no lugar de `python`. No macOS e no Linux, use `python3`.
+
+Para ver a matrícula e a senha dos usuários de demonstração (ficam só no seu `.env`):
 
 ```sh
-make credenciais
+python scripts/credenciais.py
 ```
 
 | Endereço | Tela |
@@ -61,31 +71,30 @@ make credenciais
 | http://127.0.0.1:5000/html/cadastro.html | Criar conta |
 | http://127.0.0.1:5000/html/login.html | Entrar |
 | http://127.0.0.1:5000/html/minha_conta.html | Saldo, créditos, extrato e compras |
-| http://127.0.0.1:5000/html/catalogo_produtos_adm.html | Painel administrativo |
+| http://127.0.0.1:5000/html/painel_adm.html | Painel administrativo (início) |
+| http://127.0.0.1:5000/html/catalogo_produtos_adm.html | Produtos no painel |
 | http://127.0.0.1:5000/api/health/db | Teste da conexão com o banco |
 
 ### Comandos
 
 | Comando | Ação |
 | --- | --- |
-| `make setup` | Prepara o `.env` e o ambiente Python |
-| `make up` | Banco + migrações + sistema |
-| `make demo` | Produtos de exemplo + administrador + cliente com crédito |
-| `make credenciais` | Mostra matrícula e senha dos usuários de demonstração |
-| `make admin` | Cria ou redefine só o administrador (dados `ADMIN_*` do `.env`) |
-| `make seed` | Insere produtos de exemplo se a tabela estiver vazia |
-| `make backup` | Grava uma cópia do banco em `backups/` |
-| `make restore ARQUIVO=backups/arquivo.sql` | Restaura uma cópia (substitui os dados atuais) |
-| `make migrate` | Aplica migrações pendentes |
-| `make test` | Testes automatizados |
-| `make status` | Mostra o que está rodando |
-| `make down` | Para o MySQL preservando os dados |
+| `python instalar.py` | Instalação completa (primeira vez; pode repetir) |
+| `python iniciar.py` | Liga o sistema (`--sem-navegador` não abre o navegador) |
+| `python scripts/credenciais.py` | Mostra os dados dos usuários de demonstração |
+| `python scripts/criar_admin.py` | Cria ou redefine o administrador (dados `ADMIN_*` do `.env`) |
+| `python scripts/banco.py testar` | Confere a conexão com o MySQL |
+| `python scripts/banco.py backup` | Grava uma cópia do banco em `backups/` |
+| `python scripts/banco.py restaurar ARQUIVO` | Volta o banco a uma cópia (substitui os dados atuais) |
+| `python scripts/testes.py` | Roda os testes automatizados |
+
+Outros comandos do banco (`migrar`, `semear`) e os atalhos opcionais com `make` estão em [docs/como-rodar.md](docs/como-rodar.md#comandos-do-dia-a-dia).
 
 ### QR Code e teste pelo celular
 
 No painel, a tela **QR Codes** gera o código da cantina (abre o catálogo) e um por produto (abre o catálogo com o item já na sacola), prontos para imprimir.
 
-O QR Code leva o endereço do sistema. Com o padrão (`127.0.0.1`) ele só abre neste computador. Para abrir pelo celular na mesma rede Wi-Fi, ajuste no `.env` e reinicie o `make up`:
+O QR Code leva o endereço do sistema. Com o padrão (`127.0.0.1`) ele só abre neste computador. Para abrir pelo celular na mesma rede Wi-Fi, ajuste no `.env` e rode `python iniciar.py` de novo:
 
 ```
 APP_HOST=0.0.0.0
@@ -96,39 +105,26 @@ Use isso só em rede de confiança: o sistema fica acessível a quem estiver na 
 
 ### Problemas comuns
 
-- **"A porta 3306 já está em uso"**: há outro MySQL no computador. Troque `MYSQL_PORT` para `3307` no `.env` e rode `make up` de novo.
-- **"Não consegui acessar o Docker"**: abra o Docker Desktop e espere ele ficar pronto.
-- **Login cai ao reiniciar o servidor**: falta `SECRET_KEY` no `.env`; rode `make setup`.
-
-### Sem Docker (MySQL instalado no computador)
-
-1. No MySQL Workbench, execute [`database/schema.sql`](database/schema.sql) e, se quiser, [`database/seeds/produtos_exemplo.sql`](database/seeds/produtos_exemplo.sql).
-2. Crie um usuário do MySQL com acesso ao banco `cantina_inteligente` e informe-o no `.env` (`MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_PORT`).
-3. Rode `make setup` e depois:
-
-```sh
-.venv/Scripts/python scripts/criar_demo.py
-```
-
-```sh
-.venv/Scripts/python -m flask --app src.backend.app run --debug
-```
-
-(No macOS/Linux, troque `.venv/Scripts/python` por `.venv/bin/python`.)
+Os erros mais comuns (MySQL desligado, senha do root errada, Python antigo) estão com a mensagem exata e a solução em [docs/como-rodar.md](docs/como-rodar.md#problemas-comuns). Se aparecer "Não encontrei o MySQL em 127.0.0.1:3306", ligue o serviço do MySQL e rode o comando de novo.
 
 ## Organização
 
 ```
+instalar.py        instalação completa (rode uma vez)
+iniciar.py         liga o sistema
 assets/produtos/   fotos enviadas pela tela (não versionadas)
 database/          migrations/, seeds/ e schema.sql
 docs/              documentação (índice em docs/README.md)
-scripts/           atalhos usados pelo Makefile
+scripts/           banco.py (instalar, migrar, semear, testar, backup, restaurar),
+                   criar_demo.py, criar_admin.py, credenciais.py, testes.py e
+                   _ambiente.py (ajudas comuns: .venv e .env)
 src/backend/       API Flask: usuarios, produtos, carteira, compras, admin e qr,
-                   cada módulo em camadas routes → controller → service → repository
+                   cada módulo em camadas routes → service → repository
 src/frontend/      telas HTML, CSS e JavaScript (servidas pelo próprio Flask)
 tests/             testes automatizados
 ```
 
+- [Como rodar o projeto](docs/como-rodar.md)
 - [Arquitetura e pastas](docs/arquitetura.md)
 - [Contrato da API](docs/contrato-api.md) e [API de produtos](docs/contrato-api-produtos.md)
 - [Documento do Sistema](docs/documento-do-sistema.md)
