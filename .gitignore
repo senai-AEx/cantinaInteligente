@@ -16,5 +16,5 @@ coverage/
 assets/produtos/*
 !assets/produtos/.gitkeep
 
-# Cópias do banco geradas por `make backup` (contêm dados dos usuários)
+# Cópias do banco geradas por `python scripts/banco.py backup` (contêm dados dos usuários)
 backups/

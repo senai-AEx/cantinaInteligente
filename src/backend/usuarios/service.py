@@ -98,7 +98,7 @@ def autenticar(payload):
 def garantir_administrador(dados):
     """Cria o administrador ou, se a matrícula já existir, redefine senha e perfil.
 
-    Usado pelo comando `make admin`. Devolve (usuario, criado).
+    Usado por `python scripts/criar_admin.py`. Devolve (usuario, criado).
     """
     return garantir_usuario(dados, "ADMINISTRADOR")
 
@@ -166,7 +166,7 @@ def redefinir_senha(id_usuario, payload):
 def garantir_usuario(dados, perfil):
     """Cria o usuário de demonstração ou, se a matrícula já existir, redefine a senha.
 
-    Usado por `make demo` para o cliente. Devolve (usuario, criado).
+    Usado por `python scripts/criar_demo.py` para o cliente. Devolve (usuario, criado).
     """
     dados_validos, erros = validar_cadastro({**dados, "confirmar_senha": dados.get("senha")})
     if erros:

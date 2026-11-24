@@ -140,7 +140,7 @@ def buscar_id_por_matricula(cursor, matricula):
 
 
 def atualizar_acesso(cursor, id_usuario, senha_hash, perfil):
-    """Redefine senha e perfil e reativa o usuário (usado pelo `make admin`)."""
+    """Redefine senha e perfil e reativa o usuário (usado por `python scripts/criar_admin.py`)."""
     cursor.execute(
         """UPDATE usuarios
            SET senha_hash = %s, id_tipo_usuario = %s, status = 'ATIVO'

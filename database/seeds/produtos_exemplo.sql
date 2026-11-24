@@ -1,5 +1,5 @@
 -- Produtos fictícios para desenvolvimento e demonstração.
--- Aplicar com `make seed` ou executando este arquivo no MySQL Workbench.
+-- Aplicar com `python scripts/banco.py semear` ou executando este arquivo no MySQL Workbench.
 -- Valores em centavos: 750 = R$ 7,50. Frutas recebem os selos automaticamente.
 USE cantina_inteligente;
 
